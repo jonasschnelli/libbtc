@@ -12,6 +12,6 @@ matrix:
         - true
 
 script: 
-    - ./autogen
+    - ./autogen.sh
     - ./configure
-    - ./make
+    - make
