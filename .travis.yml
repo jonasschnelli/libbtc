@@ -1,0 +1,17 @@
+language: c
+os:
+    - osx
+    - linux
+
+compiler:
+    - clang
+    - gcc
+
+matrix:
+    fast_finish:
+        - true
+
+script: 
+    - ./autogen
+    - ./configure
+    - ./make
