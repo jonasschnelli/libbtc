@@ -30,9 +30,11 @@
     } \
 } while(0)
 
+extern void test_sha_256();
+extern void test_sha_512();
 int main(int argc, char **argv)
 {
-	testSha256();
-    testSha512();
+	test_sha_256();
+    test_sha_512();
 	return 0;
 }
