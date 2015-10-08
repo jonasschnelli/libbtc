@@ -33,5 +33,6 @@
 int main(int argc, char **argv)
 {
 	testSha256();
+    testSha512();
 	return 0;
 }

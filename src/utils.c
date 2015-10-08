@@ -69,7 +69,7 @@ void utils_hex_to_bin(const char *str, unsigned char *out, int inLen, int *outLe
         if (str[i * 2 + 1] >= 'A' && str[i * 2 + 1] <= 'F') {
             *out |= (10 + str[i * 2 + 1] - 'A');
         }
-        *out++;
+        out++;
     }
     *outLen = i;
 }
