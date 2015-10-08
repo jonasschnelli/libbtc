@@ -10,6 +10,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <assert.h>
 
 #ifdef HAVE_BUILTIN_EXPECT
 #define EXPECT(x,c) __builtin_expect((x),(c))
@@ -30,5 +32,6 @@
 
 int main(int argc, char **argv)
 {
+	testSha256();
 	return 0;
 }

@@ -9,8 +9,12 @@ $(LIBSECP256K1): $(wildcard src/secp256k1/src/*) $(wildcard src/secp256k1/includ
 include_HEADERS = include/libbtc.h
 lib_LTLIBRARIES = src/libbtc.la
 
+noinst_HEADERS = src/sha2.h
+noinst_HEADERS += src/utils.h
+
 src_libbtc_la_SOURCES = \
-	src/aes.c
+	src/sha2.c \
+	src/utils.c
 
 src_libbtc_la_LDFLAGS = \
 	-version-info 1:0:0 \
@@ -19,7 +23,10 @@ src_libbtc_la_CFLAGS = -I$(top_srcdir)/include
 
 if USE_TESTS
 noinst_PROGRAMS = tests
-tests_SOURCES = test/unittester.c
+tests_LDADD = src/libbtc.la
+tests_SOURCES = \
+	test/unittester.c \
+  test/sha2_tests.c
 tests_CPPFLAGS = -I$(top_srcdir)/src
 tests_LDFLAGS = -static
 TESTS = tests
