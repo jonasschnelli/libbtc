@@ -1,4 +1,6 @@
 tests
+tests.*
+test-suite.log
 *.exe
 *.so
 *.a
