@@ -9,7 +9,19 @@ AM_INIT_AUTOMAKE([no-define subdir-objects foreign])
 
 LT_INIT
 
+AC_ARG_ENABLE(tests,
+    AS_HELP_STRING([--enable-tests],[compile tests (default is yes)]),
+    [use_tests=$enableval],
+    [use_tests=yes])
+
+AC_MSG_CHECKING([for __builtin_expect])
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([[void myfunc() {__builtin_expect(0,0);}]])],
+    [ AC_MSG_RESULT([yes]);AC_DEFINE(HAVE_BUILTIN_EXPECT,1,[Define this symbol if __builtin_expect is available]) ],
+    [ AC_MSG_RESULT([no])
+    ])
+
 AC_CONFIG_FILES([Makefile])
 AC_SUBST(LIBTOOL_APP_LDFLAGS)
 AC_SUBST(BUILD_EXEEXT)
+AM_CONDITIONAL([USE_TESTS], [test x"$use_tests" != x"no"])
 AC_OUTPUT
