@@ -32,9 +32,12 @@
 
 extern void test_sha_256();
 extern void test_sha_512();
+extern void test_base58check();
+
 int main(int argc, char **argv)
 {
 	test_sha_256();
     test_sha_512();
+	test_base58check();
 	return 0;
 }
