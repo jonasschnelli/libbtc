@@ -9,6 +9,19 @@ AM_INIT_AUTOMAKE([no-define subdir-objects foreign])
 
 LT_INIT
 
+# Enable debug
+AC_ARG_ENABLE([debug],
+    [AS_HELP_STRING([--enable-debug],
+                    [use debug compiler flags and macros (default is no)])],
+    [enable_debug=$enableval],
+    [enable_debug=no])
+
+if test "x$enable_debug" = xyes; then
+    CFLAGS="$CFLAGS -g3 -O0 -DDEBUG"
+    CXXFLAGS="$CXXFLAGS -g3 -O0 -DDEBUG"
+		AC_DEFINE_UNQUOTED([ENABLE_DEBUG],[1],[Define to 1 to enable debung output])
+fi
+
 AC_ARG_ENABLE(tests,
     AS_HELP_STRING([--enable-tests],[compile tests (default is yes)]),
     [use_tests=$enableval],
