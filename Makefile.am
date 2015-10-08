@@ -1,4 +1,10 @@
+DIST_SUBDIRS = src/secp256k1
 ACLOCAL_AMFLAGS = -I build-aux/m4
+
+LIBSECP256K1=secp256k1/libsecp256k1.la
+
+$(LIBSECP256K1): $(wildcard src/secp256k1/src/*) $(wildcard src/secp256k1/include/*)
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 include_HEADERS = include/libbtc.h
 lib_LTLIBRARIES = src/libbtc.la
