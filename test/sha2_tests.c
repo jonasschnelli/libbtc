@@ -439,7 +439,22 @@ void test_sha_256()
     {
         unsigned char msg_buf[nist_sha256_test_vectors_long[i].len/8];
         utils_hex_to_bin((char *)nist_sha256_test_vectors_long[i].msg, msg_buf, nist_sha256_test_vectors_long[i].len/8*2, &oLen);
-        sha256_Raw(msg_buf, oLen, buf);
+
+        SHA256_CTX  context;
+        sha256_Init(&context);
+        if (oLen == 3680/8)
+        {
+            int j;
+            for (j=0; j < oLen;j+=oLen/10)
+            {
+                sha256_Update(&context, msg_buf+j, oLen/10);
+            }
+        }
+        else
+        {
+            sha256_Update(&context, msg_buf, oLen);
+        }
+        sha256_Final(buf, &context);
         digest_out = utils_hex_to_uint8((const char *)nist_sha256_test_vectors_long[i].digest_hex);
         assert(memcmp(buf, digest_out, SHA256_DIGEST_LENGTH) == 0);
     }
@@ -465,7 +480,24 @@ void test_sha_512()
     {
         unsigned char msg_buf[nist_sha512_test_vectors_long[i].len/8];
         utils_hex_to_bin((char *)nist_sha512_test_vectors_long[i].msg, msg_buf, nist_sha512_test_vectors_long[i].len/8*2, &oLen);
-        sha512_Raw(msg_buf, oLen, buf);
+
+        SHA512_CTX  context;
+        sha512_Init(&context);
+
+        if (oLen == 12800)
+        {
+            int j;
+            for (j=0; j < oLen;j+=oLen/1280)
+            {
+                sha512_Update(&context, msg_buf+j, oLen/1280);
+            }
+        }
+        else
+        {
+            sha512_Update(&context, msg_buf, oLen);
+        }
+        sha512_Final(buf, &context);
+
         digest_out = utils_hex_to_uint8((const char *)nist_sha512_test_vectors_long[i].digest_hex);
         assert(memcmp(buf, digest_out, SHA512_DIGEST_LENGTH) == 0);
     }
