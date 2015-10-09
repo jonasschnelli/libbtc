@@ -1,6 +1,7 @@
 #include "secp256k1/include/secp256k1.h"
 
 #include <stdint.h>
+#include <string.h>
 
 static secp256k1_context* secp256k1_ctx = NULL;
 
@@ -40,7 +41,7 @@ static void ecc_get_pubkey(const uint8_t *private_key, uint8_t *public_key,
         return;
     }
 
-    if (!secp256k1_ec_pubkey_serialize(secp256k1_ctx, public_key, &public_key_len, &pubkey,
+    if (!secp256k1_ec_pubkey_serialize(secp256k1_ctx, public_key, (size_t *)&public_key_len, &pubkey,
                                        compressed)) {
         return;
     }

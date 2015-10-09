@@ -37,6 +37,7 @@ extern void test_sha_512();
 extern void test_sha_hmac();
 extern void test_base58check();
 extern void utils_clear_buffers();
+extern void bip32_tests();
 
 int U_TESTS_RUN = 0;
 int U_TESTS_FAIL = 0;
