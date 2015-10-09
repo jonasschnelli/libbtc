@@ -17,7 +17,9 @@ matrix:
 script: 
     - ./autogen.sh
     - ./configure CFLAGS='-fprofile-arcs -ftest-coverage'
-    - make clean && make check
+    - make
+    - valgrind --leak-check=full --error-exitcode=1 ./tests
+    - make check
     
 after_success:
   - coveralls --verbose -i src -x c -e src/secp256k1 -r $TRAVIS_BUILD_DIR -b $TRAVIS_BUILD_DIR --gcov-options '\-lp'
