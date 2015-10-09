@@ -36,9 +36,10 @@ extern void test_base58check();
 
 int main(int argc, char **argv)
 {
-	test_sha_256();
+    test_sha_256();
     test_sha_512();
     test_sha_hmac();
-	test_base58check();
+    test_base58check();
+    utils_clear_buffers();
 	return 0;
 }
