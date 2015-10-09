@@ -13,6 +13,8 @@
 #include <string.h>
 #include <assert.h>
 
+#include "utest.h"
+
 #ifdef HAVE_BUILTIN_EXPECT
 #define EXPECT(x,c) __builtin_expect((x),(c))
 #else
@@ -36,6 +38,9 @@ extern void test_sha_hmac();
 extern void test_base58check();
 extern void utils_clear_buffers();
 
+int U_TESTS_RUN = 0;
+int U_TESTS_FAIL = 0;
+
 int main(int argc, char **argv)
 {
     test_sha_256();
@@ -43,5 +48,7 @@ int main(int argc, char **argv)
     test_sha_hmac();
     test_base58check();
     utils_clear_buffers();
+
+    bip32_tests();
 	return 0;
 }
