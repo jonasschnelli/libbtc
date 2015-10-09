@@ -32,7 +32,9 @@
 
 extern void test_sha_256();
 extern void test_sha_512();
+extern void test_sha_hmac();
 extern void test_base58check();
+extern void utils_clear_buffers();
 
 int main(int argc, char **argv)
 {
