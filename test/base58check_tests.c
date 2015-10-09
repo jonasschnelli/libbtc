@@ -67,6 +67,14 @@ static const char *base58_vector[] = {
     0, 0,
 };
 
+static const char *base58_invalid_vector[] = {
+    "dc", "3ALJH9Y951VCGcVZYAdpA3KchoP9McEj1G3ALJH9Y951VCGcVZYAdpA3KchoP9McEj1G3ALJH9Y951VCGcVZYAdpA3KchoP9McEj1G3ALJH9Y951VCGcVZYAdpA3KchoP9McEj1G3ALJH9Y951VCGcVZYAdpA3KchoP9McEj1G3ALJH9Y951VCGcVZYAdpA3KchoP9McEj1G",
+    "ec","055ece0cadddc415b1980f001785947120acdb36fc055ece0cadddc415b1980f001785947120acdb36fc055ece0cadddc415b1980f001785947120acdb36fc055ece0cadddc415b1980f001785947120acdb36fc055ece0cadddc415b1980f001785947120acdb36fc055ece0cadddc415b1980f001785947120acdb36fc055ece0cadddc415b1980f001785947120acdb36fc055ece0cadddc415b1980f001785947120acdb36fc",
+    "dc","",
+    "dc","9ALJH9Y951VCGcVZYAdpA3KchoP9McEj1G",
+    0, 0
+};
+
 void test_base58check()
 {
     const char **raw = base58_vector;
@@ -87,5 +95,24 @@ void test_base58check()
 
         raw += 2;
         str += 2;
+    }
+
+    const char **i_cmd = base58_invalid_vector;
+    const char **i_raw = base58_invalid_vector + 1;
+    uint8_t i_rawn[255];
+    while (*i_raw && *i_cmd) {
+        int len = strlen(*i_raw) / 2;
+
+        memcpy(i_rawn, utils_hex_to_uint8(*i_raw), len);
+
+        int r = 0;
+        if (strncmp(*i_cmd, "ec", 2) == 0)
+            r = base58_encode_check(i_rawn, len, strn, sizeof(strn));
+        else
+            r = base58_decode_check(strn, i_rawn, len);
+
+        assert(r == 0);
+        i_raw += 2;
+        i_cmd += 2;
     }
 }
