@@ -33,3 +33,6 @@ m4/lt~obsolete.m4
 src/stamp-h1
 libbtc256k1.pc
 *.DS_Store
+*.gcda
+*.gcov
+*.gcno
