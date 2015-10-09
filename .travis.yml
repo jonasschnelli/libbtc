@@ -7,8 +7,14 @@ compiler:
     - clang
     - gcc
 
+addons:
+  apt:
+    packages:
+    - valgrind
+
 before_install:
   - pip install --user cpp-coveralls
+  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew install valgrind; fi
   
 matrix:
     fast_finish:
@@ -18,7 +24,7 @@ script:
     - ./autogen.sh
     - ./configure CFLAGS='-fprofile-arcs -ftest-coverage'
     - make
-    - valgrind --leak-check=full --error-exitcode=1 ./tests
+    - if [ ${CC} = gcc ] || [ "${TRAVIS_OS_NAME}" = "osx" ]; then valgrind --leak-check=full --error-exitcode=1 ./tests; fi;
     - make check
     
 after_success:
