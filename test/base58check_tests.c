@@ -12,6 +12,7 @@
 #include "base58.h"
 #include "utils.h"
 
+//test vectors from bitcoin core
 static const char *base58_vector[] = {
     "0065a16059864a2fdbc7c99a4723a8395bc6f188eb", "1AGNa15ZQXAZUgFiqJ2i7Z2DPU2J6hW62i",
     "0574f209f6ea907e2ea48f74fae05782ae8a665257", "3CMNFxN1oHBc4R1EpboAL5yzHGgE611Xou",
