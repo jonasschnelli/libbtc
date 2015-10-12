@@ -32,6 +32,7 @@
     } \
 } while(0)
 
+extern void test_random();
 extern void test_sha_256();
 extern void test_sha_512();
 extern void test_sha_hmac();
@@ -44,6 +45,7 @@ int U_TESTS_FAIL = 0;
 
 int main(int argc, char **argv)
 {
+    test_random();
     test_sha_256();
     test_sha_512();
     test_sha_hmac();
