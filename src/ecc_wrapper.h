@@ -26,11 +26,27 @@
 
 #include <stdint.h>
 
-void ecc_context_init(void);
+//!init static ecc context
+void ecc_start(void);
+
+//!destroys the static ecc context
+void ecc_stop(void);
+
+//!get public key from given private key
 static void ecc_get_pubkey(const uint8_t *private_key, uint8_t *public_key,
                            int public_key_len, int compressed);
+
+//!get uncompressed public key from given private key
 void ecc_get_public_key65(const uint8_t *private_key, uint8_t *public_key);
+
+//!get compressed public key from given private key
 void ecc_get_public_key33(const uint8_t *private_key, uint8_t *public_key);
+
+//!ec mul tweak on given private key
 int ecc_private_key_tweak_add(uint8_t *private_key, const uint8_t *tweak);
+
+//!ec mul tweak on given public key
 int ecc_public_key_tweak_add(uint8_t *public_key_inout, const uint8_t *tweak);
+
+//!verifies a given 32byte key
 int ecc_verify_privatekey(const uint8_t *private_key);
