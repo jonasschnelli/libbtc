@@ -66,7 +66,7 @@ int random_bytes(uint8_t *buf, uint32_t len, uint8_t update_seed)
 
     size_t len_read = fread(buf, 1, len, frand);
     assert(len_read == len);
-
+    fclose(frand);
     return BTC_OK;
 }
 #else
