@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "flags.h"
+
 static secp256k1_context* secp256k1_ctx = NULL;
 
 void ecc_context_init(void)
@@ -58,4 +60,22 @@ void ecc_get_public_key65(const uint8_t *private_key, uint8_t *public_key)
 void ecc_get_public_key33(const uint8_t *private_key, uint8_t *public_key)
 {
     ecc_get_pubkey(private_key, public_key, 33, 1);
+}
+
+int ecc_pubkey_tweak_add(uint8_t *public_key_inout, const uint8_t *tweak)
+{
+    int out, res;
+    secp256k1_pubkey pubkey;
+
+    if (!secp256k1_ec_pubkey_parse(secp256k1_ctx, &pubkey, public_key_inout, 33))
+        return BTC_ERR;
+
+    if (!secp256k1_ec_pubkey_tweak_add(secp256k1_ctx, &pubkey, (const unsigned char *)tweak))
+        return BTC_ERR;
+
+    if (!secp256k1_ec_pubkey_serialize(secp256k1_ctx, public_key_inout, (size_t *)&out, &pubkey,
+                                  SECP256K1_EC_COMPRESSED))
+        return BTC_ERR;
+
+    return BTC_OK;
 }

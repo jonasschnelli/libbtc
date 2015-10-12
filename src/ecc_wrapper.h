@@ -35,3 +35,4 @@ static void ecc_get_pubkey(const uint8_t *private_key, uint8_t *public_key,
                            int public_key_len, int compressed);
 void ecc_get_public_key65(const uint8_t *private_key, uint8_t *public_key);
 void ecc_get_public_key33(const uint8_t *private_key, uint8_t *public_key);
+int ecc_pubkey_tweak_add(uint8_t *public_key_inout, const uint8_t *tweak);

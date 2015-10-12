@@ -11,7 +11,7 @@
 
 void bip32_tests()
 {
-    HDNode node, node2, node3;
+    HDNode node, node2, node3, node4;
     char str[112];
     int r;
     uint8_t private_key_master[32];
@@ -176,8 +176,7 @@ void bip32_tests()
                     utils_hex_to_uint8("022a471424da5e657499d1ff51cb43c47481a03b1e77f951fe64cec9f5a48f7011"),
                     33);
     hdnode_serialize_private(&node, str, sizeof(str));
-    u_assert_str_eq(str,
-                    "xprvA41z7zogVVwxVSgdKUHDy1SKmdb533PjDz7J6N6mV6uS3ze1ai8FHa8kmHScGpWmj4WggLyQjgPie1rFSruoUihUZREPSL39UNdE3BBDu76");
+    u_assert_str_eq(str, "xprvA41z7zogVVwxVSgdKUHDy1SKmdb533PjDz7J6N6mV6uS3ze1ai8FHa8kmHScGpWmj4WggLyQjgPie1rFSruoUihUZREPSL39UNdE3BBDu76");
     r = hdnode_deserialize(str, &node2);
     u_assert_int_eq(r, BTC_OK);
     u_assert_mem_eq(&node, &node2, sizeof(HDNode));
@@ -189,4 +188,17 @@ void bip32_tests()
     memcpy(&node3, &node, sizeof(HDNode));
     memset(&node3.private_key, 0, 32);
     u_assert_mem_eq(&node2, &node3, sizeof(HDNode));
+
+
+    char str_pub_ckd[] = "xpub6LTiQPFh8tFrK56BQXuYcyam39cTXsBvudjQ7NM4EyRABPKapbm9dNe7aYQ6VNDzYHmhZYde5Pv8a6vTeQcfG3g1s7S8g1otXsK8d4qGyLs";
+
+    r = hdnode_deserialize(str_pub_ckd, &node4);
+    r = hdnode_public_ckd(&node4, 123);
+    u_assert_int_eq(r, BTC_OK);
+    hdnode_serialize_public(&node4, str, sizeof(str));
+    u_assert_str_eq(str, "xpub6Mf5jT2qB3v8YP8frMBbgQ9L79UF6zXzdYbUSAwzezhEQep8w3GfBrbFGquW7T4PQXvmRh8DFEJFbm6qgsJXmT4FjNgrJL2m6YuKJRbsgUa");
+
+
+    r = hdnode_public_ckd(&node4, 0x80000000 + 1); //try deriving a hardened key (= must fail)
+    u_assert_int_eq(r, BTC_ERR);
 }

@@ -79,6 +79,47 @@ int hdnode_from_seed(const uint8_t *seed, int seed_len, HDNode *out)
 }
 
 
+int hdnode_public_ckd(HDNode *inout, uint32_t i)
+{
+    uint8_t data[1 + 32 + 4];
+    uint8_t I[32 + 32];
+    uint8_t fingerprint[32];
+
+    if (i & 0x80000000) { // private derivation
+        return 0;
+    } else { // public derivation
+        memcpy(data, inout->public_key, 33);
+    }
+    write_be(data + 33, i);
+
+    sha256_Raw(inout->public_key, 33, fingerprint);
+    ripemd160(fingerprint, 32, fingerprint);
+    inout->fingerprint = (fingerprint[0] << 24) + (fingerprint[1] << 16) + (fingerprint[2] << 8) + fingerprint[3];
+
+    memset(inout->private_key, 0, 32);
+
+    int failed = 0;
+    hmac_sha512(inout->chain_code, 32, data, sizeof(data), I);
+    memcpy(inout->chain_code, I + 32, 32);
+
+
+    if (!ecc_pubkey_tweak_add(inout->public_key, I))
+        failed = BTC_ERR;
+
+    if (!failed) {
+        inout->depth++;
+        inout->child_num = i;
+    }
+
+    // Wipe all stack data.
+    memset(data, 0, sizeof(data));
+    memset(I, 0, sizeof(I));
+    memset(fingerprint, 0, sizeof(fingerprint));
+    
+    return failed ? BTC_ERR : BTC_OK;
+}
+
+
 int hdnode_private_ckd(HDNode *inout, uint32_t i)
 {
     uint8_t data[1 + 32 + 4];
@@ -99,6 +140,7 @@ int hdnode_private_ckd(HDNode *inout, uint32_t i)
     inout->fingerprint = (fingerprint[0] << 24) + (fingerprint[1] << 16) +
                          (fingerprint[2] << 8) + fingerprint[3];
 
+    memset(fingerprint, 0, sizeof(fingerprint));
     memcpy(p, inout->private_key, 32);
 
     hmac_sha512(inout->chain_code, 32, data, sizeof(data), I);
@@ -107,25 +149,32 @@ int hdnode_private_ckd(HDNode *inout, uint32_t i)
 
     memcpy(z, inout->private_key, 32);
 
+    int failed = 0;
     if (!ecc_isValid(z)) {
-        memset(data, 0, sizeof(data));
-        memset(I, 0, sizeof(I));
+        failed = 1;
         return BTC_ERR;
     }
 
     if (!ecc_generate_private_key(inout->private_key, p, z)) {
         memset(data, 0, sizeof(data));
         memset(I, 0, sizeof(I));
+        memset(p, 0, sizeof(p));
+        memset(z, 0, sizeof(z));
         return BTC_ERR;
     }
 
-    inout->depth++;
-    inout->child_num = i;
+    if (!failed)
+    {
+        inout->depth++;
+        inout->child_num = i;
 
-    hdnode_fill_public_key(inout);
+        hdnode_fill_public_key(inout);
+    }
 
     memset(data, 0, sizeof(data));
     memset(I, 0, sizeof(I));
+    memset(p, 0, sizeof(p));
+    memset(z, 0, sizeof(z));
     return BTC_OK;
 }
 
