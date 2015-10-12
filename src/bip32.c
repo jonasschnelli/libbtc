@@ -67,7 +67,7 @@ int hdnode_from_seed(const uint8_t *seed, int seed_len, HDNode *out)
     hmac_sha512((const uint8_t *)"Bitcoin seed", 12, seed, seed_len, I);
     memcpy(out->private_key, I, 32);
 
-    if (!ecc_isValid(out->private_key)) {
+    if (!ecc_verify_privatekey(out->private_key)) {
         memset(I, 0, sizeof(I));
         return BTC_ERR;
     }
@@ -150,24 +150,20 @@ int hdnode_private_ckd(HDNode *inout, uint32_t i)
     memcpy(z, inout->private_key, 32);
 
     int failed = 0;
-    if (!ecc_isValid(z)) {
+    if (!ecc_verify_privatekey(z)) {
         failed = 1;
         return BTC_ERR;
     }
 
-    if (!ecc_generate_private_key(inout->private_key, p, z)) {
-        memset(data, 0, sizeof(data));
-        memset(I, 0, sizeof(I));
-        memset(p, 0, sizeof(p));
-        memset(z, 0, sizeof(z));
-        return BTC_ERR;
+    memcpy(inout->private_key, p, 32);
+    if (!ecc_private_key_tweak_add(inout->private_key, z)) {
+        failed = 1;
     }
 
     if (!failed)
     {
         inout->depth++;
         inout->child_num = i;
-
         hdnode_fill_public_key(inout);
     }
 

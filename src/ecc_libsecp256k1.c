@@ -12,21 +12,6 @@ void ecc_context_init(void)
     secp256k1_ctx = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
 }
 
-int ecc_isValid(uint8_t *private_key)
-{
-    if (!secp256k1_ctx) {
-        ecc_context_init();
-    }
-    return (secp256k1_ec_seckey_verify(secp256k1_ctx, (const unsigned char *)private_key));
-}
-
-int ecc_generate_private_key(uint8_t *private_child, const uint8_t *private_master,
-                             const uint8_t *z)
-{
-    memcpy(private_child, private_master, 32);
-    return secp256k1_ec_privkey_tweak_add(secp256k1_ctx, (unsigned char *)private_child,
-                                          (const unsigned char *)z);
-}
 
 static void ecc_get_pubkey(const uint8_t *private_key, uint8_t *public_key,
                            int public_key_len, int compressed)
@@ -51,6 +36,7 @@ static void ecc_get_pubkey(const uint8_t *private_key, uint8_t *public_key,
     return;
 }
 
+
 void ecc_get_public_key65(const uint8_t *private_key, uint8_t *public_key)
 {
     ecc_get_pubkey(private_key, public_key, 65, 0);
@@ -62,7 +48,12 @@ void ecc_get_public_key33(const uint8_t *private_key, uint8_t *public_key)
     ecc_get_pubkey(private_key, public_key, 33, 1);
 }
 
-int ecc_pubkey_tweak_add(uint8_t *public_key_inout, const uint8_t *tweak)
+int ecc_private_key_tweak_add(uint8_t *private_key, const uint8_t *tweak)
+{
+    return secp256k1_ec_privkey_tweak_add(secp256k1_ctx, (unsigned char *)private_key, (const unsigned char *)tweak);
+}
+
+int ecc_public_key_tweak_add(uint8_t *public_key_inout, const uint8_t *tweak)
 {
     int out, res;
     secp256k1_pubkey pubkey;
@@ -78,4 +69,10 @@ int ecc_pubkey_tweak_add(uint8_t *public_key_inout, const uint8_t *tweak)
         return BTC_ERR;
 
     return BTC_OK;
+}
+
+
+int ecc_verify_privatekey(const uint8_t *private_key)
+{
+    return secp256k1_ec_seckey_verify(secp256k1_ctx, (const unsigned char *)private_key);
 }
