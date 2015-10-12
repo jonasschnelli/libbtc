@@ -103,7 +103,7 @@ int hdnode_public_ckd(HDNode *inout, uint32_t i)
     memcpy(inout->chain_code, I + 32, 32);
 
 
-    if (!ecc_pubkey_tweak_add(inout->public_key, I))
+    if (!ecc_public_key_tweak_add(inout->public_key, I))
         failed = BTC_ERR;
 
     if (!failed) {
