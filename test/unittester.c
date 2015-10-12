@@ -52,6 +52,6 @@ int main(int argc, char **argv)
     test_base58check();
     utils_clear_buffers();
 
-    bip32_tests();
+    tests_bip32();
 	return 0;
 }
