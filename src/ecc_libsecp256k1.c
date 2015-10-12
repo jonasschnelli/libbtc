@@ -95,3 +95,18 @@ int ecc_verify_privatekey(const uint8_t *private_key)
     assert(secp256k1_ctx);
     return secp256k1_ec_seckey_verify(secp256k1_ctx, (const unsigned char *)private_key);
 }
+
+int ecc_verify_pubkey(const uint8_t *public_key, int compressed)
+{
+    secp256k1_pubkey pubkey;
+
+    assert(secp256k1_ctx);
+    if (!secp256k1_ec_pubkey_parse(secp256k1_ctx, &pubkey, public_key, compressed ? 33 : 65))
+    {
+        memset(&pubkey, 0, sizeof(pubkey));
+        return BTC_ERR;
+    }
+
+    memset(&pubkey, 0, sizeof(pubkey));
+    return BTC_OK;
+}

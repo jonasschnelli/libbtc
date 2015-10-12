@@ -50,3 +50,6 @@ int ecc_public_key_tweak_add(uint8_t *public_key_inout, const uint8_t *tweak);
 
 //!verifies a given 32byte key
 int ecc_verify_privatekey(const uint8_t *private_key);
+
+//!verifies a given public key (compressed[33] or uncompressed[65] bytes)
+int ecc_verify_pubkey(const uint8_t *public_key, int compressed);
