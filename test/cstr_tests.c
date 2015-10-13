@@ -49,6 +49,7 @@ void test_cstr()
     assert(s != NULL);
 
     cstr_resize(s, 2);
+    cstr_resize(s, 2);
     assert(s->len == 2);
     assert(strcmp(s->str, "fo") == 0);
 
@@ -63,12 +64,17 @@ void test_cstr()
     cstring *s1 = cstr_new("foo");
     cstring *s2 = cstr_new("foo");
     cstring *s3 = cstr_new("bar");
+    cstring *s4 = cstr_new("bar1");
 
     assert(cstr_equal(s1, s2) == true);
     assert(cstr_equal(s1, s3) == false);
+    assert(cstr_equal(s1, NULL) == false);
     assert(cstr_equal(s2, s3) == false);
     assert(cstr_equal(s3, s3) == true);
-    
+    assert(cstr_equal(s3, s4) == false);
+    cstr_erase(s4, 0,3);
+    assert(strcmp(s4->str, "1") == 0);
+
     cstr_free(s1, true);
     cstr_free(s2, true);
     cstr_free(s3, true);
