@@ -18,7 +18,8 @@ noinst_HEADERS = \
 	src/ecc_wrapper.h \
 	src/random.h \
 	src/vector.h \
-	src/buffer.h
+	src/buffer.h \
+	src/cstr.h
 
 src_libbtc_la_SOURCES = \
 	src/sha2.c \
@@ -29,7 +30,8 @@ src_libbtc_la_SOURCES = \
 	src/ecc_libsecp256k1.c \
 	src/random.c \
 	src/vector.c \
-	src/buffer.c
+	src/buffer.c \
+	src/cstr.c
 
 src_libbtc_la_LDFLAGS = \
 	-version-info 1:0:0 \
@@ -48,7 +50,8 @@ tests_SOURCES = \
 	test/bip32_tests.c \
 	test/random_tests.c \
 	test/ecc_tests.c \
-	test/vector_tests.c
+	test/vector_tests.c \
+	test/cstr_tests.c
 
 tests_CPPFLAGS = -I$(top_srcdir)/src
 tests_LDFLAGS = -static

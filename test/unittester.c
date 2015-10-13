@@ -40,6 +40,7 @@ extern void test_base58check();
 extern void test_bip32();
 extern void test_ecc();
 extern void test_vector();
+extern void test_cstr();
 
 extern void utils_clear_buffers();
 extern void ecc_start();
@@ -62,6 +63,7 @@ int main(int argc, char **argv)
     test_bip32();
     test_ecc();
     test_vector();
+    test_cstr();
 
     ecc_stop();
 	return 0;
