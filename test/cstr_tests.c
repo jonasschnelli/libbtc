@@ -78,4 +78,5 @@ void test_cstr()
     cstr_free(s1, true);
     cstr_free(s2, true);
     cstr_free(s3, true);
+    cstr_free(s4, true);
 }
