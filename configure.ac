@@ -9,7 +9,7 @@ AH_TOP([#ifndef LIBBTC_CONFIG_H])
 AH_TOP([#define LIBBTC_CONFIG_H])
 AH_BOTTOM([#endif /*LIBBTC_CONFIG_H*/])
 AM_INIT_AUTOMAKE([no-define subdir-objects foreign])
-
+AC_HEADER_STDBOOL
 LT_INIT
 
 # Enable debug
