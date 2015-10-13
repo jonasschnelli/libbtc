@@ -181,8 +181,7 @@ bool vector_resize(vector *vec, size_t newsz)
     // set new elements to NULL
     for (i = vec->len; i < newsz; i++)
         vec->data[i] = NULL;
-    
-    vec->len = newsz;
+
     return true;
 }
 

@@ -45,6 +45,7 @@ void test_vector()
     assert(vec->len == 2);
 
     assert(vector_find(vec, str0) == 0);
+    assert(vector_find(vec, "test") == -1);
     assert(vector_find(vec, str1) == 1);
 
     assert(strcmp(vector_idx(vec, 0), "string") == 0);
@@ -59,12 +60,19 @@ void test_vector()
     vec = vector_new(10, free);
     res = vector_add(vec, strdup("TEST0")); assert(res == true);
     res = vector_add(vec, strdup("TEST1")); assert(res == true);
+
+    char *a_str = strdup("TEST2");
+    res = vector_add(vec, a_str); assert(res == true);
+    assert(vec->len == 3);
+    res = vector_remove(vec, a_str); assert(res == true);
     assert(vec->len == 2);
     vector_free(vec, true);
 
 
     // test resize
-    vec = vector_new(10, free);
+    vec = vector_new(1, free);
+    res = vector_resize(vec, 30); assert(res == true);
+    res = vector_resize(vec, 30); assert(res == true);
     char str[80];
     int i;
     for (i=0;i<20;i++)
@@ -78,6 +86,9 @@ void test_vector()
     assert(strcmp(vector_idx(vec, 0), "TEST0") == 0);
     assert(strcmp(vector_idx(vec, 4), "TEST4") == 0);
     assert(vector_idx(vec, 5) == NULL);
+
+    vector_remove_range(vec, 0, 4);
+    assert(strcmp(vector_idx(vec, 0), "TEST4") == 0);
     vector_free(vec, true);
 
 
