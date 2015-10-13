@@ -9,7 +9,7 @@
 #include "flags.h"
 #include "utest.h"
 
-void tests_bip32()
+void test_bip32()
 {
     HDNode node, node2, node3, node4;
     char str[112];
