@@ -39,6 +39,7 @@ extern void test_sha_hmac();
 extern void test_base58check();
 extern void test_bip32();
 extern void test_ecc();
+extern void test_vector();
 
 extern void utils_clear_buffers();
 extern void ecc_start();
@@ -60,6 +61,7 @@ int main(int argc, char **argv)
 
     test_bip32();
     test_ecc();
+    test_vector();
 
     ecc_stop();
 	return 0;
