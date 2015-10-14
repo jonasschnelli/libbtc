@@ -48,6 +48,10 @@ void test_serialize()
     ser_u32(s2,0xDDBBAAFF);
     ser_u64(s2,0x99FF99FFDDBBAAFF);
     ser_varlen(s2, 10);
+    ser_str(s2, "test", 4);
+    cstring *s3 = cstr_new("foo");
+    ser_varstr(s2, s3);
+    cstr_free(s3, true);
     //ser_varlen(s2, (uint64_t)0x9999999999999999); //uint64 varlen is not supported right now
 
     struct const_buffer buf2 = { s2->str, s2->len };
@@ -63,6 +67,17 @@ void test_serialize()
     uint32_t num3;
     deser_varlen(&num3, &buf2);
     assert(num3 == 10);
+
+
+    char strbuf[255];
+    deser_str(strbuf, &buf2, 255);
+    assert(strncmp(strbuf, "test", 4) == 0);
+
+    cstring *deser_test = cstr_new_sz(0);
+    deser_varstr(&deser_test, &buf2);
+    assert(strncmp(deser_test->str, "foo", 3) == 0);
+
+    cstr_free(deser_test, true);
 
     cstr_free(s2, true);
 }
