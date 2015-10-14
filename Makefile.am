@@ -52,7 +52,8 @@ tests_SOURCES = \
 	test/ecc_tests.c \
 	test/vector_tests.c \
 	test/cstr_tests.c \
-	test/buffer_tests.c
+	test/buffer_tests.c \
+	test/utils_tests.c
 
 tests_CPPFLAGS = -I$(top_srcdir)/src
 tests_LDFLAGS = -static
