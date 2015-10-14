@@ -48,6 +48,8 @@ void test_serialize()
     ser_u32(s2,0xDDBBAAFF);
     ser_u64(s2,0x99FF99FFDDBBAAFF);
     ser_varlen(s2, 10);
+    ser_varlen(s2, 1000);
+    ser_varlen(s2, 100000000);
     ser_str(s2, "test", 4);
     cstring *s3 = cstr_new("foo");
     ser_varstr(s2, s3);
@@ -67,6 +69,10 @@ void test_serialize()
     uint32_t num3;
     deser_varlen(&num3, &buf2);
     assert(num3 == 10);
+    deser_varlen(&num3, &buf2);
+    assert(num3 == 1000);
+    deser_varlen(&num3, &buf2);
+    assert(num3 == 100000000);
 
 
     char strbuf[255];
