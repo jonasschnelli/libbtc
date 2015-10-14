@@ -49,7 +49,7 @@ void test_utils()
 
     char varint1[] = "ffffffffffffffffff";
     utils_varint_to_uint64(varint1, &bigint);
-    assert(bigint == 18446744073709551615);
+    assert(bigint == 0xFFFFFFFFFFFFFFFF);
 
     char varint2[] = "fdfa0f";
     utils_varint_to_uint64(varint2, &bigint);
@@ -58,4 +58,14 @@ void test_utils()
     char varint3[] = "fefaff0f00";
     utils_varint_to_uint64(varint3, &bigint);
     assert(bigint == 1048570);
+
+    unsigned char data[] = {0x00, 0xFF, 0x00, 0xAA, 0x00, 0xFF, 0x00, 0xAA};
+    char hex[sizeof(data)*2+1];
+    utils_bin_to_hex(data, sizeof(data), hex);
+    assert(strcmp(hex, "00ff00aa00ff00aa") == 0);
+
+    unsigned char data2[sizeof(data)];
+    utils_hex_to_bin(hex, data2, strlen(hex), &outlen);
+    assert(outlen == 8);
+    assert(memcmp(data, data2, outlen) == 0);
 }

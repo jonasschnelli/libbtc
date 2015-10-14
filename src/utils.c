@@ -108,6 +108,18 @@ uint8_t *utils_hex_to_uint8(const char *str)
 }
 
 
+void utils_bin_to_hex(unsigned char *bin_in, size_t inlen, char *hex_out)
+{
+    static char digits[] = "0123456789abcdef";
+    size_t i;
+    for (i = 0; i < inlen; i++) {
+        hex_out[i * 2] = digits[(bin_in[i] >> 4) & 0xF];
+        hex_out[i * 2 + 1] = digits[bin_in[i] & 0xF];
+    }
+    hex_out[inlen * 2] = '\0';
+}
+
+
 char *utils_uint8_to_hex(const uint8_t *bin, size_t l)
 {
     if (l > (TO_UINT8_HEX_BUF_LEN / 2 - 1)) {
