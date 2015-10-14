@@ -1,0 +1,84 @@
+/*
+
+ The MIT License (MIT)
+
+ Copyright (c) 2015 Jonas Schnelli
+
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation files (the "Software"),
+ to deal in the Software without restriction, including without limitation
+ the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ and/or sell copies of the Software, and to permit persons to whom the
+ Software is furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included
+ in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES
+ OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ OTHER DEALINGS IN THE SOFTWARE.
+
+ */
+
+
+#ifndef LIBBTC_TX_H_
+#define LIBBTC_TX_H_
+
+
+#include <stdint.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "cstr.h"
+#include "vector.h"
+
+typedef uint8_t uint256[32];
+typedef struct lbc_script_
+{
+    int* data;
+    size_t limit; // Total size of the vector
+    size_t current; //Number of vectors in it at present
+} lbc_script;
+
+typedef struct lbc_tx_outpoint_
+{
+    uint256 hash;
+    uint32_t n;
+} lbc_tx_outpoint;
+
+typedef struct lbc_tx_in_
+{
+    lbc_tx_outpoint prevout;
+    cstring *script_sig;
+    uint32_t sequence;
+} lbc_tx_in;
+
+typedef struct lbc_tx_out_
+{
+    int64_t value;
+    cstring *script_pubkey;
+} lbc_tx_out;
+
+typedef struct lbc_tx_
+{
+    uint32_t version;
+    vector *vin;
+    vector *vout;
+    uint32_t locktime;
+} lbc_tx;
+
+lbc_tx* lbc_tx_new();
+bool lbc_tx_free(lbc_tx *tx);
+
+lbc_tx_in* lbc_tx_in_new();
+
+void lbc_tx_in_init();
+int lbc_tx_parse(const unsigned char *tx_serialized, size_t inlen, lbc_tx *tx);
+void lbc_tx_serialize(cstring *s, const lbc_tx *tx);
+
+
+#endif //LIBBTC_TX_H_
