@@ -72,8 +72,6 @@ bool lbc_script_copy_without_op_codeseperator(const cstring *script_in, cstring 
         cstr_append_buf(script_out, buf.p, data_len);
         if (!deser_skip(&buf, data_len))
             goto err_out;
-
-
     }
     
 err_out:
