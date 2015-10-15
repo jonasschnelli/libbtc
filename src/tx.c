@@ -48,6 +48,7 @@ void lbc_tx_in_free(lbc_tx_in *tx_in)
     }
 }
 
+//callback for vector free function
 void lbc_tx_in_free_cb(void *data)
 {
     if (!data)
@@ -106,7 +107,7 @@ lbc_tx_out* lbc_tx_out_new()
 }
 
 
-bool lbc_tx_free(lbc_tx *tx)
+void lbc_tx_free(lbc_tx *tx)
 {
     if (tx->vin)
         vector_free(tx->vin, true);
@@ -115,7 +116,6 @@ bool lbc_tx_free(lbc_tx *tx)
         vector_free(tx->vout, true);
 
     free(tx);
-    return true;
 }
 
 
@@ -131,7 +131,7 @@ lbc_tx* lbc_tx_new()
 }
 
 
-bool lbc_deserialize_tx_in(lbc_tx_in *tx_in, struct const_buffer *buf)
+bool lbc_tx_in_deserialize(lbc_tx_in *tx_in, struct const_buffer *buf)
 {
     deser_u256(tx_in->prevout.hash, buf);
     uint32_t outp;
@@ -141,14 +141,14 @@ bool lbc_deserialize_tx_in(lbc_tx_in *tx_in, struct const_buffer *buf)
     return true;
 }
 
-bool lbc_deserialize_txout(lbc_tx_out *tx_out, struct const_buffer *buf)
+bool lbc_tx_out_deserialize(lbc_tx_out *tx_out, struct const_buffer *buf)
 {
     if (!deser_s64(&tx_out->value, buf)) return false;
     if (!deser_varstr(&tx_out->script_pubkey, buf)) return false;
     return true;
 }
 
-int lbc_tx_parse(const unsigned char *tx_serialized, size_t inlen, lbc_tx *tx)
+int lbc_tx_deserialize(const unsigned char *tx_serialized, size_t inlen, lbc_tx *tx)
 {
     struct const_buffer buf = { tx_serialized, inlen };
 
@@ -161,7 +161,7 @@ int lbc_tx_parse(const unsigned char *tx_serialized, size_t inlen, lbc_tx *tx)
     for (i = 0; i < vlen; i++) {
         lbc_tx_in *tx_in = lbc_tx_in_new();
 
-        if (!lbc_deserialize_tx_in(tx_in, &buf)) {
+        if (!lbc_tx_in_deserialize(tx_in, &buf)) {
             free(tx_in);
         }
         
@@ -172,7 +172,7 @@ int lbc_tx_parse(const unsigned char *tx_serialized, size_t inlen, lbc_tx *tx)
     for (i = 0; i < vlen; i++) {
         lbc_tx_out *tx_out = lbc_tx_out_new();
 
-        if (!lbc_deserialize_txout(tx_out, &buf)) {
+        if (!lbc_tx_out_deserialize(tx_out, &buf)) {
             free(tx_out);
         }
 

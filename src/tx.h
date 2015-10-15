@@ -71,13 +71,24 @@ typedef struct lbc_tx_
     uint32_t locktime;
 } lbc_tx;
 
-lbc_tx* lbc_tx_new();
-bool lbc_tx_free(lbc_tx *tx);
 
+
+//!create a new tx output
+lbc_tx_out* lbc_tx_out_new();
+void lbc_tx_out_free(lbc_tx_out *tx_out);
+
+//!create a new tx input
 lbc_tx_in* lbc_tx_in_new();
+void lbc_tx_in_free(lbc_tx_in *tx_in);
 
-void lbc_tx_in_init();
-int lbc_tx_parse(const unsigned char *tx_serialized, size_t inlen, lbc_tx *tx);
+//!create a new tx input
+lbc_tx* lbc_tx_new();
+void lbc_tx_free(lbc_tx *tx);
+
+//!deserialize/parse a p2p serialized bitcoin transaction
+int lbc_tx_deserialize(const unsigned char *tx_serialized, size_t inlen, lbc_tx *tx);
+
+//!serialize a lbc bitcoin data structure into a p2p serialized buffer
 void lbc_tx_serialize(cstring *s, const lbc_tx *tx);
 
 
