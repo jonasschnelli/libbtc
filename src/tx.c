@@ -178,6 +178,9 @@ int lbc_tx_deserialize(const unsigned char *tx_serialized, size_t inlen, lbc_tx 
 
         vector_add(tx->vout, tx_out);
     }
+
+    if (!deser_u32(&tx->locktime, &buf)) return false;
+
     return BTC_OK;
 }
 
