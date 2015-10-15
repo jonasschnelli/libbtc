@@ -179,6 +179,10 @@ void test_tx()
         lbc_tx *tx = lbc_tx_new();
         lbc_tx_deserialize(tx_data, strlen(one_test->hextx), tx);
 
+        lbc_tx *tx_copy = lbc_tx_new();
+        lbc_tx_copy(tx_copy, tx);
+
+
         assert (tx->vin->len == one_test->num_ins);
         int victx;
         for (victx = 0; victx < tx->vin->len; victx++)
@@ -192,11 +196,20 @@ void test_tx()
 
         cstring *str = cstr_new_sz(strlen(one_test->hextx)+100);
         lbc_tx_serialize(str, tx);
+
+        cstring *str2 = cstr_new_sz(strlen(one_test->hextx)+100);
+        lbc_tx_serialize(str2, tx_copy);
+
+        assert(memcmp(str->str, str2->str, str->len) == 0);
+
         char hexbuf[sizeof(one_test->hextx)+1];
         int outlen2;
         utils_bin_to_hex((unsigned char *)str->str, str->len, hexbuf);
         cstr_free(str, true);
+        cstr_free(str2, true);
+
         assert(memcmp(one_test->hextx, hexbuf, strlen(hexbuf)) == 0);
         lbc_tx_free(tx);
+        lbc_tx_free(tx_copy);
     }
 }

@@ -72,18 +72,20 @@ typedef struct lbc_tx_
 } lbc_tx;
 
 
+//!create a new tx input
+lbc_tx_in* lbc_tx_in_new();
+void lbc_tx_in_free(lbc_tx_in *tx_in);
+void lbc_tx_in_copy(lbc_tx_in *dest, const lbc_tx_in *src);
 
 //!create a new tx output
 lbc_tx_out* lbc_tx_out_new();
 void lbc_tx_out_free(lbc_tx_out *tx_out);
-
-//!create a new tx input
-lbc_tx_in* lbc_tx_in_new();
-void lbc_tx_in_free(lbc_tx_in *tx_in);
+void lbc_tx_out_copy(lbc_tx_out *dest, const lbc_tx_out *src);
 
 //!create a new tx input
 lbc_tx* lbc_tx_new();
 void lbc_tx_free(lbc_tx *tx);
+void lbc_tx_copy(lbc_tx *dest, const lbc_tx *src);
 
 //!deserialize/parse a p2p serialized bitcoin transaction
 int lbc_tx_deserialize(const unsigned char *tx_serialized, size_t inlen, lbc_tx *tx);

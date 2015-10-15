@@ -224,3 +224,84 @@ void lbc_tx_serialize(cstring *s, const lbc_tx *tx)
     
     ser_u32(s, tx->locktime);
 }
+
+
+void lbc_tx_in_copy(lbc_tx_in *dest, const lbc_tx_in *src)
+{
+    
+    memcpy(&dest->prevout, &src->prevout, sizeof(dest->prevout));
+    dest->sequence = src->sequence;
+
+    if (!src->script_sig)
+        dest->script_sig = NULL;
+    else {
+        dest->script_sig = cstr_new_sz(src->script_sig->len);
+        cstr_append_buf(dest->script_sig,
+                        src->script_sig->str, src->script_sig->len);
+    }
+}
+
+
+void lbc_tx_out_copy(lbc_tx_out *dest, const lbc_tx_out *src)
+{
+    dest->value = src->value;
+
+    if (!src->script_pubkey)
+        dest->script_pubkey = NULL;
+    else {
+        dest->script_pubkey = cstr_new_sz(src->script_pubkey->len);
+        cstr_append_buf(dest->script_pubkey,
+                        src->script_pubkey->str,
+                        src->script_pubkey->len);
+    }
+}
+
+
+void lbc_tx_copy(lbc_tx *dest, const lbc_tx *src)
+{
+    dest->version = src->version;
+    dest->locktime = src->locktime;
+
+    if (!src->vin)
+        dest->vin = NULL;
+    else {
+        unsigned int i;
+
+        if (dest->vin)
+            vector_free(dest->vin, true);
+
+        dest->vin = vector_new(src->vin->len, lbc_tx_in_free_cb);
+
+        for (i = 0; i < src->vin->len; i++) {
+            lbc_tx_in *tx_in_old, *tx_in_new;
+
+            tx_in_old = vector_idx(src->vin, i);
+            tx_in_new = malloc(sizeof(*tx_in_new));
+            lbc_tx_in_copy(tx_in_new, tx_in_old);
+            vector_add(dest->vin, tx_in_new);
+        }
+    }
+
+    if (!src->vout)
+        dest->vout = NULL;
+    else {
+        unsigned int i;
+
+        if (dest->vout)
+            vector_free(dest->vout, true);
+
+        dest->vout = vector_new(src->vout->len,
+                              lbc_tx_out_free_cb);
+
+        for (i = 0; i < src->vout->len; i++) {
+            lbc_tx_out *tx_out_old, *tx_out_new;
+            
+            tx_out_old = vector_idx(src->vout, i);
+            tx_out_new = malloc(sizeof(*tx_out_new));
+            lbc_tx_out_copy(tx_out_new, tx_out_old);
+            vector_add(dest->vout, tx_out_new);
+        }
+    }
+}
+
+}
