@@ -44,7 +44,8 @@ extern void test_cstr();
 extern void test_buffer();
 extern void test_utils();
 extern void test_serialize();
-extern void test_tx();
+extern void test_tx_serialization();
+extern void test_tx_sighash();
 
 extern void ecc_start();
 extern void ecc_stop();
@@ -69,8 +70,9 @@ int main(int argc, char **argv)
     test_cstr();
     test_buffer();
     test_serialize();
-    test_tx();
-    
+    test_tx_serialization();
+    test_tx_sighash();
+
     ecc_stop();
 	return 0;
 }

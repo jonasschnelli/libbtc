@@ -21,7 +21,8 @@ noinst_HEADERS = \
 	src/buffer.h \
 	src/cstr.h \
 	src/serialize.h \
-	src/tx.h
+	src/tx.h \
+	src/script.h
 
 src_libbtc_la_SOURCES = \
 	src/sha2.c \
@@ -35,7 +36,8 @@ src_libbtc_la_SOURCES = \
 	src/buffer.c \
 	src/cstr.c \
 	src/serialize.c \
-	src/tx.c
+	src/tx.c \
+	src/script.c
 
 src_libbtc_la_LDFLAGS = \
 	-version-info 1:0:0 \

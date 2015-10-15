@@ -37,6 +37,8 @@
 #include "vector.h"
 
 typedef uint8_t uint256[32];
+
+
 typedef struct lbc_script_
 {
     int* data;
@@ -93,5 +95,6 @@ int lbc_tx_deserialize(const unsigned char *tx_serialized, size_t inlen, lbc_tx 
 //!serialize a lbc bitcoin data structure into a p2p serialized buffer
 void lbc_tx_serialize(cstring *s, const lbc_tx *tx);
 
+bool lbc_tx_sighash(const lbc_tx *tx_to, const cstring *fromPubKey, unsigned int in_num, int hashtype, uint8_t *hash);
 
 #endif //LIBBTC_TX_H_

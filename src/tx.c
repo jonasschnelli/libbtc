@@ -33,6 +33,9 @@
 #include "flags.h"
 #include "tx.h"
 #include "serialize.h"
+#include "sha2.h"
+#include "script.h"
+#include "utils.h"
 
 void lbc_tx_in_free(lbc_tx_in *tx_in)
 {
@@ -307,4 +310,98 @@ void lbc_tx_copy(lbc_tx *dest, const lbc_tx *src)
     }
 }
 
+bool lbc_tx_sighash(const lbc_tx *tx_to, const cstring *fromPubKey, unsigned int in_num, int hashtype, uint8_t *hash)
+{
+    if (in_num >= tx_to->vin->len)
+        return false;
+
+    bool ret = true;
+
+    lbc_tx *tx_tmp = lbc_tx_new();
+    lbc_tx_copy(tx_tmp, tx_to);
+
+    cstring *new_script = cstr_new_sz(fromPubKey->len);
+    lbc_script_copy_without_op_codeseperator(fromPubKey, new_script);
+
+    unsigned int i;
+    lbc_tx_in *tx_in;
+    for (i = 0; i < tx_tmp->vin->len; i++) {
+        tx_in = vector_idx(tx_tmp->vin, i);
+        cstr_resize(tx_in->script_sig, 0);
+
+        if (i == in_num)
+            cstr_append_buf(tx_in->script_sig,
+                            new_script->str, new_script->len);
+    }
+    cstr_free(new_script, true);
+    /* Blank out some of the outputs */
+    if ((hashtype & 0x1f) == SIGHASH_NONE) {
+        /* Wildcard payee */
+        if (tx_tmp->vout)
+            vector_free(tx_tmp->vout, true);
+
+        tx_tmp->vout = vector_new(1, lbc_tx_out_free_cb);
+
+        /* Let the others update at will */
+        for (i = 0; i < tx_tmp->vin->len; i++) {
+            tx_in = vector_idx(tx_tmp->vin, i);
+            if (i != in_num)
+                tx_in->sequence = 0;
+        }
+    }
+
+    else if ((hashtype & 0x1f) == SIGHASH_SINGLE) {
+        /* Only lock-in the txout payee at same index as txin */
+        unsigned int n_out = in_num;
+        if (n_out >= tx_tmp->vout->len) {
+            //TODO: set error code
+            ret = false;
+            goto out;
+        }
+
+        vector_resize(tx_tmp->vout, n_out + 1);
+
+        for (i = 0; i < n_out; i++) {
+            lbc_tx_out *tx_out;
+
+            tx_out = vector_idx(tx_tmp->vout, i);
+            tx_out->value = -1;
+            if (tx_out->script_pubkey) {
+                cstr_free(tx_out->script_pubkey, true);
+                tx_out->script_pubkey = NULL;
+            }
+        }
+
+        /* Let the others update at will */
+        for (i = 0; i < tx_tmp->vin->len; i++) {
+            tx_in = vector_idx(tx_tmp->vin, i);
+            if (i != in_num)
+                tx_in->sequence = 0;
+        }
+    }
+    
+    /* Blank out other inputs completely;
+     not recommended for open transactions */
+    if (hashtype & SIGHASH_ANYONECANPAY) {
+        if (in_num > 0)
+            vector_remove_range(tx_tmp->vin, 0, in_num);
+        vector_resize(tx_tmp->vin, 1);
+    }
+
+    cstring *s = cstr_new_sz(512);
+    lbc_tx_serialize(s, tx_tmp);
+    char hextest[4096];
+    ser_s32(s, hashtype);
+
+    utils_bin_to_hex((unsigned char *)s->str, s->len, hextest);
+
+    sha256_Raw((const uint8_t *)s->str, s->len, hash);
+    sha256_Raw(hash, 32, hash);
+
+    cstr_free(s, true);
+
+out:
+    lbc_tx_free(tx_tmp);
+
+    return ret;
 }
