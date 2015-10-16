@@ -39,62 +39,62 @@
 typedef uint8_t uint256[32];
 
 
-typedef struct lbc_script_
+typedef struct btc_script_
 {
     int* data;
     size_t limit; // Total size of the vector
     size_t current; //Number of vectors in it at present
-} lbc_script;
+} btc_script;
 
-typedef struct lbc_tx_outpoint_
+typedef struct btc_tx_outpoint_
 {
     uint256 hash;
     uint32_t n;
-} lbc_tx_outpoint;
+} btc_tx_outpoint;
 
-typedef struct lbc_tx_in_
+typedef struct btc_tx_in_
 {
-    lbc_tx_outpoint prevout;
+    btc_tx_outpoint prevout;
     cstring *script_sig;
     uint32_t sequence;
-} lbc_tx_in;
+} btc_tx_in;
 
-typedef struct lbc_tx_out_
+typedef struct btc_tx_out_
 {
     int64_t value;
     cstring *script_pubkey;
-} lbc_tx_out;
+} btc_tx_out;
 
-typedef struct lbc_tx_
+typedef struct btc_tx_
 {
     uint32_t version;
     vector *vin;
     vector *vout;
     uint32_t locktime;
-} lbc_tx;
+} btc_tx;
 
 
 //!create a new tx input
-lbc_tx_in* lbc_tx_in_new();
-void lbc_tx_in_free(lbc_tx_in *tx_in);
-void lbc_tx_in_copy(lbc_tx_in *dest, const lbc_tx_in *src);
+btc_tx_in* btc_tx_in_new();
+void btc_tx_in_free(btc_tx_in *tx_in);
+void btc_tx_in_copy(btc_tx_in *dest, const btc_tx_in *src);
 
 //!create a new tx output
-lbc_tx_out* lbc_tx_out_new();
-void lbc_tx_out_free(lbc_tx_out *tx_out);
-void lbc_tx_out_copy(lbc_tx_out *dest, const lbc_tx_out *src);
+btc_tx_out* btc_tx_out_new();
+void btc_tx_out_free(btc_tx_out *tx_out);
+void btc_tx_out_copy(btc_tx_out *dest, const btc_tx_out *src);
 
 //!create a new tx input
-lbc_tx* lbc_tx_new();
-void lbc_tx_free(lbc_tx *tx);
-void lbc_tx_copy(lbc_tx *dest, const lbc_tx *src);
+btc_tx* btc_tx_new();
+void btc_tx_free(btc_tx *tx);
+void btc_tx_copy(btc_tx *dest, const btc_tx *src);
 
 //!deserialize/parse a p2p serialized bitcoin transaction
-int lbc_tx_deserialize(const unsigned char *tx_serialized, size_t inlen, lbc_tx *tx);
+int btc_tx_deserialize(const unsigned char *tx_serialized, size_t inlen, btc_tx *tx);
 
 //!serialize a lbc bitcoin data structure into a p2p serialized buffer
-void lbc_tx_serialize(cstring *s, const lbc_tx *tx);
+void btc_tx_serialize(cstring *s, const btc_tx *tx);
 
-bool lbc_tx_sighash(const lbc_tx *tx_to, const cstring *fromPubKey, unsigned int in_num, int hashtype, uint8_t *hash);
+bool btc_tx_sighash(const btc_tx *tx_to, const cstring *fromPubKey, unsigned int in_num, int hashtype, uint8_t *hash);
 
 #endif //LIBBTC_TX_H_

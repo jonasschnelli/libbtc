@@ -716,11 +716,11 @@ void test_tx_serialization()
         int outlen;
         utils_hex_to_bin(one_test->hextx, tx_data, strlen(one_test->hextx), &outlen);
 
-        lbc_tx *tx = lbc_tx_new();
-        lbc_tx_deserialize(tx_data, strlen(one_test->hextx), tx);
+        btc_tx *tx = btc_tx_new();
+        btc_tx_deserialize(tx_data, strlen(one_test->hextx), tx);
 
-        lbc_tx *tx_copy = lbc_tx_new();
-        lbc_tx_copy(tx_copy, tx);
+        btc_tx *tx_copy = btc_tx_new();
+        btc_tx_copy(tx_copy, tx);
 
 
         assert (tx->vin->len == one_test->num_ins);
@@ -728,17 +728,17 @@ void test_tx_serialization()
         for (victx = 0; victx < tx->vin->len; victx++)
         {
             //hex prevout hash
-            lbc_tx_in *tx_in = vector_idx(tx->vin, victx);
+            btc_tx_in *tx_in = vector_idx(tx->vin, victx);
             char *hex_txin = utils_uint8_to_hex(tx_in->prevout.hash, 32);
             utils_reverse_hex(hex_txin, strlen(hex_txin));
             assert(strcmp(one_test->inputs[victx].hash, hex_txin) == 0);
         }
 
         cstring *str = cstr_new_sz(strlen(one_test->hextx)+100);
-        lbc_tx_serialize(str, tx);
+        btc_tx_serialize(str, tx);
 
         cstring *str2 = cstr_new_sz(strlen(one_test->hextx)+100);
-        lbc_tx_serialize(str2, tx_copy);
+        btc_tx_serialize(str2, tx_copy);
 
         assert(memcmp(str->str, str2->str, str->len) == 0);
 
@@ -749,8 +749,8 @@ void test_tx_serialization()
         cstr_free(str2, true);
 
         assert(memcmp(one_test->hextx, hexbuf, strlen(hexbuf)) == 0);
-        lbc_tx_free(tx);
-        lbc_tx_free(tx_copy);
+        btc_tx_free(tx);
+        btc_tx_free(tx_copy);
     }
 }
 
@@ -767,18 +767,18 @@ void test_tx_sighash()
         int outlen;
         utils_hex_to_bin(test->txhex, tx_data, strlen(test->txhex), &outlen);
 
-        lbc_tx *tx = lbc_tx_new();
-        lbc_tx_deserialize(tx_data, strlen(test->txhex), tx);
+        btc_tx *tx = btc_tx_new();
+        btc_tx_deserialize(tx_data, strlen(test->txhex), tx);
 
         uint8_t script_data[strlen(test->script)/2];
         utils_hex_to_bin(test->script, script_data, strlen(test->script), &outlen);
         cstring *script = cstr_new_buf(script_data, outlen);
         uint8_t sighash[32];
         memset(sighash, 0, 32);
-        lbc_tx_sighash(tx, script, test->inputindex, test->hashtype, sighash);
+        btc_tx_sighash(tx, script, test->inputindex, test->hashtype, sighash);
 
-        vector *vec = vector_new(10, lbc_script_op_free_cb);
-        lbc_script_get_ops(script, vec);
+        vector *vec = vector_new(10, btc_script_op_free_cb);
+        btc_script_get_ops(script, vec);
         enum btc_tx_out_type type = btc_script_classify(vec);
         vector_free(vec, true);
         cstr_free(script, true);
@@ -790,7 +790,7 @@ void test_tx_sighash()
         if (i!=0)
             assert(strcmp(hexbuf, test->hashhex) == 0);
 
-        lbc_tx_free(tx);
+        btc_tx_free(tx);
     }
 }
 
@@ -817,8 +817,8 @@ void test_script_parse()
         utils_hex_to_bin(test->scripthex, script_data, strlen(test->scripthex), &outlen);
 
         cstring *script = cstr_new_buf(script_data, outlen);
-        vector *vec = vector_new(10, lbc_script_op_free_cb);
-        lbc_script_get_ops(script, vec);
+        vector *vec = vector_new(10, btc_script_op_free_cb);
+        btc_script_get_ops(script, vec);
         enum btc_tx_out_type type = btc_script_classify(vec);
 
         assert(type == test->type);
@@ -836,12 +836,12 @@ void test_script_parse()
         utils_hex_to_bin(test->script, script_data, strlen(test->script), &outlen);
 
         cstring *script = cstr_new_buf(script_data, outlen);
-        vector *vec = vector_new(10, lbc_script_op_free_cb);
-        lbc_script_get_ops(script, vec);
+        vector *vec = vector_new(10, btc_script_op_free_cb);
+        btc_script_get_ops(script, vec);
         enum btc_tx_out_type type = btc_script_classify(vec);
 
         cstring *new_script = cstr_new_sz(script->len);
-        lbc_script_copy_without_op_codeseperator(script, new_script);
+        btc_script_copy_without_op_codeseperator(script, new_script);
         cstr_free(new_script, true);
         cstr_free(script, true);
         vector_free(vec, true);

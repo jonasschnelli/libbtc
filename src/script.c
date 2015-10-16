@@ -32,7 +32,7 @@
 #include "buffer.h"
 #include "serialize.h"
 
-bool lbc_script_copy_without_op_codeseperator(const cstring *script_in, cstring *script_out)
+bool btc_script_copy_without_op_codeseperator(const cstring *script_in, cstring *script_out)
 {
     if (script_in->len == 0)
         return false;			/* EOF */
@@ -81,16 +81,16 @@ err_out:
     return false;
 }
 
-lbc_script_op* lbc_script_op_new()
+btc_script_op* btc_script_op_new()
 {
-    lbc_script_op *script_op;
+    btc_script_op *script_op;
     script_op = calloc(1, sizeof(*script_op));
 
     return script_op;
 }
 
 
-void lbc_script_op_free(lbc_script_op *script_op)
+void btc_script_op_free(btc_script_op *script_op)
 {
     if (script_op->data)
     {
@@ -101,15 +101,15 @@ void lbc_script_op_free(lbc_script_op *script_op)
     script_op->op = OP_0;
 }
 
-void lbc_script_op_free_cb(void *data)
+void btc_script_op_free_cb(void *data)
 {
-    lbc_script_op *script_op = data;
-    lbc_script_op_free(script_op);
+    btc_script_op *script_op = data;
+    btc_script_op_free(script_op);
 
     free(script_op);
 }
 
-bool lbc_script_get_ops(const cstring *script_in, vector *ops_out)
+bool btc_script_get_ops(const cstring *script_in, vector *ops_out)
 {
     if (script_in->len == 0)
         return false;			/* EOF */
@@ -118,11 +118,11 @@ bool lbc_script_get_ops(const cstring *script_in, vector *ops_out)
     int pos = 0;
     unsigned char opcode;
 
-    lbc_script_op *op = NULL;
+    btc_script_op *op = NULL;
     while(buf.len > 0)
     {
 
-        op = lbc_script_op_new();
+        op = btc_script_op_new();
 
         if (!deser_bytes(&opcode, &buf, 1))
             goto err_out;
@@ -169,7 +169,7 @@ bool lbc_script_get_ops(const cstring *script_in, vector *ops_out)
 
     return true;
 err_out:
-    lbc_script_op_free(op);
+    btc_script_op_free(op);
     return false;
 }
 
@@ -178,12 +178,12 @@ static inline bool btc_script_is_pushdata(enum opcodetype op)
     return (op <= OP_PUSHDATA4);
 }
 
-static bool btc_script_is_op(const lbc_script_op *op, enum opcodetype opcode)
+static bool btc_script_is_op(const btc_script_op *op, enum opcodetype opcode)
 {
     return (op->op == opcode);
 }
 
-static bool btc_script_is_op_pubkey(const lbc_script_op *op)
+static bool btc_script_is_op_pubkey(const btc_script_op *op)
 {
     if (!btc_script_is_pushdata(op->op))
         return false;
@@ -192,7 +192,7 @@ static bool btc_script_is_op_pubkey(const lbc_script_op *op)
     return true;
 }
 
-static bool btc_script_is_op_pubkeyhash(const lbc_script_op *op)
+static bool btc_script_is_op_pubkeyhash(const btc_script_op *op)
 {
     if (!btc_script_is_pushdata(op->op))
         return false;
@@ -229,7 +229,7 @@ bool btc_script_is_scripthash(vector *ops)
             btc_script_is_op(vector_idx(ops, 2), OP_EQUAL));
 }
 
-static bool btc_script_is_op_smallint(const lbc_script_op *op)
+static bool btc_script_is_op_smallint(const btc_script_op *op)
 {
     return ((op->op == OP_0) ||
             (op->op >= OP_1 && op->op <= OP_16));

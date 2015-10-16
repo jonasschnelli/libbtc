@@ -193,18 +193,18 @@ enum btc_tx_out_type
     BTC_TX_MULTISIG,
 };
 
-typedef struct lbc_script_op_ {
+typedef struct btc_script_op_ {
     enum opcodetype		op;		/* opcode found */
     unsigned char *data;	/* associated data, if any */
     size_t datalen;
-} lbc_script_op;
+} btc_script_op;
 
 //copy a script without the codeseperator ops
-bool lbc_script_copy_without_op_codeseperator(const cstring *scriptin, cstring *scriptout);
+bool btc_script_copy_without_op_codeseperator(const cstring *scriptin, cstring *scriptout);
 
-lbc_script_op* lbc_script_op_new();
-void lbc_script_op_free(lbc_script_op *script_op);
-void lbc_script_op_free_cb(void *data);
-bool lbc_script_get_ops(const cstring *script_in, vector *ops_out);
+btc_script_op* btc_script_op_new();
+void btc_script_op_free(btc_script_op *script_op);
+void btc_script_op_free_cb(void *data);
+bool btc_script_get_ops(const cstring *script_in, vector *ops_out);
 
 enum btc_tx_out_type btc_script_classify(vector *ops);
