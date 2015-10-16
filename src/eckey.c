@@ -49,11 +49,13 @@ btc_key* btc_privkey_new()
     return privkey;
 }
 
+
 void btc_privkey_free(btc_key *privkey)
 {
     memset(privkey->privkey, 0, BTC_ECKEY_PKEY_LENGTH);
     free(privkey);
 }
+
 
 btc_pubkey* btc_pubkey_new()
 {
@@ -65,11 +67,13 @@ btc_pubkey* btc_pubkey_new()
     return pubkey;
 }
 
+
 void btc_pubkey_free(btc_pubkey* pubkey)
 {
     memset(pubkey->pubkey, 0, BTC_ECKEY_UNCOMPRESSED_LENGTH);
     free(pubkey);
 }
+
 
 void btc_pubkey_from_key(btc_key *privkey, btc_pubkey* pubkey_inout)
 {
@@ -82,6 +86,7 @@ bool btc_key_sign_hash(const btc_key *privkey, const uint8_t *hash, unsigned cha
 {
     return ecc_sign(privkey->privkey, hash, sigout, (size_t *)outlen);
 }
+
 
 bool btc_pubkey_verify_sig(const btc_pubkey *pubkey, const uint8_t *hash, unsigned char *sigder, int len)
 {

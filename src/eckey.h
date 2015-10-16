@@ -26,6 +26,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #define BTC_ECKEY_UNCOMPRESSED_LENGTH 64
 #define BTC_ECKEY_COMPRESSED_LENGTH 33
@@ -48,5 +49,9 @@ void btc_privkey_free(btc_key *privkey);
 btc_pubkey* btc_pubkey_new();
 void btc_pubkey_free(btc_pubkey* pubkey);
 void btc_pubkey_from_key(btc_key *privkey, btc_pubkey* pubkey_inout);
+
+//sign a 32byte message/hash and returns a DER encoded signature (through *sigout)
 bool btc_key_sign_hash(const btc_key *privkey, const uint8_t *hash, unsigned char *sigout, int *outlen);
+
+//verifies a DER encoded signature with given pubkey and return true if valid
 bool btc_pubkey_verify_sig(const btc_pubkey *pubkey, const uint8_t *hash, unsigned char *sigder, int len);
