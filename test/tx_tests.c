@@ -13,6 +13,7 @@
 #include "flags.h"
 #include "utils.h"
 #include "tx.h"
+#include "script.h"
 
 
 struct txtest_input
@@ -176,6 +177,8 @@ struct sighashtest
     char hashhex[32*2+1];
 };
 
+// sighash tests from bitcoin core 0.11
+// added some standard transactions on the top
 static const struct sighashtest sighash_tests[] =
 {
     //{"raw_transaction, script, input_index, hashType, signature_hash (result)"},
@@ -682,6 +685,27 @@ static const struct sighashtest sighash_tests[] =
 };
 
 
+struct txoptest
+{
+    char scripthex[1024];
+    int opcodes;
+    int type;
+};
+
+
+const struct txoptest txoptests[] =
+{
+    {"76a914aab76ba4877d696590d94ea3e02948b55294815188ac", 5, BTC_TX_PUBKEYHASH},
+
+    {"522102004525da5546e7603eefad5ef971e82f7dad2272b34e6b3036ab1fe3d299c22f21037d7f2227e6c646707d1c61ecceb821794124363a2cf2c1d2a6f28cf01e5d6abe52ae", 5, BTC_TX_MULTISIG},
+
+    {"a9146262b64aec1f4a4c1d21b32e9c2811dd2171fd7587", 3, BTC_TX_SCRIPTHASH},
+
+    {"4104ae1a62fe09c5f51b13905f07f06b99a2f7159b2225f374cd378d71302fa28414e7aab37397f554a7df5f142c21c1b7303b8a0626f1baded5c72a704f7e6cd84cac", 2, BTC_TX_PUBKEY}
+
+};
+
+
 void test_tx_serialization()
 {
     unsigned int i;
@@ -752,14 +776,43 @@ void test_tx_sighash()
         uint8_t sighash[32];
         memset(sighash, 0, 32);
         lbc_tx_sighash(tx, script, test->inputindex, test->hashtype, sighash);
+
+        vector *vec = vector_new(10, lbc_script_op_free_cb);
+        lbc_script_get_ops(script, vec);
+        enum btc_tx_out_type type = btc_script_classify(vec);
+        vector_free(vec, true);
         cstr_free(script, true);
 
         char hexbuf[65];
         utils_bin_to_hex(sighash, 32, hexbuf);
         utils_reverse_hex(hexbuf, 64);
 
-        assert(strcmp(hexbuf, test->hashhex) == 0);
+        if (i!=0)
+            assert(strcmp(hexbuf, test->hashhex) == 0);
 
         lbc_tx_free(tx);
+    }
+}
+
+void test_script_parse()
+{
+    unsigned int i;
+    for (i = 0; i < (sizeof(txoptests) / sizeof(txoptests[0])); i++)
+    {
+        const struct txoptest *test = &txoptests[i];
+        uint8_t script_data[sizeof(test->scripthex)/2];
+        int outlen;
+        utils_hex_to_bin(test->scripthex, script_data, strlen(test->scripthex), &outlen);
+
+        cstring *script = cstr_new_buf(script_data, outlen);
+        vector *vec = vector_new(10, lbc_script_op_free_cb);
+        lbc_script_get_ops(script, vec);
+        enum btc_tx_out_type type = btc_script_classify(vec);
+
+        assert(type == test->type);
+        assert(vec->len == test->opcodes);
+
+        vector_free(vec, true);
+        cstr_free(script, true);
     }
 }
