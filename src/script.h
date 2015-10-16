@@ -26,6 +26,7 @@
 
 
 #include "cstr.h"
+#include "vector.h"
 
 /** Signature hash types/flags */
 enum
@@ -182,5 +183,28 @@ enum opcodetype
     OP_INVALIDOPCODE = 0xff,
 };
 
+enum btc_tx_out_type
+{
+    BTC_TX_NONSTANDARD,
+    // 'standard' transaction types:
+    BTC_TX_PUBKEY,
+    BTC_TX_PUBKEYHASH,
+    BTC_TX_SCRIPTHASH,
+    BTC_TX_MULTISIG,
+};
+
+typedef struct lbc_script_op_ {
+    enum opcodetype		op;		/* opcode found */
+    unsigned char *data;	/* associated data, if any */
+    size_t datalen;
+} lbc_script_op;
+
 //copy a script without the codeseperator ops
 bool lbc_script_copy_without_op_codeseperator(const cstring *scriptin, cstring *scriptout);
+
+lbc_script_op* lbc_script_op_new();
+void lbc_script_op_free(lbc_script_op *script_op);
+void lbc_script_op_free_cb(void *data);
+bool lbc_script_get_ops(const cstring *script_in, vector *ops_out);
+
+enum btc_tx_out_type btc_script_classify(vector *ops);
