@@ -44,6 +44,7 @@ typedef struct btc_pubkey_
 } btc_pubkey;
 
 btc_key* btc_privkey_new();
+void btc_privkey_gen(btc_key *privkey);
 void btc_privkey_free(btc_key *privkey);
 
 btc_pubkey* btc_pubkey_new();

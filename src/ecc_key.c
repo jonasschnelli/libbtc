@@ -29,11 +29,12 @@
 #include <string.h>
 #include <assert.h>
 
-#include "eckey.h"
+#include "ecc_key.h"
 #include "flags.h"
 #include "random.h"
 #include "utils.h"
 #include "ecc_wrapper.h"
+
 
 btc_key* btc_privkey_new()
 {
@@ -47,6 +48,14 @@ btc_key* btc_privkey_new()
     } while(ecc_verify_privatekey(privkey->privkey) == 0);
 
     return privkey;
+}
+
+void btc_privkey_gen(btc_key *privkey)
+{
+    do
+    {
+        random_bytes(privkey->privkey, BTC_ECKEY_PKEY_LENGTH, 0);
+    } while(ecc_verify_privatekey(privkey->privkey) == 0);
 }
 
 

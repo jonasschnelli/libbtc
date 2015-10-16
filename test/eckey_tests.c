@@ -9,13 +9,13 @@
 #include <string.h>
 #include <assert.h>
 
-#include "eckey.h"
+#include "ecc_key.h"
 #include "utils.h"
 
 void test_eckey()
 {
     btc_key* key = btc_privkey_new();
-
+    btc_privkey_gen(key);
 
     btc_pubkey *pubkey = btc_pubkey_new();
     btc_pubkey_from_key(key, pubkey);
@@ -25,7 +25,6 @@ void test_eckey()
         assert(pubkey->pubkey[i] == 0);
 
     uint8_t *hash = utils_hex_to_uint8((const char *)"26db47a48a10b9b0b697b793f5c0231aa35fe192c9d063d7b03a55e3c302850a");
-
     uint8_t hash2[32];
     memcpy(hash2, hash, 32);
     unsigned char sig[100];

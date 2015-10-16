@@ -23,7 +23,7 @@ noinst_HEADERS = \
 	src/serialize.h \
 	src/tx.h \
 	src/script.h \
-	src/eckey.h
+	src/ecc_key.h
 
 src_libbtc_la_SOURCES = \
 	src/sha2.c \
@@ -39,7 +39,7 @@ src_libbtc_la_SOURCES = \
 	src/serialize.c \
 	src/tx.c \
 	src/script.c \
-	src/eckey.c
+	src/ecc_key.c
 
 src_libbtc_la_LDFLAGS = \
 	-version-info 1:0:0 \
