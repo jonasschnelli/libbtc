@@ -33,7 +33,7 @@ void ecc_start(void);
 void ecc_stop(void);
 
 //!get public key from given private key
-static void ecc_get_pubkey(const uint8_t *private_key, uint8_t *public_key,
+void ecc_get_pubkey(const uint8_t *private_key, uint8_t *public_key,
                            int public_key_len, int compressed);
 
 //!get uncompressed public key from given private key
