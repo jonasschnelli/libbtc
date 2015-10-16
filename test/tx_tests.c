@@ -794,6 +794,18 @@ void test_tx_sighash()
     }
 }
 
+struct script_test
+{
+    char script[32];
+};
+
+const struct script_test script_tests[] =
+{
+    {"0x4c01"},
+    {"0x4d0200ff"},
+    {"0x4e03000000ffff"}
+};
+
 void test_script_parse()
 {
     unsigned int i;
@@ -815,4 +827,24 @@ void test_script_parse()
         vector_free(vec, true);
         cstr_free(script, true);
     }
+
+    for (i = 0; i < (sizeof(script_tests) / sizeof(script_tests[0])); i++)
+    {
+        const struct script_test *test = &script_tests[i];
+        uint8_t script_data[sizeof(test->script)/2];
+        int outlen;
+        utils_hex_to_bin(test->script, script_data, strlen(test->script), &outlen);
+
+        cstring *script = cstr_new_buf(script_data, outlen);
+        vector *vec = vector_new(10, lbc_script_op_free_cb);
+        lbc_script_get_ops(script, vec);
+        enum btc_tx_out_type type = btc_script_classify(vec);
+
+        cstring *new_script = cstr_new_sz(script->len);
+        lbc_script_copy_without_op_codeseperator(script, new_script);
+        cstr_free(new_script, true);
+        cstr_free(script, true);
+        vector_free(vec, true);
+    }
+
 }
