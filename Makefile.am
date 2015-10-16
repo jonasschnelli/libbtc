@@ -52,7 +52,7 @@ libbtc_la_LIBADD = $(LIBSECP256K1)
 
 if USE_TESTS
 noinst_PROGRAMS = tests
-tests_LDADD = src/libbtc.la
+tests_LDADD = libbtc.la
 tests_SOURCES = \
 	test/utest.h \
 	test/unittester.c \
