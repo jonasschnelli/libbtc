@@ -1,5 +1,8 @@
-DIST_SUBDIRS = src/secp256k1
 ACLOCAL_AMFLAGS = -I build-aux/m4
+.PHONY: gen
+.INTERMEDIATE: $(GENBIN)
+
+DIST_SUBDIRS = src/secp256k1
 
 LIBSECP256K1=src/secp256k1/libsecp256k1.la
 
@@ -7,7 +10,7 @@ $(LIBSECP256K1): $(wildcard src/secp256k1/src/*) $(wildcard src/secp256k1/includ
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 include_HEADERS = include/libbtc.h
-lib_LTLIBRARIES = src/libbtc.la
+lib_LTLIBRARIES = libbtc.la
 
 noinst_HEADERS = \
 	src/sha2.h \
@@ -25,7 +28,7 @@ noinst_HEADERS = \
 	src/script.h \
 	src/ecc_key.h
 
-src_libbtc_la_SOURCES = \
+libbtc_la_SOURCES = \
 	src/sha2.c \
 	src/utils.c \
 	src/base58.c \
@@ -41,11 +44,11 @@ src_libbtc_la_SOURCES = \
 	src/script.c \
 	src/ecc_key.c
 
-src_libbtc_la_LDFLAGS = \
+libbtc_la_LDFLAGS = \
 	-version-info 1:0:0 \
 	-no-undefined
-src_libbtc_la_CFLAGS = -I$(top_srcdir)/include
-src_libbtc_la_LIBADD = $(LIBSECP256K1)
+libbtc_la_CFLAGS = -I$(top_srcdir)/include
+libbtc_la_LIBADD = $(LIBSECP256K1)
 
 if USE_TESTS
 noinst_PROGRAMS = tests
