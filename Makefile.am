@@ -22,7 +22,8 @@ noinst_HEADERS = \
 	src/cstr.h \
 	src/serialize.h \
 	src/tx.h \
-	src/script.h
+	src/script.h \
+	src/eckey.h
 
 src_libbtc_la_SOURCES = \
 	src/sha2.c \
@@ -37,7 +38,8 @@ src_libbtc_la_SOURCES = \
 	src/cstr.c \
 	src/serialize.c \
 	src/tx.c \
-	src/script.c
+	src/script.c \
+	src/eckey.c
 
 src_libbtc_la_LDFLAGS = \
 	-version-info 1:0:0 \
@@ -61,7 +63,8 @@ tests_SOURCES = \
 	test/buffer_tests.c \
 	test/utils_tests.c \
 	test/serialize_tests.c \
-	test/tx_tests.c
+	test/tx_tests.c \
+	test/eckey_tests.c
 
 tests_CPPFLAGS = -I$(top_srcdir)/src
 tests_LDFLAGS = -static

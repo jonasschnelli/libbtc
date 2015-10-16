@@ -53,3 +53,6 @@ int ecc_verify_privatekey(const uint8_t *private_key);
 
 //!verifies a given public key (compressed[33] or uncompressed[65] bytes)
 int ecc_verify_pubkey(const uint8_t *public_key, int compressed);
+
+int ecc_sign(const uint8_t *private_key, const uint8_t *hash, unsigned char *sigder, size_t *outlen);
+int ecc_verify_sig(const uint8_t *public_key, int compressed, const uint8_t *hash, unsigned char *sigder, size_t siglen);

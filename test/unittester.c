@@ -47,6 +47,7 @@ extern void test_serialize();
 extern void test_tx_serialization();
 extern void test_tx_sighash();
 extern void test_script_parse();
+extern void test_eckey();
 
 
 extern void ecc_start();
@@ -75,6 +76,8 @@ int main(int argc, char **argv)
     test_tx_serialization();
     test_tx_sighash();
     test_script_parse();
+
+    test_eckey();
 
     ecc_stop();
 	return 0;
