@@ -13,7 +13,7 @@ include_HEADERS = include/libbtc.h
 lib_LTLIBRARIES = libbtc.la
 
 include_HEADERS = include/libbtc.h
-noinst_HEADERS = \
+include_HEADERS += \
 	src/sha2.h \
 	src/utils.h \
 	src/base58.h \
