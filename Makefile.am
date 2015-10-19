@@ -12,6 +12,7 @@ $(LIBSECP256K1): $(wildcard src/secp256k1/src/*) $(wildcard src/secp256k1/includ
 include_HEADERS = include/libbtc.h
 lib_LTLIBRARIES = libbtc.la
 
+include_HEADERS = include/libbtc.h
 noinst_HEADERS = \
 	src/sha2.h \
 	src/utils.h \
@@ -27,6 +28,9 @@ noinst_HEADERS = \
 	src/tx.h \
 	src/script.h \
 	src/ecc_key.h
+
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = libbtc.pc
 
 libbtc_la_SOURCES = \
 	src/sha2.c \

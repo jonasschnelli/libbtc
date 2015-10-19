@@ -12,6 +12,36 @@ AM_INIT_AUTOMAKE([no-define subdir-objects foreign])
 AC_HEADER_STDBOOL
 LT_INIT
 
+PKG_PROG_PKG_CONFIG
+AC_PATH_TOOL(AR, ar)
+AC_PATH_TOOL(RANLIB, ranlib)
+AC_PATH_TOOL(STRIP, strip)
+AX_PROG_CC_FOR_BUILD
+AM_PROG_CC_C_O
+AC_PROG_CC_C99
+
+CFLAGS="$CFLAGS -W"
+
+warn_CFLAGS="-std=c99 -pedantic -Wall -Wextra -Wnested-externs -Wshadow -Wstrict-prototypes -Wno-unused-function -Wno-long-long -Wno-overlength-strings"
+saved_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS $warn_CFLAGS"
+AC_MSG_CHECKING([if ${CC} supports ${warn_CFLAGS}])
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([[char foo;]])],
+    [ AC_MSG_RESULT([yes]) ],
+    [ AC_MSG_RESULT([no])
+      CFLAGS="$saved_CFLAGS"
+    ])
+
+saved_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -fvisibility=hidden"
+AC_MSG_CHECKING([if ${CC} supports -fvisibility=hidden])
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([[char foo;]])],
+    [ AC_MSG_RESULT([yes]) ],
+    [ AC_MSG_RESULT([no])
+      CFLAGS="$saved_CFLAGS"
+    ])
+
+
 # Enable debug
 AC_ARG_ENABLE([debug],
     [AS_HELP_STRING([--enable-debug],
@@ -47,11 +77,16 @@ if test "x$random_device" = x"/dev/random"; then
     AC_DEFINE([RANDOM_DEVICE],["/dev/random"],[Define to set random file handle])
 fi
 
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile libbtc.pc])
 AC_SUBST(LIBTOOL_APP_LDFLAGS)
 AC_SUBST(BUILD_EXEEXT)
 AM_CONDITIONAL([USE_TESTS], [test x"$use_tests" != x"no"])
 
 AC_CONFIG_SUBDIRS([src/secp256k1])
+
+dnl make sure nothing new is exported so that we don't break the cache
+PKGCONFIG_PATH_TEMP="$PKG_CONFIG_PATH"
+unset PKG_CONFIG_PATH
+PKG_CONFIG_PATH="$PKGCONFIG_PATH_TEMP"
 
 AC_OUTPUT
