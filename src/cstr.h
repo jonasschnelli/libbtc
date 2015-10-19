@@ -10,9 +10,9 @@
 #include <sys/types.h>
 
 typedef struct cstring {
-	char	*str;		// string data, incl. NUL
-	size_t	len;		// length of string, not including NUL
-	size_t	alloc;		// total allocated buffer length
+	char	*str;		/* string data, incl. NUL */
+	size_t	len;		/* length of string, not including NUL */
+	size_t	alloc;		/* total allocated buffer length */
 } cstring;
 
 extern cstring *cstr_new(const char *init_str);

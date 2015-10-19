@@ -156,11 +156,11 @@ bool vector_resize(vector *vec, size_t newsz)
 {
     unsigned int i;
 
-    // same size
+    /* same size */
     if (newsz == vec->len)
         return true;
 
-    // truncate
+    /* truncate */
     else if (newsz < vec->len) {
         size_t del_count = vec->len - newsz;
         
@@ -174,11 +174,11 @@ bool vector_resize(vector *vec, size_t newsz)
         return true;
     }
     
-    // last possibility: grow
+    /* last possibility: grow */
     if (!vector_grow(vec, newsz))
         return false;
     
-    // set new elements to NULL
+    /* set new elements to NULL */
     for (i = vec->len; i < newsz; i++)
         vec->data[i] = NULL;
 

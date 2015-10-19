@@ -17,10 +17,10 @@ void test_bip32()
     uint8_t private_key_master[32];
     uint8_t chain_code_master[32];
 
-    // init m
+    /* init m */
     hdnode_from_seed(utils_hex_to_uint8("000102030405060708090a0b0c0d0e0f"), 16, &node);
 
-    // [Chain m]
+    /* [Chain m] */
     memcpy(private_key_master,
            utils_hex_to_uint8("e8f32e723decf4051aefac8e2c93c9c5b214313817cdb01a1494b917c8436b35"),
            32);
@@ -49,7 +49,7 @@ void test_bip32()
     u_assert_mem_eq(&node2, &node3, sizeof(HDNode));
 
 
-    // [Chain m/0']
+    /* [Chain m/0'] */
     char path0[] = "m/0'";
     hd_generate_key(&node, path0, private_key_master, chain_code_master);
     u_assert_int_eq(node.fingerprint, 0x3442193e);
@@ -78,7 +78,7 @@ void test_bip32()
     u_assert_mem_eq(&node2, &node3, sizeof(HDNode));
 
 
-    // [Chain m/0'/1]
+    /* [Chain m/0'/1] */
     char path1[] = "m/0'/1";
     hd_generate_key(&node, path1, private_key_master, chain_code_master);
     u_assert_int_eq(node.fingerprint, 0x5c1bd648);
@@ -106,7 +106,7 @@ void test_bip32()
     memset(&node3.private_key, 0, 32);
     u_assert_mem_eq(&node2, &node3, sizeof(HDNode));
 
-    // [Chain m/0'/1/2']
+    /* [Chain m/0'/1/2'] */
     char path2[] = "m/0'/1/2'";
     hd_generate_key(&node, path2, private_key_master, chain_code_master);
     u_assert_int_eq(node.fingerprint, 0xbef5a2f9);
@@ -134,7 +134,7 @@ void test_bip32()
     memset(&node3.private_key, 0, 32);
     u_assert_mem_eq(&node2, &node3, sizeof(HDNode));
 
-    // [Chain m/0'/1/2'/2]
+    /* [Chain m/0'/1/2'/2] */
     char path3[] = "m/0'/1/2'/2";
     hd_generate_key(&node, path3, private_key_master, chain_code_master);
     u_assert_int_eq(node.fingerprint, 0xee7ab90c);
@@ -162,7 +162,7 @@ void test_bip32()
     memset(&node3.private_key, 0, 32);
     u_assert_mem_eq(&node2, &node3, sizeof(HDNode));
 
-    // [Chain m/0'/1/2'/2/1000000000]
+    /* [Chain m/0'/1/2'/2/1000000000] */
     char path4[] = "m/0'/1/2'/2/1000000000";
     hd_generate_key(&node, path4, private_key_master, chain_code_master);
     u_assert_int_eq(node.fingerprint, 0xd880d7d8);

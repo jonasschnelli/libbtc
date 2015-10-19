@@ -171,7 +171,7 @@ void utils_uint64_to_varint(char *vi, int *l, uint64_t i)
         len = 16;
     }
 
-    // reverse order
+    /* reverse order */
     if (len > 2) {
         utils_reverse_hex(v, len);
         strncat(vi, v, len);
@@ -201,7 +201,7 @@ int utils_varint_to_uint64(const char *vi, uint64_t *i)
     }
 
     if (len == 0) {
-        // continue
+        /* continue */
     } else if (len > 2) {
         strncpy(v, vi + 2, len);
         utils_reverse_hex(v, len);

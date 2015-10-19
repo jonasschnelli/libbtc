@@ -32,9 +32,9 @@
 #include <sys/types.h>
 
 typedef struct vector {
-    void		**data;		// array of pointers
-    size_t		len;		// array element count
-    size_t		alloc;		// allocated array elements
+    void		**data;		/* array of pointers */
+    size_t		len;		/* array element count */
+    size_t		alloc;		/* allocated array elements */
 
     void		(*elem_free_f)(void *);
 } vector;

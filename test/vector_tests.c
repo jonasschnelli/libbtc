@@ -69,7 +69,7 @@ void test_vector()
     vector_free(vec, true);
 
 
-    // test resize
+    /* test resize */
     vec = vector_new(1, free);
     res = vector_resize(vec, 30); assert(res == true);
     res = vector_resize(vec, 30); assert(res == true);
@@ -92,7 +92,7 @@ void test_vector()
     vector_free(vec, true);
 
 
-    // test custom free callback handler
+    /* test custom free callback handler */
     struct teststruct *some_data = calloc(1,sizeof(struct teststruct));
     some_data->dummy1 = calloc(1,10);
     some_data->dummy2 = calloc(1,10);
