@@ -27,7 +27,7 @@
 
 #include "script.h"
 
-#include <strings.h>
+#include <string.h>
 
 #include "buffer.h"
 #include "serialize.h"
