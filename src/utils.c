@@ -48,7 +48,7 @@ void utils_hex_to_bin(const char *str, unsigned char *out, int inLen, int *outLe
     int bLen = inLen / 2;
     memset(out, 0, bLen);
     uint8_t c;
-    size_t i;
+    int i;
     for (i = 0; i < bLen; i++) {
         c = 0;
         if (str[i * 2] >= '0' && str[i * 2] <= '9') {

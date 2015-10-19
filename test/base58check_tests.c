@@ -86,7 +86,7 @@ void test_base58check()
 
         memcpy(rawn, utils_hex_to_uint8(*raw), len);
         int r = base58_encode_check(rawn, len, strn, sizeof(strn));
-        assert(r == strlen(*str) + 1);
+        assert(r == (int)strlen(*str) + 1);
         assert(strcmp(strn, *str) == 0);
 
         r = base58_decode_check(strn, rawn, len);

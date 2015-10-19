@@ -56,7 +56,7 @@ extern void ecc_stop();
 int U_TESTS_RUN = 0;
 int U_TESTS_FAIL = 0;
 
-int main(int argc, char **argv)
+int main()
 {
     ecc_start();
 

@@ -39,7 +39,6 @@
 btc_key* btc_privkey_new()
 {
     btc_key *privkey = calloc(1, sizeof(*privkey));
-    int test = sizeof(*privkey);
     memset(&privkey->privkey, 0, BTC_ECKEY_PKEY_LENGTH);
 
     do
@@ -69,7 +68,6 @@ void btc_privkey_free(btc_key *privkey)
 btc_pubkey* btc_pubkey_new()
 {
     btc_pubkey *pubkey = calloc(1, sizeof(*pubkey));
-    int test = sizeof(*pubkey);
     memset(pubkey->pubkey, 0, BTC_ECKEY_UNCOMPRESSED_LENGTH);
     pubkey->compressed = false;
 

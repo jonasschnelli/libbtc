@@ -79,7 +79,7 @@ void test_vector()
     {
         sprintf(str, "TEST%d", i);
         res = vector_add(vec, strdup(str)); assert(res == true);
-        assert(vec->len == i+1);
+        assert(vec->len == (size_t)i+1);
     }
 
     res = vector_resize(vec, 5); assert(res == true);

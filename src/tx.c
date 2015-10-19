@@ -137,7 +137,6 @@ btc_tx* btc_tx_new()
 bool btc_tx_in_deserialize(btc_tx_in *tx_in, struct const_buffer *buf)
 {
     deser_u256(tx_in->prevout.hash, buf);
-    uint32_t outp;
     if (!deser_u32(&tx_in->prevout.n, buf)) return false;
     if (!deser_varstr(&tx_in->script_sig, buf)) return false;
     if (!deser_u32(&tx_in->sequence, buf)) return false;

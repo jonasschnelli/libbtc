@@ -29,7 +29,7 @@ void test_ecc()
     memset(r_buf, 0xFF, 32);
     u_assert_int_eq(ecc_verify_privatekey(r_buf), 0); //secp256k1 overflow
 
-    uint8_t sig[64], pub_key33[33],pub_key33_invalid[33], pub_key65[65], pub_key65_invalid[65], msg[256];
+    uint8_t pub_key33[33],pub_key33_invalid[33], pub_key65[65], pub_key65_invalid[65];
 
     memcpy(pub_key33, utils_hex_to_uint8("02fcba7ecf41bc7e1be4ee122d9d22e3333671eb0a3a87b5cdf099d59874e1940f"),
            33);

@@ -54,11 +54,9 @@ int random_bytes(uint8_t *buf, uint32_t len, uint8_t update_seed)
 void random_init(void) { }
 
 
-int random_bytes(uint8_t *buf, uint32_t len, uint8_t update_seed)
+int random_bytes(uint8_t *buf, uint32_t len, const uint8_t update_seed)
 {
-    uint32_t r;
-    size_t read_len = 0;
-    size_t read_len_current = 0;
+    (void)update_seed;//unused
     FILE *frand = fopen(RANDOM_DEVICE, "r");
     if (!frand) {
         return BTC_ERR;

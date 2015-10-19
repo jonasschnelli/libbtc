@@ -38,7 +38,6 @@ bool btc_script_copy_without_op_codeseperator(const cstring *script_in, cstring 
         return false;			/* EOF */
 
     struct const_buffer buf = {script_in->str, script_in->len};
-    int pos = 0;
     unsigned char opcode;
     while(buf.len > 0)
     {
@@ -115,7 +114,6 @@ bool btc_script_get_ops(const cstring *script_in, vector *ops_out)
         return false;			/* EOF */
 
     struct const_buffer buf = {script_in->str, script_in->len};
-    int pos = 0;
     unsigned char opcode;
 
     btc_script_op *op = NULL;

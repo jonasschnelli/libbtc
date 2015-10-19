@@ -724,8 +724,8 @@ void test_tx_serialization()
         btc_tx_copy(tx_copy, tx);
 
 
-        assert (tx->vin->len == one_test->num_ins);
-        int victx;
+        assert (tx->vin->len == (size_t)one_test->num_ins);
+        size_t victx;
         for (victx = 0; victx < tx->vin->len; victx++)
         {
             /* hex prevout hash */
@@ -744,7 +744,6 @@ void test_tx_serialization()
         assert(memcmp(str->str, str2->str, str->len) == 0);
 
         char hexbuf[sizeof(one_test->hextx)+1];
-        int outlen2;
         utils_bin_to_hex((unsigned char *)str->str, str->len, hexbuf);
         cstr_free(str, true);
         cstr_free(str2, true);
@@ -823,7 +822,7 @@ void test_script_parse()
         enum btc_tx_out_type type = btc_script_classify(vec);
 
         assert(type == test->type);
-        assert(vec->len == test->opcodes);
+        assert(vec->len == (size_t)test->opcodes);
 
         vector_free(vec, true);
         cstr_free(script, true);

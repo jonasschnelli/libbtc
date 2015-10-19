@@ -54,7 +54,7 @@ void test_serialize()
     cstring *s3 = cstr_new("foo");
     ser_varstr(s2, s3);
     cstr_free(s3, true);
-    /* ser_varlen(s2, (uint64_t)0x9999999999999999); /* uint64 varlen is not supported right now */
+    // ser_varlen(s2, (uint64_t)0x9999999999999999); // uint64 varlen is not supported right now
 
     struct const_buffer buf2 = { s2->str, s2->len };
     uint16_t num0;

@@ -133,7 +133,7 @@ bool cstr_erase(cstring *s, size_t pos, ssize_t len)
 	if (pos >= s->len)
 		return false;
 
-	size_t old_tail = s->len - pos;
+	ssize_t old_tail = s->len - pos;
 	if ((len >= 0) && (len > old_tail))
 		return false;
 

@@ -72,7 +72,7 @@ int ecc_private_key_tweak_add(uint8_t *private_key, const uint8_t *tweak)
 
 int ecc_public_key_tweak_add(uint8_t *public_key_inout, const uint8_t *tweak)
 {
-    int out, res;
+    int out;
     secp256k1_pubkey pubkey;
 
     assert(secp256k1_ctx);
