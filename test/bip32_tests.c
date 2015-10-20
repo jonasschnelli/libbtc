@@ -4,7 +4,8 @@
  * file COPYING or http://www.opensource.org/licenses/mit-license.php.*
  **********************************************************************/
 
-#include "bip32.h"
+#include <btc/bip32.h>
+
 #include "utils.h"
 #include "flags.h"
 #include "utest.h"

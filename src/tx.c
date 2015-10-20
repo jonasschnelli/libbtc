@@ -31,7 +31,7 @@
 #include <string.h>
 
 #include "flags.h"
-#include "tx.h"
+#include "btc/tx.h"
 #include "serialize.h"
 #include "sha2.h"
 #include "script.h"

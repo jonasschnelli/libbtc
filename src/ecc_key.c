@@ -24,16 +24,18 @@
  
 */
 
+#include "btc/ecc_key.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
-#include "ecc_key.h"
+#include "btc/ecc.h"
+
 #include "flags.h"
 #include "random.h"
 #include "utils.h"
-#include "ecc_wrapper.h"
 
 
 btc_key* btc_privkey_new()

@@ -25,9 +25,10 @@
  */
 
 
-#ifndef LIBBTC_TX_H_
-#define LIBBTC_TX_H_
+#ifndef __LIBBTC_TX_H__
+#define __LIBBTC_TX_H__
 
+#include "btc.h"
 
 #include <stdint.h>
 #include <stddef.h>
@@ -75,26 +76,26 @@ typedef struct btc_tx_
 
 
 //!create a new tx input
-btc_tx_in* btc_tx_in_new();
-void btc_tx_in_free(btc_tx_in *tx_in);
-void btc_tx_in_copy(btc_tx_in *dest, const btc_tx_in *src);
+LIBBTC_API btc_tx_in* btc_tx_in_new();
+LIBBTC_API void btc_tx_in_free(btc_tx_in *tx_in);
+LIBBTC_API void btc_tx_in_copy(btc_tx_in *dest, const btc_tx_in *src);
 
 //!create a new tx output
-btc_tx_out* btc_tx_out_new();
-void btc_tx_out_free(btc_tx_out *tx_out);
-void btc_tx_out_copy(btc_tx_out *dest, const btc_tx_out *src);
+LIBBTC_API btc_tx_out* btc_tx_out_new();
+LIBBTC_API void btc_tx_out_free(btc_tx_out *tx_out);
+LIBBTC_API void btc_tx_out_copy(btc_tx_out *dest, const btc_tx_out *src);
 
 //!create a new tx input
-btc_tx* btc_tx_new();
-void btc_tx_free(btc_tx *tx);
-void btc_tx_copy(btc_tx *dest, const btc_tx *src);
+LIBBTC_API btc_tx* btc_tx_new();
+LIBBTC_API void btc_tx_free(btc_tx *tx);
+LIBBTC_API void btc_tx_copy(btc_tx *dest, const btc_tx *src);
 
 //!deserialize/parse a p2p serialized bitcoin transaction
-int btc_tx_deserialize(const unsigned char *tx_serialized, size_t inlen, btc_tx *tx);
+LIBBTC_API int btc_tx_deserialize(const unsigned char *tx_serialized, size_t inlen, btc_tx *tx);
 
 //!serialize a lbc bitcoin data structure into a p2p serialized buffer
-void btc_tx_serialize(cstring *s, const btc_tx *tx);
+LIBBTC_API void btc_tx_serialize(cstring *s, const btc_tx *tx);
 
-bool btc_tx_sighash(const btc_tx *tx_to, const cstring *fromPubKey, unsigned int in_num, int hashtype, uint8_t *hash);
+LIBBTC_API bool btc_tx_sighash(const btc_tx *tx_to, const cstring *fromPubKey, unsigned int in_num, int hashtype, uint8_t *hash);
 
-#endif //LIBBTC_TX_H_
+#endif //__LIBBTC_TX_H__

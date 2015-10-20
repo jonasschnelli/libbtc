@@ -9,10 +9,11 @@
 #include <string.h>
 #include <assert.h>
 
+#include <btc/tx.h>
+
 #include "cstr.h"
 #include "flags.h"
 #include "utils.h"
-#include "tx.h"
 #include "script.h"
 
 

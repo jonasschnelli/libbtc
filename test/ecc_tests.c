@@ -9,7 +9,8 @@
 #include <string.h>
 #include <assert.h>
 
-#include "ecc_wrapper.h"
+#include <btc/ecc.h>
+
 #include "flags.h"
 #include "random.h"
 #include "utest.h"

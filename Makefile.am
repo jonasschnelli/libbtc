@@ -10,22 +10,23 @@ $(LIBSECP256K1): $(wildcard src/secp256k1/src/*) $(wildcard src/secp256k1/includ
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 lib_LTLIBRARIES = libbtc.la
-include_HEADERS = include/libbtc.h
-include_HEADERS += \
+include_HEADERS = include/btc/btc.h \
+	include/btc/tx.h \
+	include/btc/base58.h \
+	include/btc/bip32.h \
+	include/btc/ecc_key.h \
+	include/btc/ecc.h
+
+noinst_HEADERS = \
 	src/sha2.h \
 	src/utils.h \
-	src/base58.h \
 	src/ripemd160.h \
-	src/bip32.h \
-	src/ecc_wrapper.h \
 	src/random.h \
 	src/vector.h \
 	src/buffer.h \
 	src/cstr.h \
 	src/serialize.h \
-	src/tx.h \
-	src/script.h \
-	src/ecc_key.h
+	src/script.h
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libbtc.pc
@@ -71,6 +72,7 @@ tests_SOURCES = \
 	test/tx_tests.c \
 	test/eckey_tests.c
 
+tests_CFLAGS = -I$(top_srcdir)/include
 tests_CPPFLAGS = -I$(top_srcdir)/src
 tests_LDFLAGS = -static
 TESTS = tests

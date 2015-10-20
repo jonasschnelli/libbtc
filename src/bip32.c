@@ -23,17 +23,19 @@
  */
 
 
+#include "btc/bip32.h"
+
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <inttypes.h>
 
-#include "ecc_wrapper.h"
-#include "ripemd160.h"
-#include "base58.h"
-#include "bip32.h"
+#include "btc/base58.h"
+#include "btc/ecc.h"
+
 #include "flags.h"
+#include "ripemd160.h"
 #include "sha2.h"
 #include "utils.h"
 

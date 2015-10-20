@@ -22,18 +22,23 @@
  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
  
- */
+*/
+
+#ifndef __LIBBTC_ECC_H__
+#define __LIBBTC_ECC_H__
+
+#include "btc.h"
 
 #include <stdint.h>
 
 //!init static ecc context
-void ecc_start(void);
+LIBBTC_API void ecc_start(void);
 
 //!destroys the static ecc context
-void ecc_stop(void);
+LIBBTC_API void ecc_stop(void);
 
 //!get public key from given private key
-void ecc_get_pubkey(const uint8_t *private_key, uint8_t *public_key,
+LIBBTC_API void ecc_get_pubkey(const uint8_t *private_key, uint8_t *public_key,
                            int public_key_len, int compressed);
 
 //!get uncompressed public key from given private key
@@ -43,16 +48,18 @@ void ecc_get_public_key65(const uint8_t *private_key, uint8_t *public_key);
 void ecc_get_public_key33(const uint8_t *private_key, uint8_t *public_key);
 
 //!ec mul tweak on given private key
-int ecc_private_key_tweak_add(uint8_t *private_key, const uint8_t *tweak);
+LIBBTC_API int ecc_private_key_tweak_add(uint8_t *private_key, const uint8_t *tweak);
 
 //!ec mul tweak on given public key
-int ecc_public_key_tweak_add(uint8_t *public_key_inout, const uint8_t *tweak);
+LIBBTC_API int ecc_public_key_tweak_add(uint8_t *public_key_inout, const uint8_t *tweak);
 
 //!verifies a given 32byte key
-int ecc_verify_privatekey(const uint8_t *private_key);
+LIBBTC_API int ecc_verify_privatekey(const uint8_t *private_key);
 
 //!verifies a given public key (compressed[33] or uncompressed[65] bytes)
-int ecc_verify_pubkey(const uint8_t *public_key, int compressed);
+LIBBTC_API int ecc_verify_pubkey(const uint8_t *public_key, int compressed);
 
-int ecc_sign(const uint8_t *private_key, const uint8_t *hash, unsigned char *sigder, size_t *outlen);
-int ecc_verify_sig(const uint8_t *public_key, int compressed, const uint8_t *hash, unsigned char *sigder, size_t siglen);
+LIBBTC_API int ecc_sign(const uint8_t *private_key, const uint8_t *hash, unsigned char *sigder, size_t *outlen);
+LIBBTC_API int ecc_verify_sig(const uint8_t *public_key, int compressed, const uint8_t *hash, unsigned char *sigder, size_t siglen);
+
+#endif //__LIBBTC_ECC_H__

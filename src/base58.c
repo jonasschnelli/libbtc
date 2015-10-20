@@ -21,10 +21,12 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include "btc/base58.h"
+
 #include <string.h>
 #include <stdbool.h>
 #include <sys/types.h>
-#include "base58.h"
+
 #include "sha2.h"
 
 static const int8_t b58digits_map[] = {

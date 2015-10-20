@@ -9,7 +9,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "base58.h"
+#include <btc/base58.h>
 #include "utils.h"
 
 /* test vectors from bitcoin core */

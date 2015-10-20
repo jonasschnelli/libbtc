@@ -24,37 +24,33 @@
  
 */
 
+#ifndef _LIBBTC_H_
+#define _LIBBTC_H_
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
+#include <limits.h>
 
-#include <btc/ecc_key.h>
 
-#include "utils.h"
+#ifdef  __cplusplus
+extern "C" {
+#endif
 
-void test_eckey()
-{
-    btc_key* key = btc_privkey_new();
-    btc_privkey_gen(key);
+#ifndef LIBBTC_API
+# if defined(_WIN32)
+#  ifdef LIBBTC_BUILD
+#   define LIBBTC_API __declspec(dllexport)
+#  else
+#   define LIBBTC_API
+#  endif
+# elif defined(__GNUC__) && defined(LIBBTC_BUILD)
+#  define LIBBTC_API __attribute__ ((visibility ("default")))
+# else
+#  define LIBBTC_API
+# endif
+#endif
 
-    btc_pubkey *pubkey = btc_pubkey_new();
-    btc_pubkey_from_key(key, pubkey);
-
-    unsigned int i;
-    for(i = 33; i < BTC_ECKEY_UNCOMPRESSED_LENGTH; i++)
-        assert(pubkey->pubkey[i] == 0);
-
-    uint8_t *hash = utils_hex_to_uint8((const char *)"26db47a48a10b9b0b697b793f5c0231aa35fe192c9d063d7b03a55e3c302850a");
-    uint8_t hash2[32];
-    memcpy(hash2, hash, 32);
-    unsigned char sig[100];
-    int outlen = 0;
-    btc_key_sign_hash(key, hash, sig, &outlen);
-
-    btc_pubkey_verify_sig(pubkey, hash2, sig, outlen);
-
-    btc_pubkey_free(pubkey);
-    btc_privkey_free(key);
+#ifdef  __cplusplus
 }
+#endif
+
+#endif //_LIBBTC_H_

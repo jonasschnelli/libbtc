@@ -1,6 +1,8 @@
 /**
  * Copyright (c) 2013-2014 Tomas Dzetkulic
  * Copyright (c) 2013-2014 Pavol Rusnak
+ * Copyright (c) 2015 Douglas J. Bakkumk
+ * Copyright (c) 2015 Jonas Schnelli
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the "Software"),
@@ -21,12 +23,38 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef __BASE58_H__
-#define __BASE58_H__
+
+#ifndef __LIBBTC_BIP32_H__
+#define __LIBBTC_BIP32_H__
+
+#include "btc.h"
 
 #include <stdint.h>
 
-int base58_encode_check(const uint8_t *data, int len, char *str, int strsize);
-int base58_decode_check(const char *str, uint8_t *data, int datalen);
 
-#endif
+typedef struct {
+    uint32_t depth;
+    uint32_t fingerprint;
+    uint32_t child_num;
+    uint8_t chain_code[32];
+    uint8_t private_key[32];
+    uint8_t public_key[33];
+} HDNode;
+
+
+#define hdnode_private_ckd_prime(X, I) hdnode_private_ckd((X), ((I) | 0x80000000))
+
+
+LIBBTC_API int hdnode_public_ckd(HDNode *inout, uint32_t i);
+LIBBTC_API int hdnode_from_seed(const uint8_t *seed, int seed_len, HDNode *out);
+LIBBTC_API int hdnode_private_ckd(HDNode *inout, uint32_t i);
+LIBBTC_API void hdnode_fill_public_key(HDNode *node);
+LIBBTC_API void hdnode_serialize_public(const HDNode *node, char *str, int strsize);
+LIBBTC_API void hdnode_serialize_private(const HDNode *node, char *str, int strsize);
+LIBBTC_API int hdnode_deserialize(const char *str, HDNode *node);
+
+//!derive HDNode including private key from master private key
+LIBBTC_API int hd_generate_key(HDNode *node, const char *keypath, const uint8_t *privkeymaster,
+                    const uint8_t *chaincode);
+
+#endif // __LIBBTC_BIP32_H__
