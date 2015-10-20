@@ -24,7 +24,6 @@
 #include "btc/base58.h"
 
 #include <string.h>
-#include <stdbool.h>
 #include <sys/types.h>
 
 #include "sha2.h"

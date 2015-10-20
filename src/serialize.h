@@ -29,7 +29,6 @@
 #define LIBBTC_VECTOR_H__
 
 #include <stdint.h>
-#include <stdbool.h>
 
 #include "buffer.h"
 #include "cstr.h"

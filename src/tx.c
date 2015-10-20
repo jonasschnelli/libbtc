@@ -27,7 +27,6 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdbool.h>
 #include <string.h>
 
 #include "btc/tx.h"
