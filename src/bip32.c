@@ -58,10 +58,10 @@ static uint32_t read_be(const uint8_t *data)
 }
 
 
-bool hdnode_from_seed(const uint8_t *seed, int seed_len, HDNode *out)
+bool btc_hdnode_from_seed(const uint8_t *seed, int seed_len, btc_hdnode *out)
 {
     uint8_t I[32 + 32];
-    memset(out, 0, sizeof(HDNode));
+    memset(out, 0, sizeof(btc_hdnode));
     out->depth = 0;
     out->fingerprint = 0x00000000;
     out->child_num = 0;
@@ -74,13 +74,13 @@ bool hdnode_from_seed(const uint8_t *seed, int seed_len, HDNode *out)
     }
 
     memcpy(out->chain_code, I + 32, 32);
-    hdnode_fill_public_key(out);
+    btc_hdnode_fill_public_key(out);
     memset(I, 0, sizeof(I));
     return true;
 }
 
 
-bool hdnode_public_ckd(HDNode *inout, uint32_t i)
+bool btc_hdnode_public_ckd(btc_hdnode *inout, uint32_t i)
 {
     uint8_t data[1 + 32 + 4];
     uint8_t I[32 + 32];
@@ -121,7 +121,7 @@ bool hdnode_public_ckd(HDNode *inout, uint32_t i)
 }
 
 
-bool hdnode_private_ckd(HDNode *inout, uint32_t i)
+bool btc_hdnode_private_ckd(btc_hdnode *inout, uint32_t i)
 {
     uint8_t data[1 + 32 + 4];
     uint8_t I[32 + 32];
@@ -165,7 +165,7 @@ bool hdnode_private_ckd(HDNode *inout, uint32_t i)
     {
         inout->depth++;
         inout->child_num = i;
-        hdnode_fill_public_key(inout);
+        btc_hdnode_fill_public_key(inout);
     }
 
     memset(data, 0, sizeof(data));
@@ -176,13 +176,13 @@ bool hdnode_private_ckd(HDNode *inout, uint32_t i)
 }
 
 
-void hdnode_fill_public_key(HDNode *node)
+void btc_hdnode_fill_public_key(btc_hdnode *node)
 {
     ecc_get_public_key33(node->private_key, node->public_key);
 }
 
 
-static void hdnode_serialize(const HDNode *node, uint32_t version, char use_public,
+static void btc_hdnode_serialize(const btc_hdnode *node, uint32_t version, char use_public,
                              char *str, int strsize)
 {
     uint8_t node_data[78];
@@ -197,28 +197,28 @@ static void hdnode_serialize(const HDNode *node, uint32_t version, char use_publ
         node_data[45] = 0;
         memcpy(node_data + 46, node->private_key, 32);
     }
-    base58_encode_check(node_data, 78, str, strsize);
+    btc_base58_encode_check(node_data, 78, str, strsize);
 }
 
 
-void hdnode_serialize_public(const HDNode *node, const btc_chain *chain, char *str, int strsize)
+void btc_hdnode_serialize_public(const btc_hdnode *node, const btc_chain *chain, char *str, int strsize)
 {
-    hdnode_serialize(node, chain->b58prefix_bip32_pubkey, 1, str, strsize);
+    btc_hdnode_serialize(node, chain->b58prefix_bip32_pubkey, 1, str, strsize);
 }
 
 
-void hdnode_serialize_private(const HDNode *node, const btc_chain *chain, char *str, int strsize)
+void btc_hdnode_serialize_private(const btc_hdnode *node, const btc_chain *chain, char *str, int strsize)
 {
-    hdnode_serialize(node, chain->b58prefix_bip32_privkey, 0, str, strsize);
+    btc_hdnode_serialize(node, chain->b58prefix_bip32_privkey, 0, str, strsize);
 }
 
 
 // check for validity of curve point in case of public data not performed
-bool hdnode_deserialize(const char *str, const btc_chain *chain, HDNode *node)
+bool btc_hdnode_deserialize(const char *str, const btc_chain *chain, btc_hdnode *node)
 {
     uint8_t node_data[78];
-    memset(node, 0, sizeof(HDNode));
-    if (!base58_decode_check(str, node_data, sizeof(node_data))) {
+    memset(node, 0, sizeof(btc_hdnode));
+    if (!btc_base58_decode_check(str, node_data, sizeof(node_data))) {
         return false;
     }
     uint32_t version = read_be(node_data);
@@ -229,7 +229,7 @@ bool hdnode_deserialize(const char *str, const btc_chain *chain, HDNode *node)
             return false;
         }
         memcpy(node->private_key, node_data + 46, 32);
-        hdnode_fill_public_key(node);
+        btc_hdnode_fill_public_key(node);
     } else {
         return false; // invalid version
     }
@@ -240,7 +240,7 @@ bool hdnode_deserialize(const char *str, const btc_chain *chain, HDNode *node)
     return true;
 }
 
-bool hd_generate_key(HDNode *node, const char *keypath, const uint8_t *privkeymaster,
+bool hd_generate_key(btc_hdnode *node, const char *keypath, const uint8_t *privkeymaster,
                         const uint8_t *chaincode)
 {
     static char delim[] = "/";
@@ -270,7 +270,7 @@ bool hd_generate_key(HDNode *node, const char *keypath, const uint8_t *privkeyma
     node->fingerprint = 0;
     memcpy(node->chain_code, chaincode, 32);
     memcpy(node->private_key, privkeymaster, 32);
-    hdnode_fill_public_key(node);
+    btc_hdnode_fill_public_key(node);
 
     pch = strtok(kp + 2, delim);
     while (pch != NULL) {
@@ -293,11 +293,11 @@ bool hd_generate_key(HDNode *node, const char *keypath, const uint8_t *privkeyma
         }
 
         if (prm) {
-            if (hdnode_private_ckd_prime(node, idx) != true) {
+            if (btc_hdnode_private_ckd_prime(node, idx) != true) {
                 goto err;
             }
         } else {
-            if (hdnode_private_ckd(node, idx) != true) {
+            if (btc_hdnode_private_ckd(node, idx) != true) {
                 goto err;
             }
         }
