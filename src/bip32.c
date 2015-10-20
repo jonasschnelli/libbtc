@@ -201,20 +201,20 @@ static void hdnode_serialize(const HDNode *node, uint32_t version, char use_publ
 }
 
 
-void hdnode_serialize_public(const HDNode *node, char *str, int strsize)
+void hdnode_serialize_public(const HDNode *node, const btc_chain *chain, char *str, int strsize)
 {
-    hdnode_serialize(node, 0x0488B21E, 1, str, strsize);
+    hdnode_serialize(node, chain->b58prefix_bip32_pubkey, 1, str, strsize);
 }
 
 
-void hdnode_serialize_private(const HDNode *node, char *str, int strsize)
+void hdnode_serialize_private(const HDNode *node, const btc_chain *chain, char *str, int strsize)
 {
-    hdnode_serialize(node, 0x0488ADE4, 0, str, strsize);
+    hdnode_serialize(node, chain->b58prefix_bip32_privkey, 0, str, strsize);
 }
 
 
 // check for validity of curve point in case of public data not performed
-bool hdnode_deserialize(const char *str, HDNode *node)
+bool hdnode_deserialize(const char *str, const btc_chain *chain, HDNode *node)
 {
     uint8_t node_data[78];
     memset(node, 0, sizeof(HDNode));
@@ -222,9 +222,9 @@ bool hdnode_deserialize(const char *str, HDNode *node)
         return false;
     }
     uint32_t version = read_be(node_data);
-    if (version == 0x0488B21E) { // public node
+    if (version == chain->b58prefix_bip32_pubkey) { // public node
         memcpy(node->public_key, node_data + 45, 33);
-    } else if (version == 0x0488ADE4) { // private node
+    } else if (version == chain->b58prefix_bip32_privkey) { // private node
         if (node_data[45]) { // invalid data
             return false;
         }
