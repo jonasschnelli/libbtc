@@ -27,8 +27,9 @@
 #ifndef LIBBTC_VECTOR_H_
 #define LIBBTC_VECTOR_H_
 
+#include <btc/btc.h>
+
 #include <stdlib.h>
-#include <stdbool.h>
 #include <sys/types.h>
 
 typedef struct vector {

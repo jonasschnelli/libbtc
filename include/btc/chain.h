@@ -24,8 +24,8 @@
  
 */
 
-#ifndef __LIBBTC_ECC_KEY_H__
-#define __LIBBTC_ECC_KEY_H__
+#ifndef __LIBBTC_CHAIN_H__
+#define __LIBBTC_CHAIN_H__
 
 #include "btc.h"
 
@@ -33,40 +33,23 @@
 extern "C" {
 #endif
 
-#include <stdio.h>
 #include <stdint.h>
+#include <sys/types.h>
 
-#define BTC_ECKEY_UNCOMPRESSED_LENGTH 64
-#define BTC_ECKEY_COMPRESSED_LENGTH 33
-#define BTC_ECKEY_PKEY_LENGTH 32
-
-typedef struct btc_key_
+typedef struct btc_chain
 {
-    uint8_t privkey[BTC_ECKEY_PKEY_LENGTH];
-} btc_key;
+    char chainname[8];
+    uint8_t b58prefix_pubkey_address;
+    uint8_t b58prefix_script_address;
+    uint32_t b58prefix_bip32_privkey;
+    uint32_t b58prefix_bip32_pubkey;
+} btc_chain;
 
-typedef struct btc_pubkey_
-{
-    bool compressed;
-    uint8_t pubkey[BTC_ECKEY_UNCOMPRESSED_LENGTH];
-} btc_pubkey;
-
-LIBBTC_API btc_key* btc_privkey_new();
-LIBBTC_API void btc_privkey_gen(btc_key *privkey);
-LIBBTC_API void btc_privkey_free(btc_key *privkey);
-
-LIBBTC_API btc_pubkey* btc_pubkey_new();
-LIBBTC_API void btc_pubkey_free(btc_pubkey* pubkey);
-LIBBTC_API void btc_pubkey_from_key(btc_key *privkey, btc_pubkey* pubkey_inout);
-
-//sign a 32byte message/hash and returns a DER encoded signature (through *sigout)
-LIBBTC_API bool btc_key_sign_hash(const btc_key *privkey, const uint8_t *hash, unsigned char *sigout, int *outlen);
-
-//verifies a DER encoded signature with given pubkey and return true if valid
-LIBBTC_API bool btc_pubkey_verify_sig(const btc_pubkey *pubkey, const uint8_t *hash, unsigned char *sigder, int len);
+static const btc_chain btc_chain_main = { "main", 0x6f, 0xc4, 0x0488ADE4, 0x0488B21E};
+static const btc_chain btc_chain_test = { "testnet3", 0x6f, 0xc4, 0x04358394, 0x043587CF};
 
 #ifdef  __cplusplus
 }
 #endif
 
-#endif //__LIBBTC_ECC_KEY_H__
+#endif //__LIBBTC_CHAIN_H__
