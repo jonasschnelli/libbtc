@@ -26,9 +26,17 @@
 
 #include "btc.h"
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 
 LIBBTC_API int base58_encode_check(const uint8_t *data, int len, char *str, int strsize);
 LIBBTC_API int base58_decode_check(const char *str, uint8_t *data, int datalen);
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif //__LIBBTC_BASE58_H__

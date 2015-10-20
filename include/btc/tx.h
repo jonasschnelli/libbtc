@@ -30,6 +30,10 @@
 
 #include "btc.h"
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -97,5 +101,9 @@ LIBBTC_API int btc_tx_deserialize(const unsigned char *tx_serialized, size_t inl
 LIBBTC_API void btc_tx_serialize(cstring *s, const btc_tx *tx);
 
 LIBBTC_API bool btc_tx_sighash(const btc_tx *tx_to, const cstring *fromPubKey, unsigned int in_num, int hashtype, uint8_t *hash);
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif //__LIBBTC_TX_H__
