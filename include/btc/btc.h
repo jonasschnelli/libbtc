@@ -30,10 +30,16 @@
 #include <stdio.h>
 #include <limits.h>
 
-#include "libbtc-config.h"
+#ifndef bool
+typedef int bool;
+#endif
 
-#if defined(HAVE_STDBOOL_H) && defined(HAVE_BOOL_T)
-#include <stdbool.h>
+#ifndef true
+#define true 1
+#endif
+
+#ifndef false
+#define false 0
 #endif
 
 #ifdef  __cplusplus
