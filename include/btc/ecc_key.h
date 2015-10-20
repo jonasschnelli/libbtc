@@ -29,6 +29,10 @@
 
 #include "btc.h"
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -61,5 +65,9 @@ LIBBTC_API bool btc_key_sign_hash(const btc_key *privkey, const uint8_t *hash, u
 
 //verifies a DER encoded signature with given pubkey and return true if valid
 LIBBTC_API bool btc_pubkey_verify_sig(const btc_pubkey *pubkey, const uint8_t *hash, unsigned char *sigder, int len);
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif //__LIBBTC_ECC_KEY_H__

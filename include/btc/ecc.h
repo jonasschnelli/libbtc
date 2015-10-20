@@ -29,6 +29,10 @@
 
 #include "btc.h"
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 
 //!init static ecc context
@@ -61,5 +65,9 @@ LIBBTC_API bool ecc_verify_pubkey(const uint8_t *public_key, int compressed);
 
 LIBBTC_API bool ecc_sign(const uint8_t *private_key, const uint8_t *hash, unsigned char *sigder, size_t *outlen);
 LIBBTC_API bool ecc_verify_sig(const uint8_t *public_key, int compressed, const uint8_t *hash, unsigned char *sigder, size_t siglen);
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif //__LIBBTC_ECC_H__

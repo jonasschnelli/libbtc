@@ -29,6 +29,10 @@
 
 #include "btc.h"
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 
 
@@ -56,5 +60,9 @@ LIBBTC_API bool hdnode_deserialize(const char *str, HDNode *node);
 //!derive HDNode including private key from master private key
 LIBBTC_API bool hd_generate_key(HDNode *node, const char *keypath, const uint8_t *privkeymaster,
                     const uint8_t *chaincode);
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif // __LIBBTC_BIP32_H__
