@@ -26,12 +26,13 @@
 
 #include "random.h"
 
+#include "libbtc-config.h"
+
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
 
-#include "btc/btc.h"
 
 #ifdef TESTING
 void random_init(void)
@@ -40,7 +41,7 @@ void random_init(void)
 }
 
 
-int random_bytes(uint8_t *buf, uint32_t len, uint8_t update_seed)
+bool random_bytes(uint8_t *buf, uint32_t len, uint8_t update_seed)
 {
     (void) update_seed;
     for (uint32_t i = 0; i < len; i++) {
@@ -53,7 +54,7 @@ int random_bytes(uint8_t *buf, uint32_t len, uint8_t update_seed)
 void random_init(void) { }
 
 
-int random_bytes(uint8_t *buf, uint32_t len, const uint8_t update_seed)
+bool random_bytes(uint8_t *buf, uint32_t len, const uint8_t update_seed)
 {
     (void)update_seed;//unused
     FILE *frand = fopen(RANDOM_DEVICE, "r");
