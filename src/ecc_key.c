@@ -33,7 +33,6 @@
 
 #include "btc/ecc.h"
 
-#include "flags.h"
 #include "random.h"
 #include "utils.h"
 

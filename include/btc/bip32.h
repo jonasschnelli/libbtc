@@ -45,16 +45,16 @@ typedef struct {
 #define hdnode_private_ckd_prime(X, I) hdnode_private_ckd((X), ((I) | 0x80000000))
 
 
-LIBBTC_API int hdnode_public_ckd(HDNode *inout, uint32_t i);
-LIBBTC_API int hdnode_from_seed(const uint8_t *seed, int seed_len, HDNode *out);
-LIBBTC_API int hdnode_private_ckd(HDNode *inout, uint32_t i);
+LIBBTC_API bool hdnode_public_ckd(HDNode *inout, uint32_t i);
+LIBBTC_API bool hdnode_from_seed(const uint8_t *seed, int seed_len, HDNode *out);
+LIBBTC_API bool hdnode_private_ckd(HDNode *inout, uint32_t i);
 LIBBTC_API void hdnode_fill_public_key(HDNode *node);
 LIBBTC_API void hdnode_serialize_public(const HDNode *node, char *str, int strsize);
 LIBBTC_API void hdnode_serialize_private(const HDNode *node, char *str, int strsize);
-LIBBTC_API int hdnode_deserialize(const char *str, HDNode *node);
+LIBBTC_API bool hdnode_deserialize(const char *str, HDNode *node);
 
 //!derive HDNode including private key from master private key
-LIBBTC_API int hd_generate_key(HDNode *node, const char *keypath, const uint8_t *privkeymaster,
+LIBBTC_API bool hd_generate_key(HDNode *node, const char *keypath, const uint8_t *privkeymaster,
                     const uint8_t *chaincode);
 
 #endif // __LIBBTC_BIP32_H__

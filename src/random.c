@@ -24,15 +24,14 @@
 
 */
 
+#include "random.h"
 
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
-#include "random.h"
-#include "flags.h"
 
-#include "libbtc-config.h"
+#include "btc/btc.h"
 
 #ifdef TESTING
 void random_init(void)
@@ -48,7 +47,7 @@ int random_bytes(uint8_t *buf, uint32_t len, uint8_t update_seed)
         buf[i] = rand();
     }
 
-    return DBB_OK;
+    return true;
 }
 #elif FILE_RANDOM
 void random_init(void) { }
@@ -59,13 +58,13 @@ int random_bytes(uint8_t *buf, uint32_t len, const uint8_t update_seed)
     (void)update_seed;//unused
     FILE *frand = fopen(RANDOM_DEVICE, "r");
     if (!frand) {
-        return BTC_ERR;
+        return false;
     }
 
     size_t len_read = fread(buf, 1, len, frand);
     assert(len_read == len);
     fclose(frand);
-    return BTC_OK;
+    return true;
 }
 #else
 //provide extern interface

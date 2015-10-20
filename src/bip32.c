@@ -34,7 +34,6 @@
 #include "btc/base58.h"
 #include "btc/ecc.h"
 
-#include "flags.h"
 #include "ripemd160.h"
 #include "sha2.h"
 #include "utils.h"
@@ -59,7 +58,7 @@ static uint32_t read_be(const uint8_t *data)
 }
 
 
-int hdnode_from_seed(const uint8_t *seed, int seed_len, HDNode *out)
+bool hdnode_from_seed(const uint8_t *seed, int seed_len, HDNode *out)
 {
     uint8_t I[32 + 32];
     memset(out, 0, sizeof(HDNode));
@@ -71,24 +70,24 @@ int hdnode_from_seed(const uint8_t *seed, int seed_len, HDNode *out)
 
     if (!ecc_verify_privatekey(out->private_key)) {
         memset(I, 0, sizeof(I));
-        return BTC_ERR;
+        return false;
     }
 
     memcpy(out->chain_code, I + 32, 32);
     hdnode_fill_public_key(out);
     memset(I, 0, sizeof(I));
-    return BTC_OK;
+    return true;
 }
 
 
-int hdnode_public_ckd(HDNode *inout, uint32_t i)
+bool hdnode_public_ckd(HDNode *inout, uint32_t i)
 {
     uint8_t data[1 + 32 + 4];
     uint8_t I[32 + 32];
     uint8_t fingerprint[32];
 
     if (i & 0x80000000) { // private derivation
-        return 0;
+        return false;
     } else { // public derivation
         memcpy(data, inout->public_key, 33);
     }
@@ -106,7 +105,7 @@ int hdnode_public_ckd(HDNode *inout, uint32_t i)
 
 
     if (!ecc_public_key_tweak_add(inout->public_key, I))
-        failed = BTC_ERR;
+        failed = false;
 
     if (!failed) {
         inout->depth++;
@@ -118,11 +117,11 @@ int hdnode_public_ckd(HDNode *inout, uint32_t i)
     memset(I, 0, sizeof(I));
     memset(fingerprint, 0, sizeof(fingerprint));
     
-    return failed ? BTC_ERR : BTC_OK;
+    return failed ? false : true;
 }
 
 
-int hdnode_private_ckd(HDNode *inout, uint32_t i)
+bool hdnode_private_ckd(HDNode *inout, uint32_t i)
 {
     uint8_t data[1 + 32 + 4];
     uint8_t I[32 + 32];
@@ -154,7 +153,7 @@ int hdnode_private_ckd(HDNode *inout, uint32_t i)
     int failed = 0;
     if (!ecc_verify_privatekey(z)) {
         failed = 1;
-        return BTC_ERR;
+        return false;
     }
 
     memcpy(inout->private_key, p, 32);
@@ -173,7 +172,7 @@ int hdnode_private_ckd(HDNode *inout, uint32_t i)
     memset(I, 0, sizeof(I));
     memset(p, 0, sizeof(p));
     memset(z, 0, sizeof(z));
-    return BTC_OK;
+    return true;
 }
 
 
@@ -215,33 +214,33 @@ void hdnode_serialize_private(const HDNode *node, char *str, int strsize)
 
 
 // check for validity of curve point in case of public data not performed
-int hdnode_deserialize(const char *str, HDNode *node)
+bool hdnode_deserialize(const char *str, HDNode *node)
 {
     uint8_t node_data[78];
     memset(node, 0, sizeof(HDNode));
     if (!base58_decode_check(str, node_data, sizeof(node_data))) {
-        return BTC_ERR;
+        return false;
     }
     uint32_t version = read_be(node_data);
     if (version == 0x0488B21E) { // public node
         memcpy(node->public_key, node_data + 45, 33);
     } else if (version == 0x0488ADE4) { // private node
         if (node_data[45]) { // invalid data
-            return BTC_ERR;
+            return false;
         }
         memcpy(node->private_key, node_data + 46, 32);
         hdnode_fill_public_key(node);
     } else {
-        return BTC_ERR; // invalid version
+        return false; // invalid version
     }
     node->depth = node_data[4];
     node->fingerprint = read_be(node_data + 5);
     node->child_num = read_be(node_data + 9);
     memcpy(node->chain_code, node_data + 13, 32);
-    return BTC_OK;
+    return true;
 }
 
-int hd_generate_key(HDNode *node, const char *keypath, const uint8_t *privkeymaster,
+bool hd_generate_key(HDNode *node, const char *keypath, const uint8_t *privkeymaster,
                         const uint8_t *chaincode)
 {
     static char delim[] = "/";
@@ -252,7 +251,7 @@ int hd_generate_key(HDNode *node, const char *keypath, const uint8_t *privkeymas
     char *pch, *kp = malloc(strlens(keypath) + 1);
 
     if (!kp) {
-        return BTC_ERR;
+        return false;
     }
 
     if (strlens(keypath) < strlens("m/")) {
@@ -294,20 +293,20 @@ int hd_generate_key(HDNode *node, const char *keypath, const uint8_t *privkeymas
         }
 
         if (prm) {
-            if (hdnode_private_ckd_prime(node, idx) != BTC_OK) {
+            if (hdnode_private_ckd_prime(node, idx) != true) {
                 goto err;
             }
         } else {
-            if (hdnode_private_ckd(node, idx) != BTC_OK) {
+            if (hdnode_private_ckd(node, idx) != true) {
                 goto err;
             }
         }
         pch = strtok(NULL, delim);
     }
     free(kp);
-    return BTC_OK;
+    return true;
 
 err:
     free(kp);
-    return BTC_ERR;
+    return false;
 }

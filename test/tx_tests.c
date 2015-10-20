@@ -12,9 +12,8 @@
 #include <btc/tx.h>
 
 #include "cstr.h"
-#include "flags.h"
-#include "utils.h"
 #include "script.h"
+#include "utils.h"
 
 
 struct txtest_input

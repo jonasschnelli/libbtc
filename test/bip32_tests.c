@@ -6,9 +6,8 @@
 
 #include <btc/bip32.h>
 
-#include "utils.h"
-#include "flags.h"
 #include "utest.h"
+#include "utils.h"
 
 void test_bip32()
 {
@@ -38,13 +37,13 @@ void test_bip32()
     u_assert_str_eq(str,
                     "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi");
     r = hdnode_deserialize(str, &node2);
-    u_assert_int_eq(r, BTC_OK);
+    u_assert_int_eq(r, true);
     u_assert_mem_eq(&node, &node2, sizeof(HDNode));
     hdnode_serialize_public(&node, str, sizeof(str));
     u_assert_str_eq(str,
                     "xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8");
     r = hdnode_deserialize(str, &node2);
-    u_assert_int_eq(r, BTC_OK);
+    u_assert_int_eq(r, true);
     memcpy(&node3, &node, sizeof(HDNode));
     memset(&node3.private_key, 0, 32);
     u_assert_mem_eq(&node2, &node3, sizeof(HDNode));
@@ -67,13 +66,13 @@ void test_bip32()
     u_assert_str_eq(str,
                     "xprv9uHRZZhk6KAJC1avXpDAp4MDc3sQKNxDiPvvkX8Br5ngLNv1TxvUxt4cV1rGL5hj6KCesnDYUhd7oWgT11eZG7XnxHrnYeSvkzY7d2bhkJ7");
     r = hdnode_deserialize(str, &node2);
-    u_assert_int_eq(r, BTC_OK);
+    u_assert_int_eq(r, true);
     u_assert_mem_eq(&node, &node2, sizeof(HDNode));
     hdnode_serialize_public(&node, str, sizeof(str));
     u_assert_str_eq(str,
                     "xpub68Gmy5EdvgibQVfPdqkBBCHxA5htiqg55crXYuXoQRKfDBFA1WEjWgP6LHhwBZeNK1VTsfTFUHCdrfp1bgwQ9xv5ski8PX9rL2dZXvgGDnw");
     r = hdnode_deserialize(str, &node2);
-    u_assert_int_eq(r, BTC_OK);
+    u_assert_int_eq(r, true);
     memcpy(&node3, &node, sizeof(HDNode));
     memset(&node3.private_key, 0, 32);
     u_assert_mem_eq(&node2, &node3, sizeof(HDNode));
@@ -96,13 +95,13 @@ void test_bip32()
     u_assert_str_eq(str,
                     "xprv9wTYmMFdV23N2TdNG573QoEsfRrWKQgWeibmLntzniatZvR9BmLnvSxqu53Kw1UmYPxLgboyZQaXwTCg8MSY3H2EU4pWcQDnRnrVA1xe8fs");
     r = hdnode_deserialize(str, &node2);
-    u_assert_int_eq(r, BTC_OK);
+    u_assert_int_eq(r, true);
     u_assert_mem_eq(&node, &node2, sizeof(HDNode));
     hdnode_serialize_public(&node, str, sizeof(str));
     u_assert_str_eq(str,
                     "xpub6ASuArnXKPbfEwhqN6e3mwBcDTgzisQN1wXN9BJcM47sSikHjJf3UFHKkNAWbWMiGj7Wf5uMash7SyYq527Hqck2AxYysAA7xmALppuCkwQ");
     r = hdnode_deserialize(str, &node2);
-    u_assert_int_eq(r, BTC_OK);
+    u_assert_int_eq(r, true);
     memcpy(&node3, &node, sizeof(HDNode));
     memset(&node3.private_key, 0, 32);
     u_assert_mem_eq(&node2, &node3, sizeof(HDNode));
@@ -124,13 +123,13 @@ void test_bip32()
     u_assert_str_eq(str,
                     "xprv9z4pot5VBttmtdRTWfWQmoH1taj2axGVzFqSb8C9xaxKymcFzXBDptWmT7FwuEzG3ryjH4ktypQSAewRiNMjANTtpgP4mLTj34bhnZX7UiM");
     r = hdnode_deserialize(str, &node2);
-    u_assert_int_eq(r, BTC_OK);
+    u_assert_int_eq(r, true);
     u_assert_mem_eq(&node, &node2, sizeof(HDNode));
     hdnode_serialize_public(&node, str, sizeof(str));
     u_assert_str_eq(str,
                     "xpub6D4BDPcP2GT577Vvch3R8wDkScZWzQzMMUm3PWbmWvVJrZwQY4VUNgqFJPMM3No2dFDFGTsxxpG5uJh7n7epu4trkrX7x7DogT5Uv6fcLW5");
     r = hdnode_deserialize(str, &node2);
-    u_assert_int_eq(r, BTC_OK);
+    u_assert_int_eq(r, true);
     memcpy(&node3, &node, sizeof(HDNode));
     memset(&node3.private_key, 0, 32);
     u_assert_mem_eq(&node2, &node3, sizeof(HDNode));
@@ -152,13 +151,13 @@ void test_bip32()
     u_assert_str_eq(str,
                     "xprvA2JDeKCSNNZky6uBCviVfJSKyQ1mDYahRjijr5idH2WwLsEd4Hsb2Tyh8RfQMuPh7f7RtyzTtdrbdqqsunu5Mm3wDvUAKRHSC34sJ7in334");
     r = hdnode_deserialize(str, &node2);
-    u_assert_int_eq(r, BTC_OK);
+    u_assert_int_eq(r, true);
     u_assert_mem_eq(&node, &node2, sizeof(HDNode));
     hdnode_serialize_public(&node, str, sizeof(str));
     u_assert_str_eq(str,
                     "xpub6FHa3pjLCk84BayeJxFW2SP4XRrFd1JYnxeLeU8EqN3vDfZmbqBqaGJAyiLjTAwm6ZLRQUMv1ZACTj37sR62cfN7fe5JnJ7dh8zL4fiyLHV");
     r = hdnode_deserialize(str, &node2);
-    u_assert_int_eq(r, BTC_OK);
+    u_assert_int_eq(r, true);
     memcpy(&node3, &node, sizeof(HDNode));
     memset(&node3.private_key, 0, 32);
     u_assert_mem_eq(&node2, &node3, sizeof(HDNode));
@@ -179,13 +178,13 @@ void test_bip32()
     hdnode_serialize_private(&node, str, sizeof(str));
     u_assert_str_eq(str, "xprvA41z7zogVVwxVSgdKUHDy1SKmdb533PjDz7J6N6mV6uS3ze1ai8FHa8kmHScGpWmj4WggLyQjgPie1rFSruoUihUZREPSL39UNdE3BBDu76");
     r = hdnode_deserialize(str, &node2);
-    u_assert_int_eq(r, BTC_OK);
+    u_assert_int_eq(r, true);
     u_assert_mem_eq(&node, &node2, sizeof(HDNode));
     hdnode_serialize_public(&node, str, sizeof(str));
     u_assert_str_eq(str,
                     "xpub6H1LXWLaKsWFhvm6RVpEL9P4KfRZSW7abD2ttkWP3SSQvnyA8FSVqNTEcYFgJS2UaFcxupHiYkro49S8yGasTvXEYBVPamhGW6cFJodrTHy");
     r = hdnode_deserialize(str, &node2);
-    u_assert_int_eq(r, BTC_OK);
+    u_assert_int_eq(r, true);
     memcpy(&node3, &node, sizeof(HDNode));
     memset(&node3.private_key, 0, 32);
     u_assert_mem_eq(&node2, &node3, sizeof(HDNode));
@@ -195,11 +194,11 @@ void test_bip32()
 
     r = hdnode_deserialize(str_pub_ckd, &node4);
     r = hdnode_public_ckd(&node4, 123);
-    u_assert_int_eq(r, BTC_OK);
+    u_assert_int_eq(r, true);
     hdnode_serialize_public(&node4, str, sizeof(str));
     u_assert_str_eq(str, "xpub6Mf5jT2qB3v8YP8frMBbgQ9L79UF6zXzdYbUSAwzezhEQep8w3GfBrbFGquW7T4PQXvmRh8DFEJFbm6qgsJXmT4FjNgrJL2m6YuKJRbsgUa");
 
 
     r = hdnode_public_ckd(&node4, 0x80000000 + 1); //try deriving a hardened key (= must fail)
-    u_assert_int_eq(r, BTC_ERR);
+    u_assert_int_eq(r, false);
 }

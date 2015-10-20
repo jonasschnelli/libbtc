@@ -11,7 +11,6 @@
 
 #include <btc/ecc.h>
 
-#include "flags.h"
 #include "random.h"
 #include "utest.h"
 #include "utils.h"

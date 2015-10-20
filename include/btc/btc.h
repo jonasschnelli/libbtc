@@ -30,6 +30,11 @@
 #include <stdio.h>
 #include <limits.h>
 
+#include "libbtc-config.h"
+
+#if defined(HAVE_STDBOOL_H) && defined(HAVE_BOOL_T)
+#include <stdbool.h>
+#endif
 
 #ifdef  __cplusplus
 extern "C" {

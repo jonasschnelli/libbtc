@@ -30,11 +30,11 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "flags.h"
 #include "btc/tx.h"
+
+#include "script.h"
 #include "serialize.h"
 #include "sha2.h"
-#include "script.h"
 #include "utils.h"
 
 void btc_tx_in_free(btc_tx_in *tx_in)
@@ -183,7 +183,7 @@ int btc_tx_deserialize(const unsigned char *tx_serialized, size_t inlen, btc_tx 
 
     if (!deser_u32(&tx->locktime, &buf)) return false;
 
-    return BTC_OK;
+    return true;
 }
 
 void btc_tx_in_serialize(cstring *s, const btc_tx_in *tx_in)
