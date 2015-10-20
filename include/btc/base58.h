@@ -32,8 +32,8 @@ extern "C" {
 
 #include <stdint.h>
 
-LIBBTC_API int base58_encode_check(const uint8_t *data, int len, char *str, int strsize);
-LIBBTC_API int base58_decode_check(const char *str, uint8_t *data, int datalen);
+LIBBTC_API int btc_base58_encode_check(const uint8_t *data, int len, char *str, int strsize);
+LIBBTC_API int btc_base58_decode_check(const char *str, uint8_t *data, int datalen);
 
 #ifdef  __cplusplus
 }

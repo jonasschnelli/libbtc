@@ -85,11 +85,11 @@ void test_base58check()
         int len = strlen(*raw) / 2;
 
         memcpy(rawn, utils_hex_to_uint8(*raw), len);
-        int r = base58_encode_check(rawn, len, strn, sizeof(strn));
+        int r = btc_base58_encode_check(rawn, len, strn, sizeof(strn));
         assert(r == (int)strlen(*str) + 1);
         assert(strcmp(strn, *str) == 0);
 
-        r = base58_decode_check(strn, rawn, len);
+        r = btc_base58_decode_check(strn, rawn, len);
         assert(r == len);
 
         raw += 2;
@@ -106,9 +106,9 @@ void test_base58check()
 
         int r = 0;
         if (strncmp(*i_cmd, "ec", 2) == 0)
-            r = base58_encode_check(i_rawn, len, strn, sizeof(strn));
+            r = btc_base58_encode_check(i_rawn, len, strn, sizeof(strn));
         else
-            r = base58_decode_check(strn, i_rawn, len);
+            r = btc_base58_decode_check(strn, i_rawn, len);
 
         assert(r == 0);
         i_raw += 2;

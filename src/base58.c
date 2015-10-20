@@ -195,7 +195,7 @@ static int b58enc(char *b58, size_t *b58sz, const void *data, size_t binsz)
     return true;
 }
 
-int base58_encode_check(const uint8_t *data, int datalen, char *str, int strsize)
+int btc_base58_encode_check(const uint8_t *data, int datalen, char *str, int strsize)
 {
     int ret;
     if (datalen > 128) {
@@ -216,7 +216,7 @@ int base58_encode_check(const uint8_t *data, int datalen, char *str, int strsize
     return ret;
 }
 
-int base58_decode_check(const char *str, uint8_t *data, int datalen)
+int btc_base58_decode_check(const char *str, uint8_t *data, int datalen)
 {
     int ret;
 
