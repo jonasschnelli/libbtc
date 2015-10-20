@@ -19,6 +19,8 @@ What is the Focus of Libbtc?
 
 How to Build
 ----------------
-`./autogen.sh`
-`./configure`
-`make check`
+```
+./autogen.sh
+./configure
+make check
+```
