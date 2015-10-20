@@ -9,9 +9,7 @@ LIBSECP256K1=src/secp256k1/libsecp256k1.la
 $(LIBSECP256K1): $(wildcard src/secp256k1/src/*) $(wildcard src/secp256k1/include/*)
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
-include_HEADERS = include/libbtc.h
 lib_LTLIBRARIES = libbtc.la
-
 include_HEADERS = include/libbtc.h
 include_HEADERS += \
 	src/sha2.h \
