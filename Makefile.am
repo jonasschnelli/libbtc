@@ -17,16 +17,16 @@ include_HEADERS = include/btc/btc.h \
 	include/btc/ecc_key.h \
 	include/btc/ecc.h \
 	include/btc/chain.h \
-	include/btc/hash.h
+	include/btc/hash.h \
+	include/btc/vector.h \
+	include/btc/cstr.h
 
 noinst_HEADERS = \
 	src/sha2.h \
 	src/utils.h \
 	src/ripemd160.h \
 	src/random.h \
-	src/vector.h \
 	src/buffer.h \
-	src/cstr.h \
 	src/serialize.h \
 	src/script.h
 

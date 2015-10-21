@@ -3,7 +3,7 @@
  * file COPYING or http://www.opensource.org/licenses/mit-license.php.
  */
 
-#include "cstr.h"
+#include "btc/cstr.h"
 
 #include <string.h>
 

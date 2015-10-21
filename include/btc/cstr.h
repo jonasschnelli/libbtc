@@ -2,6 +2,7 @@
 
  The MIT License (MIT)
 
+ Copyright (c) 2015 BitPay, Inc.
  Copyright (c) 2015 Jonas Schnelli
 
  Permission is hereby granted, free of charge, to any person obtaining
@@ -21,36 +22,46 @@
  OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
+ 
+*/
 
- */
 
-#ifndef LIBBTC_VECTOR_H_
-#define LIBBTC_VECTOR_H_
+#ifndef __LIBBTC_CSTR_H__
+#define __LIBBTC_CSTR_H__
 
-#include <btc/btc.h>
+#include "btc.h"
+
+#ifdef  __cplusplus
+extern "C" {
+#endif
 
 #include <stdlib.h>
 #include <sys/types.h>
 
-typedef struct vector {
-    void		**data;		/* array of pointers */
-    size_t		len;		/* array element count */
-    size_t		alloc;		/* allocated array elements */
+typedef struct cstring {
+	char	*str;		/* string data, incl. NUL */
+	size_t	len;		/* length of string, not including NUL */
+	size_t	alloc;		/* total allocated buffer length */
+} cstring;
 
-    void		(*elem_free_f)(void *);
-} vector;
+LIBBTC_API cstring *cstr_new(const char *init_str);
+LIBBTC_API cstring *cstr_new_sz(size_t sz);
+LIBBTC_API cstring *cstr_new_buf(const void *buf, size_t sz);
+LIBBTC_API void cstr_free(cstring *s, bool free_buf);
 
-extern vector *vector_new(size_t res, void (*free_f)(void *));
-extern void vector_free(vector *vec, bool free_array);
+LIBBTC_API bool cstr_equal(const cstring *a, const cstring *b);
+LIBBTC_API bool cstr_resize(cstring *s, size_t sz);
+LIBBTC_API bool cstr_erase(cstring *s, size_t pos, ssize_t len);
 
-extern bool vector_add(vector *vec, void *data);
-extern bool vector_remove(vector *vec, void *data);
-extern void vector_remove_idx(vector *vec, size_t idx);
-extern void vector_remove_range(vector *vec, size_t idx, size_t len);
-extern bool vector_resize(vector *vec, size_t newsz);
+LIBBTC_API bool cstr_append_buf(cstring *s, const void *buf, size_t sz);
 
-extern ssize_t vector_find(vector *vec, void *data);
+LIBBTC_API static inline bool cstr_append_c(cstring *s, char ch)
+{
+	return cstr_append_buf(s, &ch, 1);
+}
 
-#define vector_idx(vec, idx) ((vec)->data[(idx)])
+#ifdef  __cplusplus
+}
+#endif
 
-#endif /* LIBBTC_VECTOR_H_ */
+#endif //__LIBBTC_CSTR_H__

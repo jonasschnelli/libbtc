@@ -11,7 +11,7 @@
 
 #include <btc/tx.h>
 
-#include "cstr.h"
+#include <btc/cstr.h>
 #include "script.h"
 #include "utils.h"
 
