@@ -79,3 +79,7 @@ tests_CPPFLAGS = -I$(top_srcdir)/src
 tests_LDFLAGS = -static
 TESTS = tests
 endif
+
+
+clean-local:
+	-$(MAKE) -C src/secp256k1 clean
