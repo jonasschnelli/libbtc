@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "cstr.h"
+#include "btc/cstr.h"
 
 void ser_bytes(cstring *s, const void *p, size_t len)
 {

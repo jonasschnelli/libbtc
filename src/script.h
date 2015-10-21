@@ -25,8 +25,8 @@
 */
 
 
-#include "cstr.h"
-#include "vector.h"
+#include "btc/cstr.h"
+#include "btc/vector.h"
 
 /** Signature hash types/flags */
 enum

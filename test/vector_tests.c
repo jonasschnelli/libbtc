@@ -10,7 +10,7 @@
 #include <assert.h>
 
 #include "utils.h"
-#include "vector.h"
+#include <btc/vector.h>
 
 struct teststruct {
     void *dummy1;

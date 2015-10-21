@@ -31,8 +31,8 @@
 #include <stdint.h>
 
 #include "buffer.h"
-#include "cstr.h"
-#include "vector.h"
+#include "btc/cstr.h"
+#include "btc/vector.h"
 
 #include "portable_endian.h"
 

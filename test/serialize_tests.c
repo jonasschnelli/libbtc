@@ -9,7 +9,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "cstr.h"
+#include <btc/cstr.h>
 #include "serialize.h"
 #include "utils.h"
 
