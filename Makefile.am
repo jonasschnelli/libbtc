@@ -16,7 +16,8 @@ include_HEADERS = include/btc/btc.h \
 	include/btc/bip32.h \
 	include/btc/ecc_key.h \
 	include/btc/ecc.h \
-	include/btc/chain.h
+	include/btc/chain.h \
+	include/btc/hash.h
 
 noinst_HEADERS = \
 	src/sha2.h \

@@ -33,6 +33,7 @@
 #include <stdint.h>
 #include "sha2.h"
 
+#include "btc/hash.h"
 /*
  * ASSERT NOTE:
  * Some sanity checking code is included using assert().  On my FreeBSD
@@ -943,4 +944,11 @@ void hmac_sha512(const uint8_t *key, const uint32_t keylen, const uint8_t *msg,
     sha512_Update(&ctx, o_key_pad, SHA512_BLOCK_LENGTH);
     sha512_Update(&ctx, buf, SHA512_DIGEST_LENGTH);
     sha512_Final(hmac, &ctx);
+}
+
+void btc_hash(const unsigned char *datain, size_t length, uint256 hashout)
+{
+    //bitcoin doubale sha256 hash
+    sha256_Raw((const uint8_t *)datain, length, hashout);
+    sha256_Raw(hashout, 32, hashout);
 }
