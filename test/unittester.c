@@ -36,6 +36,7 @@ extern void test_random();
 extern void test_sha_256();
 extern void test_sha_512();
 extern void test_sha_hmac();
+extern void test_bitcoin_hash();
 extern void test_base58check();
 extern void test_bip32();
 extern void test_ecc();
@@ -64,6 +65,7 @@ int main()
     test_sha_256();
     test_sha_512();
     test_sha_hmac();
+    test_bitcoin_hash();
     test_base58check();
     test_utils();
 
