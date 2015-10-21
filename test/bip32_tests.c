@@ -205,9 +205,9 @@ void test_bip32()
 
     char str_pub_ckd_tn[] = "tprv8ZgxMBicQKsPd7Uf69XL1XwhmjHopUGep8GuEiJDZmbQz6o58LninorQAfcKZWARbtRtfnLcJ5MQ2AtHcQJCCRUcMRvmDUjyEmNUWwx8UbK";
 
-    r = btc_hdnode_deserialize(str_pub_ckd, &btc_chain_test, &node4);
+    r = btc_hdnode_deserialize(str_pub_ckd_tn, &btc_chain_test, &node4);
     r = btc_hdnode_public_ckd(&node4, 123);
     u_assert_int_eq(r, true);
     btc_hdnode_serialize_public(&node4, &btc_chain_test, str, sizeof(str));
-    u_assert_str_eq(str, "tprv8bfN9qKuC8JbFMj749jWmQrPkK9YKNcsqT3kMceYHt5rXQ6rZeF5utGruATGezvD9ewXWQpsUFM48tRYz8p5xZ7CnEDjfSKVqDunB1Ed6Vb");
+    u_assert_str_eq(str, "tpubD8MQJFN9LVzG8pktwoQ7ApWWKLfUUhonQkeXe8gqi9tFMtMdC34g6Ntj5K6V1hdzR3to2z7dGnQbXaoZSsFkVky7TFWZjmC9Ez4Gog6ujaD");
 }
