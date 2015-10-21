@@ -240,7 +240,7 @@ bool btc_hdnode_deserialize(const char *str, const btc_chain *chain, btc_hdnode 
     return true;
 }
 
-bool hd_generate_key(btc_hdnode *node, const char *keypath, const uint8_t *privkeymaster,
+bool btc_hd_generate_key(btc_hdnode *node, const char *keypath, const uint8_t *privkeymaster,
                         const uint8_t *chaincode)
 {
     static char delim[] = "/";
