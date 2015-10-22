@@ -36,14 +36,15 @@ extern "C" {
 
 #include <stdint.h>
 
+#define BTC_BIP32_CHAINCODE_SIZE 32
 
 typedef struct {
     uint32_t depth;
     uint32_t fingerprint;
     uint32_t child_num;
-    uint8_t chain_code[32];
-    uint8_t private_key[32];
-    uint8_t public_key[33];
+    uint8_t chain_code[BTC_BIP32_CHAINCODE_SIZE];
+    uint8_t private_key[BTC_ECKEY_PKEY_LENGTH];
+    uint8_t public_key[BTC_ECKEY_COMPRESSED_LENGTH];
 } btc_hdnode;
 
 

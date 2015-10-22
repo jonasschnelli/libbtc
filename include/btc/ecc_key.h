@@ -36,10 +36,6 @@ extern "C" {
 #include <stdio.h>
 #include <stdint.h>
 
-#define BTC_ECKEY_UNCOMPRESSED_LENGTH 65
-#define BTC_ECKEY_COMPRESSED_LENGTH 33
-#define BTC_ECKEY_PKEY_LENGTH 32
-
 typedef struct btc_key_
 {
     uint8_t privkey[BTC_ECKEY_PKEY_LENGTH];
