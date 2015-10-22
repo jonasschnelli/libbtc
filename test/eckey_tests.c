@@ -36,23 +36,22 @@
 
 void test_eckey()
 {
-    btc_key* key = btc_privkey_new();
-    btc_privkey_gen(key);
+    btc_key key;
+    btc_privkey_init(&key);
+    btc_privkey_gen(&key);
 
-    btc_pubkey *pubkey = btc_pubkey_new();
-    btc_pubkey_from_key(key, pubkey);
+    btc_pubkey pubkey;
+    btc_pubkey_init(&pubkey);
+    btc_pubkey_from_key(&key, &pubkey);
 
     unsigned int i;
     for(i = 33; i < BTC_ECKEY_UNCOMPRESSED_LENGTH; i++)
-        assert(pubkey->pubkey[i] == 0);
+        assert(pubkey.pubkey[i] == 0);
 
     uint8_t *hash = utils_hex_to_uint8((const char *)"26db47a48a10b9b0b697b793f5c0231aa35fe192c9d063d7b03a55e3c302850a");
     unsigned char sig[74];
     size_t outlen = 74;
-    btc_key_sign_hash(key, hash, sig, &outlen);
+    btc_key_sign_hash(&key, hash, sig, &outlen);
 
-    btc_pubkey_verify_sig(pubkey, hash, sig, outlen);
-
-    btc_pubkey_free(pubkey);
-    btc_privkey_free(key);
+    btc_pubkey_verify_sig(&pubkey, hash, sig, outlen);
 }

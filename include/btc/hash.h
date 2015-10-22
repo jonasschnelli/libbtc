@@ -43,8 +43,11 @@ extern "C" {
 
 typedef uint8_t uint256[32];
 
-//!create a new tx input
+//bitcoin double sha256 hash
 LIBBTC_API void btc_hash(const unsigned char *datain, size_t length, uint256 hashout);
+
+//single sha256 hash
+LIBBTC_API void btc_hash_sngl_sha256(const unsigned char *datain, size_t length, uint256 hashout);
 
 #ifdef  __cplusplus
 }

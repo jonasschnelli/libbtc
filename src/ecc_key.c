@@ -37,21 +37,21 @@
 #include "utils.h"
 
 
-btc_key* btc_privkey_new()
+void btc_privkey_init(btc_key *privkey)
 {
-    btc_key *privkey = calloc(1, sizeof(*privkey));
     memset(&privkey->privkey, 0, BTC_ECKEY_PKEY_LENGTH);
+}
 
-    do
-    {
-        random_bytes(privkey->privkey, BTC_ECKEY_PKEY_LENGTH, 0);
-    } while(ecc_verify_privatekey(privkey->privkey) == 0);
-
-    return privkey;
+void btc_privkey_cleanse(btc_key *privkey)
+{
+    memset(&privkey->privkey, 0, BTC_ECKEY_PKEY_LENGTH);
 }
 
 void btc_privkey_gen(btc_key *privkey)
 {
+    if (privkey == NULL)
+        return;
+
     do
     {
         random_bytes(privkey->privkey, BTC_ECKEY_PKEY_LENGTH, 0);
@@ -61,30 +61,38 @@ void btc_privkey_gen(btc_key *privkey)
 
 void btc_privkey_free(btc_key *privkey)
 {
+    if (privkey == NULL)
+        return;
+
     memset(privkey->privkey, 0, BTC_ECKEY_PKEY_LENGTH);
     free(privkey);
 }
 
 
-btc_pubkey* btc_pubkey_new()
+void btc_pubkey_init(btc_pubkey* pubkey)
 {
-    btc_pubkey *pubkey = calloc(1, sizeof(*pubkey));
+    if (pubkey == NULL)
+        return;
+
     memset(pubkey->pubkey, 0, BTC_ECKEY_UNCOMPRESSED_LENGTH);
     pubkey->compressed = false;
-
-    return pubkey;
 }
 
 
-void btc_pubkey_free(btc_pubkey* pubkey)
+void btc_pubkey_cleanse(btc_pubkey* pubkey)
 {
+    if (pubkey == NULL)
+        return;
+
     memset(pubkey->pubkey, 0, BTC_ECKEY_UNCOMPRESSED_LENGTH);
-    free(pubkey);
 }
 
 
 void btc_pubkey_from_key(btc_key *privkey, btc_pubkey* pubkey_inout)
 {
+    if (pubkey_inout == NULL || privkey == NULL)
+        return;
+
     size_t in_out_len = BTC_ECKEY_COMPRESSED_LENGTH;
 
     ecc_get_pubkey(privkey->privkey, pubkey_inout->pubkey, &in_out_len, true);

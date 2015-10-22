@@ -51,12 +51,12 @@ typedef struct btc_pubkey_
     uint8_t pubkey[BTC_ECKEY_UNCOMPRESSED_LENGTH];
 } btc_pubkey;
 
-LIBBTC_API btc_key* btc_privkey_new();
+LIBBTC_API void btc_privkey_init(btc_key *privkey);
+LIBBTC_API void btc_privkey_cleanse(btc_key *privkey);
 LIBBTC_API void btc_privkey_gen(btc_key *privkey);
-LIBBTC_API void btc_privkey_free(btc_key *privkey);
 
-LIBBTC_API btc_pubkey* btc_pubkey_new();
-LIBBTC_API void btc_pubkey_free(btc_pubkey* pubkey);
+LIBBTC_API void btc_pubkey_init(btc_pubkey* pubkey);
+LIBBTC_API void btc_pubkey_cleanse(btc_pubkey* pubkey);
 LIBBTC_API void btc_pubkey_from_key(btc_key *privkey, btc_pubkey* pubkey_inout);
 
 //sign a 32byte message/hash and returns a DER encoded signature (through *sigout)
