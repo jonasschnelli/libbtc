@@ -32,6 +32,7 @@
 #include <assert.h>
 
 #include "btc/ecc.h"
+#include "btc/hash.h"
 
 #include "random.h"
 #include "utils.h"
@@ -64,6 +65,22 @@ void btc_privkey_gen(btc_key *privkey)
     {
         random_bytes(privkey->privkey, BTC_ECKEY_PKEY_LENGTH, 0);
     } while(ecc_verify_privatekey(privkey->privkey) == 0);
+}
+
+
+btc_bool btc_privkey_verify_pubkey(btc_key *privkey, btc_pubkey *pubkey)
+{
+    uint8_t rnddata[32], hash[32];
+    random_bytes(rnddata, 32, 0);
+    btc_hash(rnddata, 32, hash);
+
+    unsigned char sig[74];
+    size_t siglen = 74;
+
+    if (!btc_key_sign_hash(privkey, hash, sig, &siglen))
+        return false;
+
+    return btc_pubkey_verify_sig(pubkey, hash, sig, siglen);
 }
 
 
