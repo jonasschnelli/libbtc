@@ -51,6 +51,7 @@ LIBBTC_API void btc_privkey_init(btc_key *privkey);
 LIBBTC_API btc_bool btc_privkey_is_valid(btc_key* privkey);
 LIBBTC_API void btc_privkey_cleanse(btc_key *privkey);
 LIBBTC_API void btc_privkey_gen(btc_key *privkey);
+LIBBTC_API btc_bool btc_privkey_verify_pubkey(btc_key *privkey, btc_pubkey *pubkey);
 
 LIBBTC_API void btc_pubkey_init(btc_pubkey* pubkey);
 LIBBTC_API btc_bool btc_pubkey_is_valid(btc_pubkey* pubkey);
