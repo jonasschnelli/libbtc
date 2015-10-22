@@ -42,10 +42,18 @@ void btc_privkey_init(btc_key *privkey)
     memset(&privkey->privkey, 0, BTC_ECKEY_PKEY_LENGTH);
 }
 
+
+btc_bool btc_privkey_is_valid(btc_key *privkey)
+{
+    return ecc_verify_privatekey(privkey->privkey);
+}
+
+
 void btc_privkey_cleanse(btc_key *privkey)
 {
     memset(&privkey->privkey, 0, BTC_ECKEY_PKEY_LENGTH);
 }
+
 
 void btc_privkey_gen(btc_key *privkey)
 {
@@ -59,16 +67,6 @@ void btc_privkey_gen(btc_key *privkey)
 }
 
 
-void btc_privkey_free(btc_key *privkey)
-{
-    if (privkey == NULL)
-        return;
-
-    memset(privkey->privkey, 0, BTC_ECKEY_PKEY_LENGTH);
-    free(privkey);
-}
-
-
 void btc_pubkey_init(btc_pubkey* pubkey)
 {
     if (pubkey == NULL)
@@ -76,6 +74,12 @@ void btc_pubkey_init(btc_pubkey* pubkey)
 
     memset(pubkey->pubkey, 0, BTC_ECKEY_UNCOMPRESSED_LENGTH);
     pubkey->compressed = false;
+}
+
+
+btc_bool btc_pubkey_is_valid(btc_pubkey* pubkey)
+{
+    return ecc_verify_pubkey(pubkey->pubkey, pubkey->compressed);
 }
 
 
