@@ -948,7 +948,12 @@ void hmac_sha512(const uint8_t *key, const uint32_t keylen, const uint8_t *msg,
 
 void btc_hash(const unsigned char *datain, size_t length, uint256 hashout)
 {
-    //bitcoin doubale sha256 hash
+    //bitcoin double sha256 hash
     sha256_Raw((const uint8_t *)datain, length, hashout);
     sha256_Raw(hashout, 32, hashout);
+}
+
+void btc_hash_sngl_sha256(const unsigned char *datain, size_t length, uint256 hashout)
+{
+    sha256_Raw((const uint8_t *)datain, length, hashout);
 }
