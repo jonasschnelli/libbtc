@@ -216,7 +216,7 @@ int btc_base58_encode_check(const uint8_t *data, int datalen, char *str, int str
     return ret;
 }
 
-int btc_base58_decode_check(const char *str, uint8_t *data, int datalen)
+int btc_base58_decode_check(const char *str, uint8_t *data, size_t datalen)
 {
     int ret;
 
@@ -227,7 +227,7 @@ int btc_base58_decode_check(const char *str, uint8_t *data, int datalen)
     size_t res = datalen + 4;
     if (btc_base58_decode(d, &res, str) != true) {
         ret = 0;
-    } else if (res != (size_t)datalen + 4) {
+    } else if (res != datalen + 4) {
         ret = 0;
     } else if (btc_b58check(d, res, str) < 0) {
         ret = 0;

@@ -82,7 +82,7 @@ void test_base58check()
     uint8_t rawn[34];
     char strn[53];
     while (*raw && *str) {
-        int len = strlen(*raw) / 2;
+        size_t len = strlen(*raw) / 2;
 
         memcpy(rawn, utils_hex_to_uint8(*raw), len);
         int r = btc_base58_encode_check(rawn, len, strn, sizeof(strn));
@@ -90,7 +90,7 @@ void test_base58check()
         assert(strcmp(strn, *str) == 0);
 
         r = btc_base58_decode_check(strn, rawn, len);
-        assert(r == len);
+        assert(r == (int)len);
 
         raw += 2;
         str += 2;
@@ -100,7 +100,7 @@ void test_base58check()
     const char **i_raw = base58_invalid_vector + 1;
     uint8_t i_rawn[255];
     while (*i_raw && *i_cmd) {
-        int len = strlen(*i_raw) / 2;
+        size_t len = strlen(*i_raw) / 2;
 
         memcpy(i_rawn, utils_hex_to_uint8(*i_raw), len);
 

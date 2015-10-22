@@ -34,35 +34,23 @@ void ecc_stop(void)
 
 
 void ecc_get_pubkey(const uint8_t *private_key, uint8_t *public_key,
-                           int public_key_len, int compressed)
+                           size_t *in_outlen, btc_bool compressed)
 {
     secp256k1_pubkey pubkey;
     assert(secp256k1_ctx);
-
-    memset(public_key, 0, public_key_len);
+    assert((int)*in_outlen == (compressed ? 33 : 65));
+    memset(public_key, 0, *in_outlen);
 
     if (!secp256k1_ec_pubkey_create(secp256k1_ctx, &pubkey, (const unsigned char *)private_key)) {
         return;
     }
 
-    if (!secp256k1_ec_pubkey_serialize(secp256k1_ctx, public_key, (size_t *)&public_key_len, &pubkey,
+    if (!secp256k1_ec_pubkey_serialize(secp256k1_ctx, public_key, in_outlen, &pubkey,
                                        compressed)) {
         return;
     }
 
     return;
-}
-
-
-void ecc_get_public_key65(const uint8_t *private_key, uint8_t *public_key)
-{
-    ecc_get_pubkey(private_key, public_key, 65, 0);
-}
-
-
-void ecc_get_public_key33(const uint8_t *private_key, uint8_t *public_key)
-{
-    ecc_get_pubkey(private_key, public_key, 33, 1);
 }
 
 btc_bool ecc_private_key_tweak_add(uint8_t *private_key, const uint8_t *tweak)
@@ -73,7 +61,7 @@ btc_bool ecc_private_key_tweak_add(uint8_t *private_key, const uint8_t *tweak)
 
 btc_bool ecc_public_key_tweak_add(uint8_t *public_key_inout, const uint8_t *tweak)
 {
-    int out;
+    size_t out;
     secp256k1_pubkey pubkey;
 
     assert(secp256k1_ctx);
@@ -83,7 +71,7 @@ btc_bool ecc_public_key_tweak_add(uint8_t *public_key_inout, const uint8_t *twea
     if (!secp256k1_ec_pubkey_tweak_add(secp256k1_ctx, &pubkey, (const unsigned char *)tweak))
         return false;
 
-    if (!secp256k1_ec_pubkey_serialize(secp256k1_ctx, public_key_inout, (size_t *)&out, &pubkey,
+    if (!secp256k1_ec_pubkey_serialize(secp256k1_ctx, public_key_inout, &out, &pubkey,
                                   SECP256K1_EC_COMPRESSED))
         return false;
 
@@ -97,7 +85,7 @@ btc_bool ecc_verify_privatekey(const uint8_t *private_key)
     return secp256k1_ec_seckey_verify(secp256k1_ctx, (const unsigned char *)private_key);
 }
 
-btc_bool ecc_verify_pubkey(const uint8_t *public_key, int compressed)
+btc_bool ecc_verify_pubkey(const uint8_t *public_key, btc_bool compressed)
 {
     secp256k1_pubkey pubkey;
 
@@ -118,15 +106,15 @@ btc_bool ecc_sign(const uint8_t *private_key, const uint8_t *hash, unsigned char
 
     secp256k1_ecdsa_signature sig;
     if (!secp256k1_ecdsa_sign(secp256k1_ctx, &sig, hash, private_key, secp256k1_nonce_function_rfc6979, NULL))
-        return false;
+        return 0;
 
-    if (secp256k1_ecdsa_signature_serialize_der(secp256k1_ctx, sigder, outlen, &sig))
-        return false;
+    if (!secp256k1_ecdsa_signature_serialize_der(secp256k1_ctx, sigder, outlen, &sig))
+        return 0;
 
-    return true;
+    return 1;
 }
 
-btc_bool ecc_verify_sig(const uint8_t *public_key, int compressed, const uint8_t *hash, unsigned char *sigder, size_t siglen)
+btc_bool ecc_verify_sig(const uint8_t *public_key, btc_bool compressed, const uint8_t *hash, unsigned char *sigder, size_t siglen)
 {
     assert(secp256k1_ctx);
 

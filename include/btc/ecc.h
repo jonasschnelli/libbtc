@@ -43,13 +43,7 @@ LIBBTC_API void ecc_stop(void);
 
 //!get public key from given private key
 LIBBTC_API void ecc_get_pubkey(const uint8_t *private_key, uint8_t *public_key,
-                           int public_key_len, int compressed);
-
-//!get uncompressed public key from given private key
-void ecc_get_public_key65(const uint8_t *private_key, uint8_t *public_key);
-
-//!get compressed public key from given private key
-void ecc_get_public_key33(const uint8_t *private_key, uint8_t *public_key);
+                           size_t *public_key_len, btc_bool compressed);
 
 //!ec mul tweak on given private key
 LIBBTC_API btc_bool ecc_private_key_tweak_add(uint8_t *private_key, const uint8_t *tweak);
@@ -61,10 +55,10 @@ LIBBTC_API btc_bool ecc_public_key_tweak_add(uint8_t *public_key_inout, const ui
 LIBBTC_API btc_bool ecc_verify_privatekey(const uint8_t *private_key);
 
 //!verifies a given public key (compressed[33] or uncompressed[65] bytes)
-LIBBTC_API btc_bool ecc_verify_pubkey(const uint8_t *public_key, int compressed);
+LIBBTC_API btc_bool ecc_verify_pubkey(const uint8_t *public_key, btc_bool compressed);
 
 LIBBTC_API btc_bool ecc_sign(const uint8_t *private_key, const uint8_t *hash, unsigned char *sigder, size_t *outlen);
-LIBBTC_API btc_bool ecc_verify_sig(const uint8_t *public_key, int compressed, const uint8_t *hash, unsigned char *sigder, size_t siglen);
+LIBBTC_API btc_bool ecc_verify_sig(const uint8_t *public_key, btc_bool compressed, const uint8_t *hash, unsigned char *sigder, size_t siglen);
 
 #ifdef  __cplusplus
 }
