@@ -65,13 +65,13 @@ void ecc_get_public_key33(const uint8_t *private_key, uint8_t *public_key)
     ecc_get_pubkey(private_key, public_key, 33, 1);
 }
 
-bool ecc_private_key_tweak_add(uint8_t *private_key, const uint8_t *tweak)
+btc_bool ecc_private_key_tweak_add(uint8_t *private_key, const uint8_t *tweak)
 {
     assert(secp256k1_ctx);
     return secp256k1_ec_privkey_tweak_add(secp256k1_ctx, (unsigned char *)private_key, (const unsigned char *)tweak);
 }
 
-bool ecc_public_key_tweak_add(uint8_t *public_key_inout, const uint8_t *tweak)
+btc_bool ecc_public_key_tweak_add(uint8_t *public_key_inout, const uint8_t *tweak)
 {
     int out;
     secp256k1_pubkey pubkey;
@@ -91,13 +91,13 @@ bool ecc_public_key_tweak_add(uint8_t *public_key_inout, const uint8_t *tweak)
 }
 
 
-bool ecc_verify_privatekey(const uint8_t *private_key)
+btc_bool ecc_verify_privatekey(const uint8_t *private_key)
 {
     assert(secp256k1_ctx);
     return secp256k1_ec_seckey_verify(secp256k1_ctx, (const unsigned char *)private_key);
 }
 
-bool ecc_verify_pubkey(const uint8_t *public_key, int compressed)
+btc_bool ecc_verify_pubkey(const uint8_t *public_key, int compressed)
 {
     secp256k1_pubkey pubkey;
 
@@ -112,7 +112,7 @@ bool ecc_verify_pubkey(const uint8_t *public_key, int compressed)
     return true;
 }
 
-bool ecc_sign(const uint8_t *private_key, const uint8_t *hash, unsigned char *sigder, size_t *outlen)
+btc_bool ecc_sign(const uint8_t *private_key, const uint8_t *hash, unsigned char *sigder, size_t *outlen)
 {
     assert(secp256k1_ctx);
 
@@ -126,7 +126,7 @@ bool ecc_sign(const uint8_t *private_key, const uint8_t *hash, unsigned char *si
     return true;
 }
 
-bool ecc_verify_sig(const uint8_t *public_key, int compressed, const uint8_t *hash, unsigned char *sigder, size_t siglen)
+btc_bool ecc_verify_sig(const uint8_t *public_key, int compressed, const uint8_t *hash, unsigned char *sigder, size_t siglen)
 {
     assert(secp256k1_ctx);
 

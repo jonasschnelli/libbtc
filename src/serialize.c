@@ -89,7 +89,7 @@ void ser_u256_vector(cstring *s, vector *vec)
 	}
 }
 
-bool deser_skip(struct const_buffer *buf, size_t len)
+btc_bool deser_skip(struct const_buffer *buf, size_t len)
 {
 	if (buf->len < len)
 		return false;
@@ -100,7 +100,7 @@ bool deser_skip(struct const_buffer *buf, size_t len)
 	return true;
 }
 
-bool deser_bytes(void *po, struct const_buffer *buf, size_t len)
+btc_bool deser_bytes(void *po, struct const_buffer *buf, size_t len)
 {
 	if (buf->len < len)
 		return false;
@@ -112,7 +112,7 @@ bool deser_bytes(void *po, struct const_buffer *buf, size_t len)
 	return true;
 }
 
-bool deser_u16(uint16_t *vo, struct const_buffer *buf)
+btc_bool deser_u16(uint16_t *vo, struct const_buffer *buf)
 {
 	uint16_t v;
 
@@ -123,7 +123,7 @@ bool deser_u16(uint16_t *vo, struct const_buffer *buf)
 	return true;
 }
 
-bool deser_u32(uint32_t *vo, struct const_buffer *buf)
+btc_bool deser_u32(uint32_t *vo, struct const_buffer *buf)
 {
 	uint32_t v;
 
@@ -134,7 +134,7 @@ bool deser_u32(uint32_t *vo, struct const_buffer *buf)
 	return true;
 }
 
-bool deser_u64(uint64_t *vo, struct const_buffer *buf)
+btc_bool deser_u64(uint64_t *vo, struct const_buffer *buf)
 {
 	uint64_t v;
 
@@ -145,7 +145,7 @@ bool deser_u64(uint64_t *vo, struct const_buffer *buf)
 	return true;
 }
 
-bool deser_varlen(uint32_t *lo, struct const_buffer *buf)
+btc_bool deser_varlen(uint32_t *lo, struct const_buffer *buf)
 {
 	uint32_t len;
 
@@ -174,7 +174,7 @@ bool deser_varlen(uint32_t *lo, struct const_buffer *buf)
 	return true;
 }
 
-bool deser_str(char *so, struct const_buffer *buf, size_t maxlen)
+btc_bool deser_str(char *so, struct const_buffer *buf, size_t maxlen)
 {
 	uint32_t len;
 	if (!deser_varlen(&len, buf)) return false;
@@ -198,7 +198,7 @@ bool deser_str(char *so, struct const_buffer *buf, size_t maxlen)
 	return true;
 }
 
-bool deser_varstr(cstring **so, struct const_buffer *buf)
+btc_bool deser_varstr(cstring **so, struct const_buffer *buf)
 {
 	if (*so) {
 		cstr_free(*so, true);
@@ -222,7 +222,7 @@ bool deser_varstr(cstring **so, struct const_buffer *buf)
 	return true;
 }
 
-bool deser_u256_vector(vector **vo, struct const_buffer *buf)
+btc_bool deser_u256_vector(vector **vo, struct const_buffer *buf)
 {
 	vector *vec = *vo;
 	if (vec) {

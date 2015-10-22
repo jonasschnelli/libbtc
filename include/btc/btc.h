@@ -29,11 +29,9 @@
 
 #include <stdio.h>
 #include <limits.h>
+#include <stdint.h>
 
-#ifndef  __cplusplus
-#ifndef bool
-typedef int bool;
-#endif
+typedef uint8_t btc_bool;
 
 #ifndef true
 #define true 1
@@ -42,7 +40,6 @@ typedef int bool;
 #ifndef false
 #define false 0
 #endif
-#endif //__cplusplus
 
 
 #ifdef  __cplusplus

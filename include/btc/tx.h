@@ -100,7 +100,7 @@ LIBBTC_API int btc_tx_deserialize(const unsigned char *tx_serialized, size_t inl
 //!serialize a lbc bitcoin data structure into a p2p serialized buffer
 LIBBTC_API void btc_tx_serialize(cstring *s, const btc_tx *tx);
 
-LIBBTC_API bool btc_tx_sighash(const btc_tx *tx_to, const cstring *fromPubKey, unsigned int in_num, int hashtype, uint8_t *hash);
+LIBBTC_API btc_bool btc_tx_sighash(const btc_tx *tx_to, const cstring *fromPubKey, unsigned int in_num, int hashtype, uint8_t *hash);
 
 #ifdef  __cplusplus
 }

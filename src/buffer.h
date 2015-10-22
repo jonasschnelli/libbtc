@@ -20,7 +20,7 @@ struct const_buffer {
 	size_t		len;
 };
 
-extern bool buffer_equal(const void *a, const void *b);
+extern btc_bool buffer_equal(const void *a, const void *b);
 extern void buffer_free(void *struct_buffer);
 extern struct buffer *buffer_copy(const void *data, size_t data_len);
 

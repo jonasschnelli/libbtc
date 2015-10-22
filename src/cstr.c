@@ -7,7 +7,7 @@
 
 #include <string.h>
 
-static bool cstr_alloc_min_sz(cstring *s, size_t sz)
+static btc_bool cstr_alloc_min_sz(cstring *s, size_t sz)
 {
 	sz++;		// NUL overhead
 
@@ -66,7 +66,7 @@ cstring *cstr_new(const char *init_str)
 	return cstr_new_buf(init_str, slen);
 }
 
-void cstr_free(cstring *s, bool free_buf)
+void cstr_free(cstring *s, btc_bool free_buf)
 {
 	if (!s)
 		return;
@@ -78,7 +78,7 @@ void cstr_free(cstring *s, bool free_buf)
 	free(s);
 }
 
-bool cstr_resize(cstring *s, size_t new_sz)
+btc_bool cstr_resize(cstring *s, size_t new_sz)
 {
 	// no change
 	if (new_sz == s->len)
@@ -103,7 +103,7 @@ bool cstr_resize(cstring *s, size_t new_sz)
 	return true;
 }
 
-bool cstr_append_buf(cstring *s, const void *buf, size_t sz)
+btc_bool cstr_append_buf(cstring *s, const void *buf, size_t sz)
 {
 	if (!cstr_alloc_min_sz(s, s->len + sz))
 		return false;
@@ -115,7 +115,7 @@ bool cstr_append_buf(cstring *s, const void *buf, size_t sz)
 	return true;
 }
 
-bool cstr_equal(const cstring *a, const cstring *b)
+btc_bool cstr_equal(const cstring *a, const cstring *b)
 {
 	if (a == b)
 		return true;
@@ -126,7 +126,7 @@ bool cstr_equal(const cstring *a, const cstring *b)
 	return (memcmp(a->str, b->str, a->len) == 0);
 }
 
-bool cstr_erase(cstring *s, size_t pos, ssize_t len)
+btc_bool cstr_erase(cstring *s, size_t pos, ssize_t len)
 {
 	if (pos == s->len && len == 0)
 		return true;
