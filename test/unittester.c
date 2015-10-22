@@ -16,21 +16,23 @@
 #include "utest.h"
 
 #ifdef HAVE_BUILTIN_EXPECT
-#define EXPECT(x,c) __builtin_expect((x),(c))
+#define EXPECT(x, c) __builtin_expect((x), (c))
 #else
-#define EXPECT(x,c) (x)
+#define EXPECT(x, c) (x)
 #endif
 
-#define TEST_FAILURE(msg) do { \
-    fprintf(stderr, "%s:%d: %s\n", __FILE__, __LINE__, msg); \
-    abort(); \
-} while(0)
+#define TEST_FAILURE(msg)                                        \
+    do {                                                         \
+        fprintf(stderr, "%s:%d: %s\n", __FILE__, __LINE__, msg); \
+        abort();                                                 \
+    } while (0)
 
-#define CHECK(cond) do { \
-    if (EXPECT(!(cond), 0)) { \
-        TEST_FAILURE("test condition failed: " #cond); \
-    } \
-} while(0)
+#define CHECK(cond)                                        \
+    do {                                                   \
+        if (EXPECT(!(cond), 0)) {                          \
+            TEST_FAILURE("test condition failed: " #cond); \
+        }                                                  \
+    } while (0)
 
 extern void test_random();
 extern void test_sha_256();
@@ -82,5 +84,5 @@ int main()
     test_eckey();
 
     ecc_stop();
-	return 0;
+    return 0;
 }

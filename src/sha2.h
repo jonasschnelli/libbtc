@@ -35,36 +35,36 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define SHA256_BLOCK_LENGTH     64
-#define SHA256_DIGEST_LENGTH        32
+#define SHA256_BLOCK_LENGTH 64
+#define SHA256_DIGEST_LENGTH 32
 #define SHA256_DIGEST_STRING_LENGTH (SHA256_DIGEST_LENGTH * 2 + 1)
-#define SHA512_BLOCK_LENGTH     128
-#define SHA512_DIGEST_LENGTH        64
+#define SHA512_BLOCK_LENGTH 128
+#define SHA512_DIGEST_LENGTH 64
 #define SHA512_DIGEST_STRING_LENGTH (SHA512_DIGEST_LENGTH * 2 + 1)
 
-typedef struct _SHA256_CTX {
-    uint32_t    state[8];
-    uint64_t    bitcount;
+typedef struct _SHA256_CTX
+{
+    uint32_t state[8];
+    uint64_t bitcount;
     uint8_t buffer[SHA256_BLOCK_LENGTH];
 } SHA256_CTX;
-typedef struct _SHA512_CTX {
-    uint64_t    state[8];
-    uint64_t    bitcount[2];
+typedef struct _SHA512_CTX
+{
+    uint64_t state[8];
+    uint64_t bitcount[2];
     uint8_t buffer[SHA512_BLOCK_LENGTH];
 } SHA512_CTX;
 
-void sha256_Init(SHA256_CTX *);
-void sha256_Update(SHA256_CTX *, const uint8_t *, size_t);
-void sha256_Final(uint8_t[SHA256_DIGEST_LENGTH], SHA256_CTX *);
-void sha256_Raw(const uint8_t *, size_t, uint8_t[SHA256_DIGEST_LENGTH]);
+void sha256_Init(SHA256_CTX*);
+void sha256_Update(SHA256_CTX*, const uint8_t*, size_t);
+void sha256_Final(uint8_t[SHA256_DIGEST_LENGTH], SHA256_CTX*);
+void sha256_Raw(const uint8_t*, size_t, uint8_t[SHA256_DIGEST_LENGTH]);
 
-void sha512_Init(SHA512_CTX *);
-void sha512_Update(SHA512_CTX *, const uint8_t *, size_t);
-void sha512_Final(uint8_t[SHA512_DIGEST_LENGTH], SHA512_CTX *);
-void sha512_Raw(const uint8_t *, size_t, uint8_t[SHA512_DIGEST_LENGTH]);
+void sha512_Init(SHA512_CTX*);
+void sha512_Update(SHA512_CTX*, const uint8_t*, size_t);
+void sha512_Final(uint8_t[SHA512_DIGEST_LENGTH], SHA512_CTX*);
+void sha512_Raw(const uint8_t*, size_t, uint8_t[SHA512_DIGEST_LENGTH]);
 
-void hmac_sha256(const uint8_t *key, const uint32_t keylen, const uint8_t *msg,
-                 const uint32_t msglen, uint8_t *hmac);
-void hmac_sha512(const uint8_t *key, const uint32_t keylen, const uint8_t *msg,
-                 const uint32_t msglen, uint8_t *hmac);
+void hmac_sha256(const uint8_t* key, const uint32_t keylen, const uint8_t* msg, const uint32_t msglen, uint8_t* hmac);
+void hmac_sha512(const uint8_t* key, const uint32_t keylen, const uint8_t* msg, const uint32_t msglen, uint8_t* hmac);
 #endif

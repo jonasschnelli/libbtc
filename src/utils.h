@@ -41,12 +41,12 @@
 
 
 void utils_clear_buffers(void);
-void utils_hex_to_bin(const char *str, unsigned char *out, int inLen, int *outLen);
-void utils_bin_to_hex(unsigned char *bin_in, size_t inlen, char *hex_out);
-uint8_t *utils_hex_to_uint8(const char *str);
-char *utils_uint8_to_hex(const uint8_t *bin, size_t l);
-void utils_reverse_hex(char *h, int len);
-void utils_uint64_to_varint(char *vi, int *l, uint64_t i);
-int utils_varint_to_uint64(const char *vi, uint64_t *i);
+void utils_hex_to_bin(const char* str, unsigned char* out, int inLen, int* outLen);
+void utils_bin_to_hex(unsigned char* bin_in, size_t inlen, char* hex_out);
+uint8_t* utils_hex_to_uint8(const char* str);
+char* utils_uint8_to_hex(const uint8_t* bin, size_t l);
+void utils_reverse_hex(char* h, int len);
+void utils_uint64_to_varint(char* vi, int* l, uint64_t i);
+int utils_varint_to_uint64(const char* vi, uint64_t* i);
 
 #endif

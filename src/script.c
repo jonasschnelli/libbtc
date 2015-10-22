@@ -32,15 +32,14 @@
 #include "buffer.h"
 #include "serialize.h"
 
-btc_bool btc_script_copy_without_op_codeseperator(const cstring *script_in, cstring *script_out)
+btc_bool btc_script_copy_without_op_codeseperator(const cstring* script_in, cstring* script_out)
 {
     if (script_in->len == 0)
-        return false;			/* EOF */
+        return false; /* EOF */
 
     struct const_buffer buf = {script_in->str, script_in->len};
     unsigned char opcode;
-    while(buf.len > 0)
-    {
+    while (buf.len > 0) {
         if (!deser_bytes(&opcode, &buf, 1))
             goto err_out;
 
@@ -48,20 +47,18 @@ btc_bool btc_script_copy_without_op_codeseperator(const cstring *script_in, cstr
 
         if (opcode == OP_CODESEPARATOR)
             continue;
-        
+
         else if (opcode == OP_PUSHDATA1) {
             uint8_t v8;
             if (!deser_bytes(&v8, &buf, 1))
                 goto err_out;
             data_len = v8;
-        }
-        else if (opcode == OP_PUSHDATA2) {
+        } else if (opcode == OP_PUSHDATA2) {
             uint16_t v16;
             if (!deser_u16(&v16, &buf))
                 goto err_out;
             data_len = v16;
-        }
-        else if (opcode == OP_PUSHDATA4) {
+        } else if (opcode == OP_PUSHDATA4) {
             uint32_t v32;
             if (!deser_u32(&v32, &buf))
                 goto err_out;
@@ -75,24 +72,23 @@ btc_bool btc_script_copy_without_op_codeseperator(const cstring *script_in, cstr
         if (!deser_skip(&buf, data_len))
             goto err_out;
     }
-    
+
 err_out:
     return false;
 }
 
 btc_script_op* btc_script_op_new()
 {
-    btc_script_op *script_op;
+    btc_script_op* script_op;
     script_op = calloc(1, sizeof(*script_op));
 
     return script_op;
 }
 
 
-void btc_script_op_free(btc_script_op *script_op)
+void btc_script_op_free(btc_script_op* script_op)
 {
-    if (script_op->data)
-    {
+    if (script_op->data) {
         free(script_op->data);
         script_op->data = NULL;
     }
@@ -100,26 +96,24 @@ void btc_script_op_free(btc_script_op *script_op)
     script_op->op = OP_0;
 }
 
-void btc_script_op_free_cb(void *data)
+void btc_script_op_free_cb(void* data)
 {
-    btc_script_op *script_op = data;
+    btc_script_op* script_op = data;
     btc_script_op_free(script_op);
 
     free(script_op);
 }
 
-btc_bool btc_script_get_ops(const cstring *script_in, vector *ops_out)
+btc_bool btc_script_get_ops(const cstring* script_in, vector* ops_out)
 {
     if (script_in->len == 0)
-        return false;			/* EOF */
+        return false; /* EOF */
 
     struct const_buffer buf = {script_in->str, script_in->len};
     unsigned char opcode;
 
-    btc_script_op *op = NULL;
-    while(buf.len > 0)
-    {
-
+    btc_script_op* op = NULL;
+    while (buf.len > 0) {
         op = btc_script_op_new();
 
         if (!deser_bytes(&opcode, &buf, 1))
@@ -129,23 +123,19 @@ btc_bool btc_script_get_ops(const cstring *script_in, vector *ops_out)
 
         uint32_t data_len;
 
-        if (opcode < OP_PUSHDATA1)
-        {
+        if (opcode < OP_PUSHDATA1) {
             data_len = opcode;
-        }
-        else if (opcode == OP_PUSHDATA1) {
+        } else if (opcode == OP_PUSHDATA1) {
             uint8_t v8;
             if (!deser_bytes(&v8, &buf, 1))
                 goto err_out;
             data_len = v8;
-        }
-        else if (opcode == OP_PUSHDATA2) {
+        } else if (opcode == OP_PUSHDATA2) {
             uint16_t v16;
             if (!deser_u16(&v16, &buf))
                 goto err_out;
             data_len = v16;
-        }
-        else if (opcode == OP_PUSHDATA4) {
+        } else if (opcode == OP_PUSHDATA4) {
             uint32_t v32;
             if (!deser_u32(&v32, &buf))
                 goto err_out;
@@ -160,7 +150,7 @@ btc_bool btc_script_get_ops(const cstring *script_in, vector *ops_out)
         op->datalen = data_len;
 
         vector_add(ops_out, op);
-        
+
         if (!deser_skip(&buf, data_len))
             goto err_out;
     }
@@ -176,12 +166,12 @@ static inline btc_bool btc_script_is_pushdata(enum opcodetype op)
     return (op <= OP_PUSHDATA4);
 }
 
-static btc_bool btc_script_is_op(const btc_script_op *op, enum opcodetype opcode)
+static btc_bool btc_script_is_op(const btc_script_op* op, enum opcodetype opcode)
 {
     return (op->op == opcode);
 }
 
-static btc_bool btc_script_is_op_pubkey(const btc_script_op *op)
+static btc_bool btc_script_is_op_pubkey(const btc_script_op* op)
 {
     if (!btc_script_is_pushdata(op->op))
         return false;
@@ -190,7 +180,7 @@ static btc_bool btc_script_is_op_pubkey(const btc_script_op *op)
     return true;
 }
 
-static btc_bool btc_script_is_op_pubkeyhash(const btc_script_op *op)
+static btc_bool btc_script_is_op_pubkeyhash(const btc_script_op* op)
 {
     if (!btc_script_is_pushdata(op->op))
         return false;
@@ -200,7 +190,7 @@ static btc_bool btc_script_is_op_pubkeyhash(const btc_script_op *op)
 }
 
 // OP_PUBKEY, OP_CHECKSIG
-btc_bool btc_script_is_pubkey(vector *ops)
+btc_bool btc_script_is_pubkey(vector* ops)
 {
     return ((ops->len == 2) &&
             btc_script_is_op(vector_idx(ops, 1), OP_CHECKSIG) &&
@@ -208,7 +198,7 @@ btc_bool btc_script_is_pubkey(vector *ops)
 }
 
 // OP_DUP, OP_HASH160, OP_PUBKEYHASH, OP_EQUALVERIFY, OP_CHECKSIG,
-btc_bool btc_script_is_pubkeyhash(vector *ops)
+btc_bool btc_script_is_pubkeyhash(vector* ops)
 {
     return ((ops->len == 5) &&
             btc_script_is_op(vector_idx(ops, 0), OP_DUP) &&
@@ -219,7 +209,7 @@ btc_bool btc_script_is_pubkeyhash(vector *ops)
 }
 
 // OP_HASH160, OP_PUBKEYHASH, OP_EQUAL
-btc_bool btc_script_is_scripthash(vector *ops)
+btc_bool btc_script_is_scripthash(vector* ops)
 {
     return ((ops->len == 3) &&
             btc_script_is_op(vector_idx(ops, 0), OP_HASH160) &&
@@ -227,13 +217,13 @@ btc_bool btc_script_is_scripthash(vector *ops)
             btc_script_is_op(vector_idx(ops, 2), OP_EQUAL));
 }
 
-static btc_bool btc_script_is_op_smallint(const btc_script_op *op)
+static btc_bool btc_script_is_op_smallint(const btc_script_op* op)
 {
     return ((op->op == OP_0) ||
             (op->op >= OP_1 && op->op <= OP_16));
 }
 
-btc_bool btc_script_is_multisig(vector *ops)
+btc_bool btc_script_is_multisig(vector* ops)
 {
     if ((ops->len < 3) || (ops->len > (16 + 3)) ||
         !btc_script_is_op_smallint(vector_idx(ops, 0)) ||
@@ -249,7 +239,7 @@ btc_bool btc_script_is_multisig(vector *ops)
     return true;
 }
 
-enum btc_tx_out_type btc_script_classify(vector *ops)
+enum btc_tx_out_type btc_script_classify(vector* ops)
 {
     if (btc_script_is_pubkeyhash(ops))
         return BTC_TX_PUBKEYHASH;
@@ -259,6 +249,6 @@ enum btc_tx_out_type btc_script_classify(vector *ops)
         return BTC_TX_PUBKEY;
     if (btc_script_is_multisig(ops))
         return BTC_TX_MULTISIG;
-    
+
     return BTC_TX_NONSTANDARD;
 }

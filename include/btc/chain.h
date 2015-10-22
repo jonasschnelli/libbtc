@@ -29,7 +29,7 @@
 
 #include "btc.h"
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -45,10 +45,10 @@ typedef struct btc_chain
     uint32_t b58prefix_bip32_pubkey;
 } btc_chain;
 
-static const btc_chain btc_chain_main = { "main", 0x6f, 0xc4, 0x0488ADE4, 0x0488B21E};
-static const btc_chain btc_chain_test = { "testnet3", 0x6f, 0xc4, 0x04358394, 0x043587CF};
+static const btc_chain btc_chain_main = {"main", 0x6f, 0xc4, 0x0488ADE4, 0x0488B21E};
+static const btc_chain btc_chain_test = {"testnet3", 0x6f, 0xc4, 0x04358394, 0x043587CF};
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

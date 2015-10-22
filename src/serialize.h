@@ -36,53 +36,53 @@
 
 #include "portable_endian.h"
 
-extern void ser_bytes(cstring *s, const void *p, size_t len);
-extern void ser_u16(cstring *s, uint16_t v_);
-extern void ser_u32(cstring *s, uint32_t v_);
-extern void ser_u64(cstring *s, uint64_t v_);
+extern void ser_bytes(cstring* s, const void* p, size_t len);
+extern void ser_u16(cstring* s, uint16_t v_);
+extern void ser_u32(cstring* s, uint32_t v_);
+extern void ser_u64(cstring* s, uint64_t v_);
 
-static inline void ser_u256(cstring *s, const unsigned char *v_)
+static inline void ser_u256(cstring* s, const unsigned char* v_)
 {
-	ser_bytes(s, v_, 32);
+    ser_bytes(s, v_, 32);
 }
 
-extern void ser_varlen(cstring *s, uint32_t vlen);
-extern void ser_str(cstring *s, const char *s_in, size_t maxlen);
-extern void ser_varstr(cstring *s, cstring *s_in);
+extern void ser_varlen(cstring* s, uint32_t vlen);
+extern void ser_str(cstring* s, const char* s_in, size_t maxlen);
+extern void ser_varstr(cstring* s, cstring* s_in);
 
-static inline void ser_s32(cstring *s, int32_t v_)
+static inline void ser_s32(cstring* s, int32_t v_)
 {
-	ser_u32(s, (uint32_t) v_);
+    ser_u32(s, (uint32_t)v_);
 }
 
-static inline void ser_s64(cstring *s, int64_t v_)
+static inline void ser_s64(cstring* s, int64_t v_)
 {
-	ser_u64(s, (uint64_t) v_);
+    ser_u64(s, (uint64_t)v_);
 }
 
-extern void ser_u256_vector(cstring *s, vector *vec);
+extern void ser_u256_vector(cstring* s, vector* vec);
 
-extern btc_bool deser_skip(struct const_buffer *buf, size_t len);
-extern btc_bool deser_bytes(void *po, struct const_buffer *buf, size_t len);
-extern btc_bool deser_u16(uint16_t *vo, struct const_buffer *buf);
-extern btc_bool deser_u32(uint32_t *vo, struct const_buffer *buf);
-extern btc_bool deser_u64(uint64_t *vo, struct const_buffer *buf);
+extern btc_bool deser_skip(struct const_buffer* buf, size_t len);
+extern btc_bool deser_bytes(void* po, struct const_buffer* buf, size_t len);
+extern btc_bool deser_u16(uint16_t* vo, struct const_buffer* buf);
+extern btc_bool deser_u32(uint32_t* vo, struct const_buffer* buf);
+extern btc_bool deser_u64(uint64_t* vo, struct const_buffer* buf);
 
-static inline btc_bool deser_u256(uint8_t *vo, struct const_buffer *buf)
+static inline btc_bool deser_u256(uint8_t* vo, struct const_buffer* buf)
 {
-	return deser_bytes(vo, buf, 32);
+    return deser_bytes(vo, buf, 32);
 }
 
-extern btc_bool deser_varlen(uint32_t *lo, struct const_buffer *buf);
-extern btc_bool deser_str(char *so, struct const_buffer *buf, size_t maxlen);
-extern btc_bool deser_varstr(cstring **so, struct const_buffer *buf);
+extern btc_bool deser_varlen(uint32_t* lo, struct const_buffer* buf);
+extern btc_bool deser_str(char* so, struct const_buffer* buf, size_t maxlen);
+extern btc_bool deser_varstr(cstring** so, struct const_buffer* buf);
 
-static inline btc_bool deser_s64(int64_t *vo, struct const_buffer *buf)
+static inline btc_bool deser_s64(int64_t* vo, struct const_buffer* buf)
 {
-	return deser_u64((uint64_t *) vo, buf);
+    return deser_u64((uint64_t*)vo, buf);
 }
 
-extern btc_bool deser_u256_vector(vector **vo, struct const_buffer *buf);
+extern btc_bool deser_u256_vector(vector** vo, struct const_buffer* buf);
 
 //extern void u256_from_compact(BIGNUM *vo, uint32_t c);
 

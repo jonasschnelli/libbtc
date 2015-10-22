@@ -8,45 +8,44 @@
 #include <stdlib.h>
 #include <string.h>
 
-btc_bool buffer_equal(const void *a_, const void *b_)
+btc_bool buffer_equal(const void* a_, const void* b_)
 {
-	const struct buffer *a = a_;
-	const struct buffer *b = b_;
+    const struct buffer* a = a_;
+    const struct buffer* b = b_;
 
-	if (a->len != b->len)
-		return false;
-	return memcmp(a->p, b->p, a->len) == 0;
+    if (a->len != b->len)
+        return false;
+    return memcmp(a->p, b->p, a->len) == 0;
 }
 
-void buffer_free(void *struct_buffer)
+void buffer_free(void* struct_buffer)
 {
-	struct buffer *buf = struct_buffer;
-	if (!buf)
-		return;
+    struct buffer* buf = struct_buffer;
+    if (!buf)
+        return;
 
-	free(buf->p);
-	free(buf);
+    free(buf->p);
+    free(buf);
 }
 
-struct buffer *buffer_copy(const void *data, size_t data_len)
+struct buffer* buffer_copy(const void* data, size_t data_len)
 {
-	struct buffer *buf;
-	buf = malloc(sizeof(*buf));
-	if (!buf)
-		goto err_out;
+    struct buffer* buf;
+    buf = malloc(sizeof(*buf));
+    if (!buf)
+        goto err_out;
 
-	buf->p = malloc(data_len);
-	if (!buf->p)
-		goto err_out_free;
+    buf->p = malloc(data_len);
+    if (!buf->p)
+        goto err_out_free;
 
-	memcpy(buf->p, data, data_len);
-	buf->len = data_len;
+    memcpy(buf->p, data, data_len);
+    buf->len = data_len;
 
-	return buf;
+    return buf;
 
 err_out_free:
-	free(buf);
+    free(buf);
 err_out:
-	return NULL;
+    return NULL;
 }
-

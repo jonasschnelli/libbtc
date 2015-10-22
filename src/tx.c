@@ -36,7 +36,7 @@
 #include "sha2.h"
 #include "utils.h"
 
-void btc_tx_in_free(btc_tx_in *tx_in)
+void btc_tx_in_free(btc_tx_in* tx_in)
 {
     if (!tx_in)
         return;
@@ -51,12 +51,12 @@ void btc_tx_in_free(btc_tx_in *tx_in)
 }
 
 //callback for vector free function
-void btc_tx_in_free_cb(void *data)
+void btc_tx_in_free_cb(void* data)
 {
     if (!data)
         return;
 
-   	btc_tx_in *tx_in = data;
+    btc_tx_in* tx_in = data;
     btc_tx_in_free(tx_in);
 
     memset(tx_in, 0, sizeof(*tx_in));
@@ -66,7 +66,7 @@ void btc_tx_in_free_cb(void *data)
 
 btc_tx_in* btc_tx_in_new()
 {
-    btc_tx_in *tx_in;
+    btc_tx_in* tx_in;
     tx_in = calloc(1, sizeof(*tx_in));
     memset(&tx_in->prevout, 0, sizeof(tx_in->prevout));
 
@@ -74,7 +74,7 @@ btc_tx_in* btc_tx_in_new()
 }
 
 
-void btc_tx_out_free(btc_tx_out *tx_out)
+void btc_tx_out_free(btc_tx_out* tx_out)
 {
     if (!tx_out)
         return;
@@ -87,12 +87,12 @@ void btc_tx_out_free(btc_tx_out *tx_out)
 }
 
 
-void btc_tx_out_free_cb(void *data)
+void btc_tx_out_free_cb(void* data)
 {
     if (!data)
         return;
 
-   	btc_tx_out *tx_out = data;
+    btc_tx_out* tx_out = data;
     btc_tx_out_free(tx_out);
 
     memset(tx_out, 0, sizeof(*tx_out));
@@ -102,14 +102,14 @@ void btc_tx_out_free_cb(void *data)
 
 btc_tx_out* btc_tx_out_new()
 {
-    btc_tx_out *tx_out;
+    btc_tx_out* tx_out;
     tx_out = calloc(1, sizeof(*tx_out));
 
     return tx_out;
 }
 
 
-void btc_tx_free(btc_tx *tx)
+void btc_tx_free(btc_tx* tx)
 {
     if (tx->vin)
         vector_free(tx->vin, true);
@@ -133,45 +133,52 @@ btc_tx* btc_tx_new()
 }
 
 
-btc_bool btc_tx_in_deserialize(btc_tx_in *tx_in, struct const_buffer *buf)
+btc_bool btc_tx_in_deserialize(btc_tx_in* tx_in, struct const_buffer* buf)
 {
     deser_u256(tx_in->prevout.hash, buf);
-    if (!deser_u32(&tx_in->prevout.n, buf)) return false;
-    if (!deser_varstr(&tx_in->script_sig, buf)) return false;
-    if (!deser_u32(&tx_in->sequence, buf)) return false;
+    if (!deser_u32(&tx_in->prevout.n, buf))
+        return false;
+    if (!deser_varstr(&tx_in->script_sig, buf))
+        return false;
+    if (!deser_u32(&tx_in->sequence, buf))
+        return false;
     return true;
 }
 
-btc_bool btc_tx_out_deserialize(btc_tx_out *tx_out, struct const_buffer *buf)
+btc_bool btc_tx_out_deserialize(btc_tx_out* tx_out, struct const_buffer* buf)
 {
-    if (!deser_s64(&tx_out->value, buf)) return false;
-    if (!deser_varstr(&tx_out->script_pubkey, buf)) return false;
+    if (!deser_s64(&tx_out->value, buf))
+        return false;
+    if (!deser_varstr(&tx_out->script_pubkey, buf))
+        return false;
     return true;
 }
 
-int btc_tx_deserialize(const unsigned char *tx_serialized, size_t inlen, btc_tx *tx)
+int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx* tx)
 {
-    struct const_buffer buf = { tx_serialized, inlen };
+    struct const_buffer buf = {tx_serialized, inlen};
 
     //tx needs to be initialized
     deser_u32(&tx->version, &buf);
     uint32_t vlen;
-    if (!deser_varlen(&vlen, &buf)) return false;
+    if (!deser_varlen(&vlen, &buf))
+        return false;
 
     unsigned int i;
     for (i = 0; i < vlen; i++) {
-        btc_tx_in *tx_in = btc_tx_in_new();
+        btc_tx_in* tx_in = btc_tx_in_new();
 
         if (!btc_tx_in_deserialize(tx_in, &buf)) {
             free(tx_in);
         }
-        
+
         vector_add(tx->vin, tx_in);
     }
 
-    if (!deser_varlen(&vlen, &buf)) return false;
+    if (!deser_varlen(&vlen, &buf))
+        return false;
     for (i = 0; i < vlen; i++) {
-        btc_tx_out *tx_out = btc_tx_out_new();
+        btc_tx_out* tx_out = btc_tx_out_new();
 
         if (!btc_tx_out_deserialize(tx_out, &buf)) {
             free(tx_out);
@@ -180,12 +187,13 @@ int btc_tx_deserialize(const unsigned char *tx_serialized, size_t inlen, btc_tx 
         vector_add(tx->vout, tx_out);
     }
 
-    if (!deser_u32(&tx->locktime, &buf)) return false;
+    if (!deser_u32(&tx->locktime, &buf))
+        return false;
 
     return true;
 }
 
-void btc_tx_in_serialize(cstring *s, const btc_tx_in *tx_in)
+void btc_tx_in_serialize(cstring* s, const btc_tx_in* tx_in)
 {
     ser_u256(s, tx_in->prevout.hash);
     ser_u32(s, tx_in->prevout.n);
@@ -193,13 +201,13 @@ void btc_tx_in_serialize(cstring *s, const btc_tx_in *tx_in)
     ser_u32(s, tx_in->sequence);
 }
 
-void btc_tx_out_serialize(cstring *s, const btc_tx_out *tx_out)
+void btc_tx_out_serialize(cstring* s, const btc_tx_out* tx_out)
 {
     ser_s64(s, tx_out->value);
     ser_varstr(s, tx_out->script_pubkey);
 }
 
-void btc_tx_serialize(cstring *s, const btc_tx *tx)
+void btc_tx_serialize(cstring* s, const btc_tx* tx)
 {
     ser_u32(s, tx->version);
 
@@ -208,7 +216,7 @@ void btc_tx_serialize(cstring *s, const btc_tx *tx)
     unsigned int i;
     if (tx->vin) {
         for (i = 0; i < tx->vin->len; i++) {
-            btc_tx_in *tx_in;
+            btc_tx_in* tx_in;
 
             tx_in = vector_idx(tx->vin, i);
             btc_tx_in_serialize(s, tx_in);
@@ -219,20 +227,19 @@ void btc_tx_serialize(cstring *s, const btc_tx *tx)
 
     if (tx->vout) {
         for (i = 0; i < tx->vout->len; i++) {
-            btc_tx_out *tx_out;
-            
+            btc_tx_out* tx_out;
+
             tx_out = vector_idx(tx->vout, i);
             btc_tx_out_serialize(s, tx_out);
         }
     }
-    
+
     ser_u32(s, tx->locktime);
 }
 
 
-void btc_tx_in_copy(btc_tx_in *dest, const btc_tx_in *src)
+void btc_tx_in_copy(btc_tx_in* dest, const btc_tx_in* src)
 {
-    
     memcpy(&dest->prevout, &src->prevout, sizeof(dest->prevout));
     dest->sequence = src->sequence;
 
@@ -241,12 +248,13 @@ void btc_tx_in_copy(btc_tx_in *dest, const btc_tx_in *src)
     else {
         dest->script_sig = cstr_new_sz(src->script_sig->len);
         cstr_append_buf(dest->script_sig,
-                        src->script_sig->str, src->script_sig->len);
+                        src->script_sig->str,
+                        src->script_sig->len);
     }
 }
 
 
-void btc_tx_out_copy(btc_tx_out *dest, const btc_tx_out *src)
+void btc_tx_out_copy(btc_tx_out* dest, const btc_tx_out* src)
 {
     dest->value = src->value;
 
@@ -261,7 +269,7 @@ void btc_tx_out_copy(btc_tx_out *dest, const btc_tx_out *src)
 }
 
 
-void btc_tx_copy(btc_tx *dest, const btc_tx *src)
+void btc_tx_copy(btc_tx* dest, const btc_tx* src)
 {
     dest->version = src->version;
     dest->locktime = src->locktime;
@@ -277,7 +285,7 @@ void btc_tx_copy(btc_tx *dest, const btc_tx *src)
         dest->vin = vector_new(src->vin->len, btc_tx_in_free_cb);
 
         for (i = 0; i < src->vin->len; i++) {
-            btc_tx_in *tx_in_old, *tx_in_new;
+            btc_tx_in* tx_in_old, *tx_in_new;
 
             tx_in_old = vector_idx(src->vin, i);
             tx_in_new = malloc(sizeof(*tx_in_new));
@@ -295,11 +303,11 @@ void btc_tx_copy(btc_tx *dest, const btc_tx *src)
             vector_free(dest->vout, true);
 
         dest->vout = vector_new(src->vout->len,
-                              btc_tx_out_free_cb);
+                                btc_tx_out_free_cb);
 
         for (i = 0; i < src->vout->len; i++) {
-            btc_tx_out *tx_out_old, *tx_out_new;
-            
+            btc_tx_out* tx_out_old, *tx_out_new;
+
             tx_out_old = vector_idx(src->vout, i);
             tx_out_new = malloc(sizeof(*tx_out_new));
             btc_tx_out_copy(tx_out_new, tx_out_old);
@@ -308,28 +316,29 @@ void btc_tx_copy(btc_tx *dest, const btc_tx *src)
     }
 }
 
-btc_bool btc_tx_sighash(const btc_tx *tx_to, const cstring *fromPubKey, unsigned int in_num, int hashtype, uint8_t *hash)
+btc_bool btc_tx_sighash(const btc_tx* tx_to, const cstring* fromPubKey, unsigned int in_num, int hashtype, uint8_t* hash)
 {
     if (in_num >= tx_to->vin->len)
         return false;
 
     btc_bool ret = true;
 
-    btc_tx *tx_tmp = btc_tx_new();
+    btc_tx* tx_tmp = btc_tx_new();
     btc_tx_copy(tx_tmp, tx_to);
 
-    cstring *new_script = cstr_new_sz(fromPubKey->len);
+    cstring* new_script = cstr_new_sz(fromPubKey->len);
     btc_script_copy_without_op_codeseperator(fromPubKey, new_script);
 
     unsigned int i;
-    btc_tx_in *tx_in;
+    btc_tx_in* tx_in;
     for (i = 0; i < tx_tmp->vin->len; i++) {
         tx_in = vector_idx(tx_tmp->vin, i);
         cstr_resize(tx_in->script_sig, 0);
 
         if (i == in_num)
             cstr_append_buf(tx_in->script_sig,
-                            new_script->str, new_script->len);
+                            new_script->str,
+                            new_script->len);
     }
     cstr_free(new_script, true);
     /* Blank out some of the outputs */
@@ -360,7 +369,7 @@ btc_bool btc_tx_sighash(const btc_tx *tx_to, const cstring *fromPubKey, unsigned
         vector_resize(tx_tmp->vout, n_out + 1);
 
         for (i = 0; i < n_out; i++) {
-            btc_tx_out *tx_out;
+            btc_tx_out* tx_out;
 
             tx_out = vector_idx(tx_tmp->vout, i);
             tx_out->value = -1;
@@ -377,7 +386,7 @@ btc_bool btc_tx_sighash(const btc_tx *tx_to, const cstring *fromPubKey, unsigned
                 tx_in->sequence = 0;
         }
     }
-    
+
     /* Blank out other inputs completely;
      not recommended for open transactions */
     if (hashtype & SIGHASH_ANYONECANPAY) {
@@ -386,14 +395,14 @@ btc_bool btc_tx_sighash(const btc_tx *tx_to, const cstring *fromPubKey, unsigned
         vector_resize(tx_tmp->vin, 1);
     }
 
-    cstring *s = cstr_new_sz(512);
+    cstring* s = cstr_new_sz(512);
     btc_tx_serialize(s, tx_tmp);
     char hextest[4096];
     ser_s32(s, hashtype);
 
-    utils_bin_to_hex((unsigned char *)s->str, s->len, hextest);
+    utils_bin_to_hex((unsigned char*)s->str, s->len, hextest);
 
-    sha256_Raw((const uint8_t *)s->str, s->len, hash);
+    sha256_Raw((const uint8_t*)s->str, s->len, hash);
     sha256_Raw(hash, 32, hash);
 
     cstr_free(s, true);
