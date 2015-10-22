@@ -85,14 +85,16 @@ void btc_pubkey_free(btc_pubkey* pubkey)
 
 void btc_pubkey_from_key(btc_key *privkey, btc_pubkey* pubkey_inout)
 {
-    ecc_get_pubkey(privkey->privkey, pubkey_inout->pubkey, BTC_ECKEY_PKEY_LENGTH, true);
+    size_t in_out_len = BTC_ECKEY_COMPRESSED_LENGTH;
+
+    ecc_get_pubkey(privkey->privkey, pubkey_inout->pubkey, &in_out_len, true);
     pubkey_inout->compressed = true;
 }
 
 
-btc_bool btc_key_sign_hash(const btc_key *privkey, const uint8_t *hash, unsigned char *sigout, int *outlen)
+btc_bool btc_key_sign_hash(const btc_key *privkey, const uint8_t *hash, unsigned char *sigout, size_t *outlen)
 {
-    return ecc_sign(privkey->privkey, hash, sigout, (size_t *)outlen);
+    return ecc_sign(privkey->privkey, hash, sigout, outlen);
 }
 
 

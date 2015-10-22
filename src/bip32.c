@@ -178,7 +178,8 @@ btc_bool btc_hdnode_private_ckd(btc_hdnode *inout, uint32_t i)
 
 void btc_hdnode_fill_public_key(btc_hdnode *node)
 {
-    ecc_get_public_key33(node->private_key, node->public_key);
+    size_t outsize = 33;
+    ecc_get_pubkey(node->private_key, node->public_key, &outsize, true);
 }
 
 

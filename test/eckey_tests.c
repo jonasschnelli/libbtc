@@ -47,13 +47,11 @@ void test_eckey()
         assert(pubkey->pubkey[i] == 0);
 
     uint8_t *hash = utils_hex_to_uint8((const char *)"26db47a48a10b9b0b697b793f5c0231aa35fe192c9d063d7b03a55e3c302850a");
-    uint8_t hash2[32];
-    memcpy(hash2, hash, 32);
-    unsigned char sig[100];
-    int outlen = 0;
+    unsigned char sig[74];
+    size_t outlen = 74;
     btc_key_sign_hash(key, hash, sig, &outlen);
 
-    btc_pubkey_verify_sig(pubkey, hash2, sig, outlen);
+    btc_pubkey_verify_sig(pubkey, hash, sig, outlen);
 
     btc_pubkey_free(pubkey);
     btc_privkey_free(key);
