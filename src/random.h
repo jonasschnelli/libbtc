@@ -34,6 +34,6 @@
 #include "btc/btc.h"
 
 void random_init(void);
-btc_bool random_bytes(uint8_t *buf, uint32_t len, const uint8_t update_seed);
+btc_bool random_bytes(uint8_t* buf, uint32_t len, const uint8_t update_seed);
 
 #endif

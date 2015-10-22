@@ -30,7 +30,7 @@
 
 #include "btc.h"
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -46,7 +46,7 @@ extern "C" {
 typedef struct btc_script_
 {
     int* data;
-    size_t limit; // Total size of the vector
+    size_t limit;   // Total size of the vector
     size_t current; //Number of vectors in it at present
 } btc_script;
 
@@ -59,49 +59,49 @@ typedef struct btc_tx_outpoint_
 typedef struct btc_tx_in_
 {
     btc_tx_outpoint prevout;
-    cstring *script_sig;
+    cstring* script_sig;
     uint32_t sequence;
 } btc_tx_in;
 
 typedef struct btc_tx_out_
 {
     int64_t value;
-    cstring *script_pubkey;
+    cstring* script_pubkey;
 } btc_tx_out;
 
 typedef struct btc_tx_
 {
     uint32_t version;
-    vector *vin;
-    vector *vout;
+    vector* vin;
+    vector* vout;
     uint32_t locktime;
 } btc_tx;
 
 
 //!create a new tx input
 LIBBTC_API btc_tx_in* btc_tx_in_new();
-LIBBTC_API void btc_tx_in_free(btc_tx_in *tx_in);
-LIBBTC_API void btc_tx_in_copy(btc_tx_in *dest, const btc_tx_in *src);
+LIBBTC_API void btc_tx_in_free(btc_tx_in* tx_in);
+LIBBTC_API void btc_tx_in_copy(btc_tx_in* dest, const btc_tx_in* src);
 
 //!create a new tx output
 LIBBTC_API btc_tx_out* btc_tx_out_new();
-LIBBTC_API void btc_tx_out_free(btc_tx_out *tx_out);
-LIBBTC_API void btc_tx_out_copy(btc_tx_out *dest, const btc_tx_out *src);
+LIBBTC_API void btc_tx_out_free(btc_tx_out* tx_out);
+LIBBTC_API void btc_tx_out_copy(btc_tx_out* dest, const btc_tx_out* src);
 
 //!create a new tx input
 LIBBTC_API btc_tx* btc_tx_new();
-LIBBTC_API void btc_tx_free(btc_tx *tx);
-LIBBTC_API void btc_tx_copy(btc_tx *dest, const btc_tx *src);
+LIBBTC_API void btc_tx_free(btc_tx* tx);
+LIBBTC_API void btc_tx_copy(btc_tx* dest, const btc_tx* src);
 
 //!deserialize/parse a p2p serialized bitcoin transaction
-LIBBTC_API int btc_tx_deserialize(const unsigned char *tx_serialized, size_t inlen, btc_tx *tx);
+LIBBTC_API int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx* tx);
 
 //!serialize a lbc bitcoin data structure into a p2p serialized buffer
-LIBBTC_API void btc_tx_serialize(cstring *s, const btc_tx *tx);
+LIBBTC_API void btc_tx_serialize(cstring* s, const btc_tx* tx);
 
-LIBBTC_API btc_bool btc_tx_sighash(const btc_tx *tx_to, const cstring *fromPubKey, unsigned int in_num, int hashtype, uint8_t *hash);
+LIBBTC_API btc_bool btc_tx_sighash(const btc_tx* tx_to, const cstring* fromPubKey, unsigned int in_num, int hashtype, uint8_t* hash);
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

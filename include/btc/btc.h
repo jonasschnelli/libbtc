@@ -42,25 +42,25 @@ typedef uint8_t btc_bool;
 #endif
 
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
 #ifndef LIBBTC_API
-# if defined(_WIN32)
-#  ifdef LIBBTC_BUILD
-#   define LIBBTC_API __declspec(dllexport)
-#  else
-#   define LIBBTC_API
-#  endif
-# elif defined(__GNUC__) && defined(LIBBTC_BUILD)
-#  define LIBBTC_API __attribute__ ((visibility ("default")))
-# else
-#  define LIBBTC_API
-# endif
+#if defined(_WIN32)
+#ifdef LIBBTC_BUILD
+#define LIBBTC_API __declspec(dllexport)
+#else
+#define LIBBTC_API
+#endif
+#elif defined(__GNUC__) && defined(LIBBTC_BUILD)
+#define LIBBTC_API __attribute__((visibility("default")))
+#else
+#define LIBBTC_API
+#endif
 #endif
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

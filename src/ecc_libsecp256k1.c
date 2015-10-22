@@ -24,7 +24,7 @@ void ecc_start(void)
 
 void ecc_stop(void)
 {
-    secp256k1_context *ctx = secp256k1_ctx;
+    secp256k1_context* ctx = secp256k1_ctx;
     secp256k1_ctx = NULL;
 
     if (ctx) {
@@ -33,33 +33,31 @@ void ecc_stop(void)
 }
 
 
-void ecc_get_pubkey(const uint8_t *private_key, uint8_t *public_key,
-                           size_t *in_outlen, btc_bool compressed)
+void ecc_get_pubkey(const uint8_t* private_key, uint8_t* public_key, size_t* in_outlen, btc_bool compressed)
 {
     secp256k1_pubkey pubkey;
     assert(secp256k1_ctx);
     assert((int)*in_outlen == (compressed ? 33 : 65));
     memset(public_key, 0, *in_outlen);
 
-    if (!secp256k1_ec_pubkey_create(secp256k1_ctx, &pubkey, (const unsigned char *)private_key)) {
+    if (!secp256k1_ec_pubkey_create(secp256k1_ctx, &pubkey, (const unsigned char*)private_key)) {
         return;
     }
 
-    if (!secp256k1_ec_pubkey_serialize(secp256k1_ctx, public_key, in_outlen, &pubkey,
-                                       compressed)) {
+    if (!secp256k1_ec_pubkey_serialize(secp256k1_ctx, public_key, in_outlen, &pubkey, compressed)) {
         return;
     }
 
     return;
 }
 
-btc_bool ecc_private_key_tweak_add(uint8_t *private_key, const uint8_t *tweak)
+btc_bool ecc_private_key_tweak_add(uint8_t* private_key, const uint8_t* tweak)
 {
     assert(secp256k1_ctx);
-    return secp256k1_ec_privkey_tweak_add(secp256k1_ctx, (unsigned char *)private_key, (const unsigned char *)tweak);
+    return secp256k1_ec_privkey_tweak_add(secp256k1_ctx, (unsigned char*)private_key, (const unsigned char*)tweak);
 }
 
-btc_bool ecc_public_key_tweak_add(uint8_t *public_key_inout, const uint8_t *tweak)
+btc_bool ecc_public_key_tweak_add(uint8_t* public_key_inout, const uint8_t* tweak)
 {
     size_t out;
     secp256k1_pubkey pubkey;
@@ -68,30 +66,28 @@ btc_bool ecc_public_key_tweak_add(uint8_t *public_key_inout, const uint8_t *twea
     if (!secp256k1_ec_pubkey_parse(secp256k1_ctx, &pubkey, public_key_inout, 33))
         return false;
 
-    if (!secp256k1_ec_pubkey_tweak_add(secp256k1_ctx, &pubkey, (const unsigned char *)tweak))
+    if (!secp256k1_ec_pubkey_tweak_add(secp256k1_ctx, &pubkey, (const unsigned char*)tweak))
         return false;
 
-    if (!secp256k1_ec_pubkey_serialize(secp256k1_ctx, public_key_inout, &out, &pubkey,
-                                  SECP256K1_EC_COMPRESSED))
+    if (!secp256k1_ec_pubkey_serialize(secp256k1_ctx, public_key_inout, &out, &pubkey, SECP256K1_EC_COMPRESSED))
         return false;
 
     return true;
 }
 
 
-btc_bool ecc_verify_privatekey(const uint8_t *private_key)
+btc_bool ecc_verify_privatekey(const uint8_t* private_key)
 {
     assert(secp256k1_ctx);
-    return secp256k1_ec_seckey_verify(secp256k1_ctx, (const unsigned char *)private_key);
+    return secp256k1_ec_seckey_verify(secp256k1_ctx, (const unsigned char*)private_key);
 }
 
-btc_bool ecc_verify_pubkey(const uint8_t *public_key, btc_bool compressed)
+btc_bool ecc_verify_pubkey(const uint8_t* public_key, btc_bool compressed)
 {
     secp256k1_pubkey pubkey;
 
     assert(secp256k1_ctx);
-    if (!secp256k1_ec_pubkey_parse(secp256k1_ctx, &pubkey, public_key, compressed ? 33 : 65))
-    {
+    if (!secp256k1_ec_pubkey_parse(secp256k1_ctx, &pubkey, public_key, compressed ? 33 : 65)) {
         memset(&pubkey, 0, sizeof(pubkey));
         return false;
     }
@@ -100,7 +96,7 @@ btc_bool ecc_verify_pubkey(const uint8_t *public_key, btc_bool compressed)
     return true;
 }
 
-btc_bool ecc_sign(const uint8_t *private_key, const uint8_t *hash, unsigned char *sigder, size_t *outlen)
+btc_bool ecc_sign(const uint8_t* private_key, const uint8_t* hash, unsigned char* sigder, size_t* outlen)
 {
     assert(secp256k1_ctx);
 
@@ -114,7 +110,7 @@ btc_bool ecc_sign(const uint8_t *private_key, const uint8_t *hash, unsigned char
     return 1;
 }
 
-btc_bool ecc_verify_sig(const uint8_t *public_key, btc_bool compressed, const uint8_t *hash, unsigned char *sigder, size_t siglen)
+btc_bool ecc_verify_sig(const uint8_t* public_key, btc_bool compressed, const uint8_t* hash, unsigned char* sigder, size_t siglen)
 {
     assert(secp256k1_ctx);
 

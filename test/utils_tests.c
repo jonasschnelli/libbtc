@@ -14,8 +14,8 @@
 void test_utils()
 {
     char hash[] = "28969cdfa74a12c82f3bad960b0b000aca2ac329deea5c2328ebc6f2ba9802c1";
-    uint8_t *hash_bin = utils_hex_to_uint8(hash);
-    char *new = utils_uint8_to_hex(hash_bin, 32);
+    uint8_t* hash_bin = utils_hex_to_uint8(hash);
+    char* new = utils_uint8_to_hex(hash_bin, 32);
     assert(strncmp(new, hash, 64) == 0);
 
     uint64_t bigint = 0xFFFFFFFFFFFFFFFF;
@@ -60,7 +60,7 @@ void test_utils()
     assert(bigint == 1048570);
 
     unsigned char data[] = {0x00, 0xFF, 0x00, 0xAA, 0x00, 0xFF, 0x00, 0xAA};
-    char hex[sizeof(data)*2+1];
+    char hex[sizeof(data) * 2 + 1];
     utils_bin_to_hex(data, sizeof(data), hex);
     assert(strcmp(hex, "00ff00aa00ff00aa") == 0);
 

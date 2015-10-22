@@ -29,7 +29,7 @@
 
 #include "btc.h"
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -42,25 +42,24 @@ LIBBTC_API void ecc_start(void);
 LIBBTC_API void ecc_stop(void);
 
 //!get public key from given private key
-LIBBTC_API void ecc_get_pubkey(const uint8_t *private_key, uint8_t *public_key,
-                           size_t *public_key_len, btc_bool compressed);
+LIBBTC_API void ecc_get_pubkey(const uint8_t* private_key, uint8_t* public_key, size_t* public_key_len, btc_bool compressed);
 
 //!ec mul tweak on given private key
-LIBBTC_API btc_bool ecc_private_key_tweak_add(uint8_t *private_key, const uint8_t *tweak);
+LIBBTC_API btc_bool ecc_private_key_tweak_add(uint8_t* private_key, const uint8_t* tweak);
 
 //!ec mul tweak on given public key
-LIBBTC_API btc_bool ecc_public_key_tweak_add(uint8_t *public_key_inout, const uint8_t *tweak);
+LIBBTC_API btc_bool ecc_public_key_tweak_add(uint8_t* public_key_inout, const uint8_t* tweak);
 
 //!verifies a given 32byte key
-LIBBTC_API btc_bool ecc_verify_privatekey(const uint8_t *private_key);
+LIBBTC_API btc_bool ecc_verify_privatekey(const uint8_t* private_key);
 
 //!verifies a given public key (compressed[33] or uncompressed[65] bytes)
-LIBBTC_API btc_bool ecc_verify_pubkey(const uint8_t *public_key, btc_bool compressed);
+LIBBTC_API btc_bool ecc_verify_pubkey(const uint8_t* public_key, btc_bool compressed);
 
-LIBBTC_API btc_bool ecc_sign(const uint8_t *private_key, const uint8_t *hash, unsigned char *sigder, size_t *outlen);
-LIBBTC_API btc_bool ecc_verify_sig(const uint8_t *public_key, btc_bool compressed, const uint8_t *hash, unsigned char *sigder, size_t siglen);
+LIBBTC_API btc_bool ecc_sign(const uint8_t* private_key, const uint8_t* hash, unsigned char* sigder, size_t* outlen);
+LIBBTC_API btc_bool ecc_verify_sig(const uint8_t* public_key, btc_bool compressed, const uint8_t* hash, unsigned char* sigder, size_t siglen);
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

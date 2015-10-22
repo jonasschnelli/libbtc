@@ -29,8 +29,7 @@
 #include "btc/vector.h"
 
 /** Signature hash types/flags */
-enum
-{
+enum {
     SIGHASH_ALL = 1,
     SIGHASH_NONE = 2,
     SIGHASH_SINGLE = 3,
@@ -38,8 +37,7 @@ enum
 };
 
 /** Script opcodes */
-enum opcodetype
-{
+enum opcodetype {
     // push value
     OP_0 = 0x00,
     OP_FALSE = OP_0,
@@ -49,7 +47,7 @@ enum opcodetype
     OP_1NEGATE = 0x4f,
     OP_RESERVED = 0x50,
     OP_1 = 0x51,
-    OP_TRUE=OP_1,
+    OP_TRUE = OP_1,
     OP_2 = 0x52,
     OP_3 = 0x53,
     OP_4 = 0x54,
@@ -179,12 +177,11 @@ enum opcodetype
     OP_PUBKEYS = 0xfb,
     OP_PUBKEYHASH = 0xfd,
     OP_PUBKEY = 0xfe,
-    
+
     OP_INVALIDOPCODE = 0xff,
 };
 
-enum btc_tx_out_type
-{
+enum btc_tx_out_type {
     BTC_TX_NONSTANDARD,
     // 'standard' transaction types:
     BTC_TX_PUBKEY,
@@ -193,18 +190,19 @@ enum btc_tx_out_type
     BTC_TX_MULTISIG,
 };
 
-typedef struct btc_script_op_ {
-    enum opcodetype		op;		/* opcode found */
-    unsigned char *data;	/* associated data, if any */
+typedef struct btc_script_op_
+{
+    enum opcodetype op;  /* opcode found */
+    unsigned char* data; /* associated data, if any */
     size_t datalen;
 } btc_script_op;
 
 //copy a script without the codeseperator ops
-btc_bool btc_script_copy_without_op_codeseperator(const cstring *scriptin, cstring *scriptout);
+btc_bool btc_script_copy_without_op_codeseperator(const cstring* scriptin, cstring* scriptout);
 
 btc_script_op* btc_script_op_new();
-void btc_script_op_free(btc_script_op *script_op);
-void btc_script_op_free_cb(void *data);
-btc_bool btc_script_get_ops(const cstring *script_in, vector *ops_out);
+void btc_script_op_free(btc_script_op* script_op);
+void btc_script_op_free_cb(void* data);
+btc_bool btc_script_get_ops(const cstring* script_in, vector* ops_out);
 
-enum btc_tx_out_type btc_script_classify(vector *ops);
+enum btc_tx_out_type btc_script_classify(vector* ops);

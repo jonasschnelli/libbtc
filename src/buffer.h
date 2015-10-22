@@ -10,18 +10,20 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-struct buffer {
-	void		*p;
-	size_t		len;
+struct buffer
+{
+    void* p;
+    size_t len;
 };
 
-struct const_buffer {
-	const void	*p;
-	size_t		len;
+struct const_buffer
+{
+    const void* p;
+    size_t len;
 };
 
-extern btc_bool buffer_equal(const void *a, const void *b);
-extern void buffer_free(void *struct_buffer);
-extern struct buffer *buffer_copy(const void *data, size_t data_len);
+extern btc_bool buffer_equal(const void* a, const void* b);
+extern void buffer_free(void* struct_buffer);
+extern struct buffer* buffer_copy(const void* data, size_t data_len);
 
 #endif /* __LIBCCOIN_BUFFER_H__ */

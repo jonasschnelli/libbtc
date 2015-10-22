@@ -31,36 +31,37 @@
 
 #include "btc.h"
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
 #include <stdlib.h>
 #include <sys/types.h>
 
-typedef struct cstring {
-	char	*str;		/* string data, incl. NUL */
-	size_t	len;		/* length of string, not including NUL */
-	size_t	alloc;		/* total allocated buffer length */
+typedef struct cstring
+{
+    char* str;    /* string data, incl. NUL */
+    size_t len;   /* length of string, not including NUL */
+    size_t alloc; /* total allocated buffer length */
 } cstring;
 
-LIBBTC_API cstring *cstr_new(const char *init_str);
-LIBBTC_API cstring *cstr_new_sz(size_t sz);
-LIBBTC_API cstring *cstr_new_buf(const void *buf, size_t sz);
-LIBBTC_API void cstr_free(cstring *s, btc_bool free_buf);
+LIBBTC_API cstring* cstr_new(const char* init_str);
+LIBBTC_API cstring* cstr_new_sz(size_t sz);
+LIBBTC_API cstring* cstr_new_buf(const void* buf, size_t sz);
+LIBBTC_API void cstr_free(cstring* s, btc_bool free_buf);
 
-LIBBTC_API btc_bool cstr_equal(const cstring *a, const cstring *b);
-LIBBTC_API btc_bool cstr_resize(cstring *s, size_t sz);
-LIBBTC_API btc_bool cstr_erase(cstring *s, size_t pos, ssize_t len);
+LIBBTC_API btc_bool cstr_equal(const cstring* a, const cstring* b);
+LIBBTC_API btc_bool cstr_resize(cstring* s, size_t sz);
+LIBBTC_API btc_bool cstr_erase(cstring* s, size_t pos, ssize_t len);
 
-LIBBTC_API btc_bool cstr_append_buf(cstring *s, const void *buf, size_t sz);
+LIBBTC_API btc_bool cstr_append_buf(cstring* s, const void* buf, size_t sz);
 
-LIBBTC_API static inline btc_bool cstr_append_c(cstring *s, char ch)
+LIBBTC_API static inline btc_bool cstr_append_c(cstring* s, char ch)
 {
-	return cstr_append_buf(s, &ch, 1);
+    return cstr_append_buf(s, &ch, 1);
 }
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

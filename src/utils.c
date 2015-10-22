@@ -43,7 +43,7 @@ void utils_clear_buffers(void)
     memset(buffer_uint8_to_hex, 0, TO_UINT8_HEX_BUF_LEN);
 }
 
-void utils_hex_to_bin(const char *str, unsigned char *out, int inLen, int *outLen)
+void utils_hex_to_bin(const char* str, unsigned char* out, int inLen, int* outLen)
 {
     int bLen = inLen / 2;
     memset(out, 0, bLen);
@@ -55,7 +55,7 @@ void utils_hex_to_bin(const char *str, unsigned char *out, int inLen, int *outLe
             *out = (str[i * 2] - '0') << 4;
         }
         if (str[i * 2] >= 'a' && str[i * 2] <= 'f') {
-            *out = (10 + str[i  * 2] - 'a') << 4;
+            *out = (10 + str[i * 2] - 'a') << 4;
         }
         if (str[i * 2] >= 'A' && str[i * 2] <= 'F') {
             *out = (10 + str[i * 2] - 'A') << 4;
@@ -74,7 +74,7 @@ void utils_hex_to_bin(const char *str, unsigned char *out, int inLen, int *outLe
     *outLen = i;
 }
 
-uint8_t *utils_hex_to_uint8(const char *str)
+uint8_t* utils_hex_to_uint8(const char* str)
 {
     if (strlens(str) > TO_UINT8_HEX_BUF_LEN) {
         return NULL;
@@ -88,7 +88,7 @@ uint8_t *utils_hex_to_uint8(const char *str)
             c += (str[i * 2] - '0') << 4;
         }
         if (str[i * 2] >= 'a' && str[i * 2] <= 'f') {
-            c += (10 + str[i  * 2] - 'a') << 4;
+            c += (10 + str[i * 2] - 'a') << 4;
         }
         if (str[i * 2] >= 'A' && str[i * 2] <= 'F') {
             c += (10 + str[i * 2] - 'A') << 4;
@@ -108,7 +108,7 @@ uint8_t *utils_hex_to_uint8(const char *str)
 }
 
 
-void utils_bin_to_hex(unsigned char *bin_in, size_t inlen, char *hex_out)
+void utils_bin_to_hex(unsigned char* bin_in, size_t inlen, char* hex_out)
 {
     static char digits[] = "0123456789abcdef";
     size_t i;
@@ -120,7 +120,7 @@ void utils_bin_to_hex(unsigned char *bin_in, size_t inlen, char *hex_out)
 }
 
 
-char *utils_uint8_to_hex(const uint8_t *bin, size_t l)
+char* utils_uint8_to_hex(const uint8_t* bin, size_t l)
 {
     if (l > (TO_UINT8_HEX_BUF_LEN / 2 - 1)) {
         return NULL;
@@ -137,7 +137,7 @@ char *utils_uint8_to_hex(const uint8_t *bin, size_t l)
 }
 
 
-void utils_reverse_hex(char *h, int len)
+void utils_reverse_hex(char* h, int len)
 {
     char copy[len];
     strncpy(copy, h, len);
@@ -149,24 +149,24 @@ void utils_reverse_hex(char *h, int len)
 }
 
 
-void utils_uint64_to_varint(char *vi, int *l, uint64_t i)
+void utils_uint64_to_varint(char* vi, int* l, uint64_t i)
 {
     int len;
     char v[VARINT_LEN];
 
     if (i < 0xfd) {
-        sprintf(v, "%02" PRIx64 , i);
+        sprintf(v, "%02" PRIx64, i);
         len = 2;
     } else if (i <= 0xffff) {
-        sprintf(v, "%04" PRIx64 , i);
+        sprintf(v, "%04" PRIx64, i);
         sprintf(vi, "fd");
         len = 4;
     } else if (i <= 0xffffffff) {
-        sprintf(v, "%08" PRIx64 , i);
+        sprintf(v, "%08" PRIx64, i);
         sprintf(vi, "fe");
         len = 8;
     } else {
-        sprintf(v, "%016" PRIx64 , i);
+        sprintf(v, "%016" PRIx64, i);
         sprintf(vi, "ff");
         len = 16;
     }
@@ -183,7 +183,7 @@ void utils_uint64_to_varint(char *vi, int *l, uint64_t i)
 }
 
 
-int utils_varint_to_uint64(const char *vi, uint64_t *i)
+int utils_varint_to_uint64(const char* vi, uint64_t* i)
 {
     char v[VARINT_LEN] = {0};
     int len;
@@ -212,4 +212,3 @@ int utils_varint_to_uint64(const char *vi, uint64_t *i)
 
     return len;
 }
-

@@ -39,7 +39,7 @@
 #include "utils.h"
 
 // write 4 big endian bytes
-static void write_be(uint8_t *data, uint32_t x)
+static void write_be(uint8_t* data, uint32_t x)
 {
     data[0] = x >> 24;
     data[1] = x >> 16;
@@ -49,23 +49,23 @@ static void write_be(uint8_t *data, uint32_t x)
 
 
 // read 4 big endian bytes
-static uint32_t read_be(const uint8_t *data)
+static uint32_t read_be(const uint8_t* data)
 {
     return (((uint32_t)data[0]) << 24) |
            (((uint32_t)data[1]) << 16) |
-           (((uint32_t)data[2]) << 8)  |
+           (((uint32_t)data[2]) << 8) |
            (((uint32_t)data[3]));
 }
 
 
-btc_bool btc_hdnode_from_seed(const uint8_t *seed, int seed_len, btc_hdnode *out)
+btc_bool btc_hdnode_from_seed(const uint8_t* seed, int seed_len, btc_hdnode* out)
 {
     uint8_t I[BTC_ECKEY_PKEY_LENGTH + BTC_BIP32_CHAINCODE_SIZE];
     memset(out, 0, sizeof(btc_hdnode));
     out->depth = 0;
     out->fingerprint = 0x00000000;
     out->child_num = 0;
-    hmac_sha512((const uint8_t *)"Bitcoin seed", 12, seed, seed_len, I);
+    hmac_sha512((const uint8_t*)"Bitcoin seed", 12, seed, seed_len, I);
     memcpy(out->private_key, I, BTC_ECKEY_PKEY_LENGTH);
 
     if (!ecc_verify_privatekey(out->private_key)) {
@@ -80,7 +80,7 @@ btc_bool btc_hdnode_from_seed(const uint8_t *seed, int seed_len, btc_hdnode *out
 }
 
 
-btc_bool btc_hdnode_public_ckd(btc_hdnode *inout, uint32_t i)
+btc_bool btc_hdnode_public_ckd(btc_hdnode* inout, uint32_t i)
 {
     uint8_t data[1 + 32 + 4];
     uint8_t I[32 + BTC_BIP32_CHAINCODE_SIZE];
@@ -116,12 +116,12 @@ btc_bool btc_hdnode_public_ckd(btc_hdnode *inout, uint32_t i)
     memset(data, 0, sizeof(data));
     memset(I, 0, sizeof(I));
     memset(fingerprint, 0, sizeof(fingerprint));
-    
+
     return failed ? false : true;
 }
 
 
-btc_bool btc_hdnode_private_ckd(btc_hdnode *inout, uint32_t i)
+btc_bool btc_hdnode_private_ckd(btc_hdnode* inout, uint32_t i)
 {
     uint8_t data[1 + BTC_ECKEY_PKEY_LENGTH + 4];
     uint8_t I[BTC_ECKEY_PKEY_LENGTH + BTC_BIP32_CHAINCODE_SIZE];
@@ -161,8 +161,7 @@ btc_bool btc_hdnode_private_ckd(btc_hdnode *inout, uint32_t i)
         failed = 1;
     }
 
-    if (!failed)
-    {
+    if (!failed) {
         inout->depth++;
         inout->child_num = i;
         btc_hdnode_fill_public_key(inout);
@@ -176,15 +175,14 @@ btc_bool btc_hdnode_private_ckd(btc_hdnode *inout, uint32_t i)
 }
 
 
-void btc_hdnode_fill_public_key(btc_hdnode *node)
+void btc_hdnode_fill_public_key(btc_hdnode* node)
 {
     size_t outsize = BTC_ECKEY_COMPRESSED_LENGTH;
     ecc_get_pubkey(node->private_key, node->public_key, &outsize, true);
 }
 
 
-static void btc_hdnode_serialize(const btc_hdnode *node, uint32_t version, char use_public,
-                             char *str, int strsize)
+static void btc_hdnode_serialize(const btc_hdnode* node, uint32_t version, char use_public, char* str, int strsize)
 {
     uint8_t node_data[78];
     write_be(node_data, version);
@@ -202,20 +200,20 @@ static void btc_hdnode_serialize(const btc_hdnode *node, uint32_t version, char 
 }
 
 
-void btc_hdnode_serialize_public(const btc_hdnode *node, const btc_chain *chain, char *str, int strsize)
+void btc_hdnode_serialize_public(const btc_hdnode* node, const btc_chain* chain, char* str, int strsize)
 {
     btc_hdnode_serialize(node, chain->b58prefix_bip32_pubkey, 1, str, strsize);
 }
 
 
-void btc_hdnode_serialize_private(const btc_hdnode *node, const btc_chain *chain, char *str, int strsize)
+void btc_hdnode_serialize_private(const btc_hdnode* node, const btc_chain* chain, char* str, int strsize)
 {
     btc_hdnode_serialize(node, chain->b58prefix_bip32_privkey, 0, str, strsize);
 }
 
 
 // check for validity of curve point in case of public data not performed
-btc_bool btc_hdnode_deserialize(const char *str, const btc_chain *chain, btc_hdnode *node)
+btc_bool btc_hdnode_deserialize(const char* str, const btc_chain* chain, btc_hdnode* node)
 {
     uint8_t node_data[78];
     memset(node, 0, sizeof(btc_hdnode));
@@ -226,7 +224,7 @@ btc_bool btc_hdnode_deserialize(const char *str, const btc_chain *chain, btc_hdn
     if (version == chain->b58prefix_bip32_pubkey) { // public node
         memcpy(node->public_key, node_data + 45, BTC_ECKEY_COMPRESSED_LENGTH);
     } else if (version == chain->b58prefix_bip32_privkey) { // private node
-        if (node_data[45]) { // invalid data
+        if (node_data[45]) {                                // invalid data
             return false;
         }
         memcpy(node->private_key, node_data + 46, BTC_ECKEY_PKEY_LENGTH);
@@ -241,15 +239,14 @@ btc_bool btc_hdnode_deserialize(const char *str, const btc_chain *chain, btc_hdn
     return true;
 }
 
-btc_bool btc_hd_generate_key(btc_hdnode *node, const char *keypath, const uint8_t *privkeymaster,
-                        const uint8_t *chaincode)
+btc_bool btc_hd_generate_key(btc_hdnode* node, const char* keypath, const uint8_t* privkeymaster, const uint8_t* chaincode)
 {
     static char delim[] = "/";
     static char prime[] = "phH\'";
     static char digits[] = "0123456789";
     uint64_t idx = 0;
     assert(strlens(keypath) < 1024);
-    char *pch, *kp = malloc(strlens(keypath) + 1);
+    char* pch, *kp = malloc(strlens(keypath) + 1);
 
     if (!kp) {
         return false;
@@ -277,7 +274,7 @@ btc_bool btc_hd_generate_key(btc_hdnode *node, const char *keypath, const uint8_
     while (pch != NULL) {
         size_t i = 0;
         int prm = 0;
-        for ( ; i < strlens(pch); i++) {
+        for (; i < strlens(pch); i++) {
             if (strchr(prime, pch[i])) {
                 if (i != strlens(pch) - 1) {
                     goto err;

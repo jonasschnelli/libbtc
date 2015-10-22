@@ -28,7 +28,7 @@ void test_bip32()
            utils_hex_to_uint8("873dff81c02f525623fd1fe5167eac3a55a049de3d314bb42ee227ffed37d508"),
            32);
     u_assert_int_eq(node.fingerprint, 0x00000000);
-    u_assert_mem_eq(node.chain_code,  chain_code_master, 32);
+    u_assert_mem_eq(node.chain_code, chain_code_master, 32);
     u_assert_mem_eq(node.private_key, private_key_master, 32);
     u_assert_mem_eq(node.public_key,
                     utils_hex_to_uint8("0339a36013301597daef41fbe593a02cc513d0b55527ec2df1050e2e8ff49c85c2"),

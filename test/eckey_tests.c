@@ -49,10 +49,10 @@ void test_eckey()
     assert(btc_pubkey_is_valid(&pubkey) == 1);
 
     unsigned int i;
-    for(i = 33; i < BTC_ECKEY_UNCOMPRESSED_LENGTH; i++)
+    for (i = 33; i < BTC_ECKEY_UNCOMPRESSED_LENGTH; i++)
         assert(pubkey.pubkey[i] == 0);
 
-    uint8_t *hash = utils_hex_to_uint8((const char *)"26db47a48a10b9b0b697b793f5c0231aa35fe192c9d063d7b03a55e3c302850a");
+    uint8_t* hash = utils_hex_to_uint8((const char*)"26db47a48a10b9b0b697b793f5c0231aa35fe192c9d063d7b03a55e3c302850a");
     unsigned char sig[74];
     size_t outlen = 74;
     btc_key_sign_hash(&key, hash, sig, &outlen);
