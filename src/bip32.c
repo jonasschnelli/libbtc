@@ -60,20 +60,20 @@ static uint32_t read_be(const uint8_t *data)
 
 btc_bool btc_hdnode_from_seed(const uint8_t *seed, int seed_len, btc_hdnode *out)
 {
-    uint8_t I[32 + 32];
+    uint8_t I[BTC_ECKEY_PKEY_LENGTH + BTC_BIP32_CHAINCODE_SIZE];
     memset(out, 0, sizeof(btc_hdnode));
     out->depth = 0;
     out->fingerprint = 0x00000000;
     out->child_num = 0;
     hmac_sha512((const uint8_t *)"Bitcoin seed", 12, seed, seed_len, I);
-    memcpy(out->private_key, I, 32);
+    memcpy(out->private_key, I, BTC_ECKEY_PKEY_LENGTH);
 
     if (!ecc_verify_privatekey(out->private_key)) {
         memset(I, 0, sizeof(I));
         return false;
     }
 
-    memcpy(out->chain_code, I + 32, 32);
+    memcpy(out->chain_code, I + BTC_ECKEY_PKEY_LENGTH, BTC_BIP32_CHAINCODE_SIZE);
     btc_hdnode_fill_public_key(out);
     memset(I, 0, sizeof(I));
     return true;
@@ -83,17 +83,17 @@ btc_bool btc_hdnode_from_seed(const uint8_t *seed, int seed_len, btc_hdnode *out
 btc_bool btc_hdnode_public_ckd(btc_hdnode *inout, uint32_t i)
 {
     uint8_t data[1 + 32 + 4];
-    uint8_t I[32 + 32];
+    uint8_t I[32 + BTC_BIP32_CHAINCODE_SIZE];
     uint8_t fingerprint[32];
 
     if (i & 0x80000000) { // private derivation
         return false;
     } else { // public derivation
-        memcpy(data, inout->public_key, 33);
+        memcpy(data, inout->public_key, BTC_ECKEY_COMPRESSED_LENGTH);
     }
-    write_be(data + 33, i);
+    write_be(data + BTC_ECKEY_COMPRESSED_LENGTH, i);
 
-    sha256_Raw(inout->public_key, 33, fingerprint);
+    sha256_Raw(inout->public_key, BTC_ECKEY_COMPRESSED_LENGTH, fingerprint);
     ripemd160(fingerprint, 32, fingerprint);
     inout->fingerprint = (fingerprint[0] << 24) + (fingerprint[1] << 16) + (fingerprint[2] << 8) + fingerprint[3];
 
@@ -101,7 +101,7 @@ btc_bool btc_hdnode_public_ckd(btc_hdnode *inout, uint32_t i)
 
     int failed = 0;
     hmac_sha512(inout->chain_code, 32, data, sizeof(data), I);
-    memcpy(inout->chain_code, I + 32, 32);
+    memcpy(inout->chain_code, I + 32, BTC_BIP32_CHAINCODE_SIZE);
 
 
     if (!ecc_public_key_tweak_add(inout->public_key, I))
@@ -123,32 +123,32 @@ btc_bool btc_hdnode_public_ckd(btc_hdnode *inout, uint32_t i)
 
 btc_bool btc_hdnode_private_ckd(btc_hdnode *inout, uint32_t i)
 {
-    uint8_t data[1 + 32 + 4];
-    uint8_t I[32 + 32];
-    uint8_t fingerprint[32];
-    uint8_t p[32], z[32];
+    uint8_t data[1 + BTC_ECKEY_PKEY_LENGTH + 4];
+    uint8_t I[BTC_ECKEY_PKEY_LENGTH + BTC_BIP32_CHAINCODE_SIZE];
+    uint8_t fingerprint[BTC_BIP32_CHAINCODE_SIZE];
+    uint8_t p[BTC_ECKEY_PKEY_LENGTH], z[BTC_ECKEY_PKEY_LENGTH];
 
     if (i & 0x80000000) { // private derivation
         data[0] = 0;
-        memcpy(data + 1, inout->private_key, 32);
+        memcpy(data + 1, inout->private_key, BTC_ECKEY_PKEY_LENGTH);
     } else { // public derivation
-        memcpy(data, inout->public_key, 33);
+        memcpy(data, inout->public_key, BTC_ECKEY_COMPRESSED_LENGTH);
     }
-    write_be(data + 33, i);
+    write_be(data + BTC_ECKEY_COMPRESSED_LENGTH, i);
 
-    sha256_Raw(inout->public_key, 33, fingerprint);
+    sha256_Raw(inout->public_key, BTC_ECKEY_COMPRESSED_LENGTH, fingerprint);
     ripemd160(fingerprint, 32, fingerprint);
     inout->fingerprint = (fingerprint[0] << 24) + (fingerprint[1] << 16) +
                          (fingerprint[2] << 8) + fingerprint[3];
 
     memset(fingerprint, 0, sizeof(fingerprint));
-    memcpy(p, inout->private_key, 32);
+    memcpy(p, inout->private_key, BTC_ECKEY_PKEY_LENGTH);
 
-    hmac_sha512(inout->chain_code, 32, data, sizeof(data), I);
-    memcpy(inout->chain_code, I + 32, 32);
-    memcpy(inout->private_key, I, 32);
+    hmac_sha512(inout->chain_code, BTC_BIP32_CHAINCODE_SIZE, data, sizeof(data), I);
+    memcpy(inout->chain_code, I + BTC_ECKEY_PKEY_LENGTH, BTC_BIP32_CHAINCODE_SIZE);
+    memcpy(inout->private_key, I, BTC_ECKEY_PKEY_LENGTH);
 
-    memcpy(z, inout->private_key, 32);
+    memcpy(z, inout->private_key, BTC_ECKEY_PKEY_LENGTH);
 
     int failed = 0;
     if (!ecc_verify_privatekey(z)) {
@@ -156,7 +156,7 @@ btc_bool btc_hdnode_private_ckd(btc_hdnode *inout, uint32_t i)
         return false;
     }
 
-    memcpy(inout->private_key, p, 32);
+    memcpy(inout->private_key, p, BTC_ECKEY_PKEY_LENGTH);
     if (!ecc_private_key_tweak_add(inout->private_key, z)) {
         failed = 1;
     }
@@ -178,7 +178,7 @@ btc_bool btc_hdnode_private_ckd(btc_hdnode *inout, uint32_t i)
 
 void btc_hdnode_fill_public_key(btc_hdnode *node)
 {
-    size_t outsize = 33;
+    size_t outsize = BTC_ECKEY_COMPRESSED_LENGTH;
     ecc_get_pubkey(node->private_key, node->public_key, &outsize, true);
 }
 
@@ -191,12 +191,12 @@ static void btc_hdnode_serialize(const btc_hdnode *node, uint32_t version, char 
     node_data[4] = node->depth;
     write_be(node_data + 5, node->fingerprint);
     write_be(node_data + 9, node->child_num);
-    memcpy(node_data + 13, node->chain_code, 32);
+    memcpy(node_data + 13, node->chain_code, BTC_BIP32_CHAINCODE_SIZE);
     if (use_public) {
-        memcpy(node_data + 45, node->public_key, 33);
+        memcpy(node_data + 45, node->public_key, BTC_ECKEY_COMPRESSED_LENGTH);
     } else {
         node_data[45] = 0;
-        memcpy(node_data + 46, node->private_key, 32);
+        memcpy(node_data + 46, node->private_key, BTC_ECKEY_PKEY_LENGTH);
     }
     btc_base58_encode_check(node_data, 78, str, strsize);
 }
@@ -224,12 +224,12 @@ btc_bool btc_hdnode_deserialize(const char *str, const btc_chain *chain, btc_hdn
     }
     uint32_t version = read_be(node_data);
     if (version == chain->b58prefix_bip32_pubkey) { // public node
-        memcpy(node->public_key, node_data + 45, 33);
+        memcpy(node->public_key, node_data + 45, BTC_ECKEY_COMPRESSED_LENGTH);
     } else if (version == chain->b58prefix_bip32_privkey) { // private node
         if (node_data[45]) { // invalid data
             return false;
         }
-        memcpy(node->private_key, node_data + 46, 32);
+        memcpy(node->private_key, node_data + 46, BTC_ECKEY_PKEY_LENGTH);
         btc_hdnode_fill_public_key(node);
     } else {
         return false; // invalid version
@@ -237,7 +237,7 @@ btc_bool btc_hdnode_deserialize(const char *str, const btc_chain *chain, btc_hdn
     node->depth = node_data[4];
     node->fingerprint = read_be(node_data + 5);
     node->child_num = read_be(node_data + 9);
-    memcpy(node->chain_code, node_data + 13, 32);
+    memcpy(node->chain_code, node_data + 13, BTC_BIP32_CHAINCODE_SIZE);
     return true;
 }
 
@@ -269,8 +269,8 @@ btc_bool btc_hd_generate_key(btc_hdnode *node, const char *keypath, const uint8_
     node->depth = 0;
     node->child_num = 0;
     node->fingerprint = 0;
-    memcpy(node->chain_code, chaincode, 32);
-    memcpy(node->private_key, privkeymaster, 32);
+    memcpy(node->chain_code, chaincode, BTC_BIP32_CHAINCODE_SIZE);
+    memcpy(node->private_key, privkeymaster, BTC_ECKEY_PKEY_LENGTH);
     btc_hdnode_fill_public_key(node);
 
     pch = strtok(kp + 2, delim);

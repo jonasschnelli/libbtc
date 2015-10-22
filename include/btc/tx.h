@@ -40,8 +40,7 @@ extern "C" {
 
 #include "cstr.h"
 #include "vector.h"
-
-typedef uint8_t uint256[32];
+#include "hash.h"
 
 
 typedef struct btc_script_

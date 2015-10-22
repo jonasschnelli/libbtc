@@ -38,11 +38,15 @@ void test_eckey()
 {
     btc_key key;
     btc_privkey_init(&key);
+    assert(btc_privkey_is_valid(&key) == 0);
     btc_privkey_gen(&key);
+    assert(btc_privkey_is_valid(&key) == 1);
 
     btc_pubkey pubkey;
     btc_pubkey_init(&pubkey);
+    assert(btc_pubkey_is_valid(&pubkey) == 0);
     btc_pubkey_from_key(&key, &pubkey);
+    assert(btc_pubkey_is_valid(&pubkey) == 1);
 
     unsigned int i;
     for(i = 33; i < BTC_ECKEY_UNCOMPRESSED_LENGTH; i++)
