@@ -58,7 +58,7 @@ static uint32_t read_be(const uint8_t *data)
 }
 
 
-bool btc_hdnode_from_seed(const uint8_t *seed, int seed_len, btc_hdnode *out)
+btc_bool btc_hdnode_from_seed(const uint8_t *seed, int seed_len, btc_hdnode *out)
 {
     uint8_t I[32 + 32];
     memset(out, 0, sizeof(btc_hdnode));
@@ -80,7 +80,7 @@ bool btc_hdnode_from_seed(const uint8_t *seed, int seed_len, btc_hdnode *out)
 }
 
 
-bool btc_hdnode_public_ckd(btc_hdnode *inout, uint32_t i)
+btc_bool btc_hdnode_public_ckd(btc_hdnode *inout, uint32_t i)
 {
     uint8_t data[1 + 32 + 4];
     uint8_t I[32 + 32];
@@ -121,7 +121,7 @@ bool btc_hdnode_public_ckd(btc_hdnode *inout, uint32_t i)
 }
 
 
-bool btc_hdnode_private_ckd(btc_hdnode *inout, uint32_t i)
+btc_bool btc_hdnode_private_ckd(btc_hdnode *inout, uint32_t i)
 {
     uint8_t data[1 + 32 + 4];
     uint8_t I[32 + 32];
@@ -214,7 +214,7 @@ void btc_hdnode_serialize_private(const btc_hdnode *node, const btc_chain *chain
 
 
 // check for validity of curve point in case of public data not performed
-bool btc_hdnode_deserialize(const char *str, const btc_chain *chain, btc_hdnode *node)
+btc_bool btc_hdnode_deserialize(const char *str, const btc_chain *chain, btc_hdnode *node)
 {
     uint8_t node_data[78];
     memset(node, 0, sizeof(btc_hdnode));
@@ -240,7 +240,7 @@ bool btc_hdnode_deserialize(const char *str, const btc_chain *chain, btc_hdnode 
     return true;
 }
 
-bool btc_hd_generate_key(btc_hdnode *node, const char *keypath, const uint8_t *privkeymaster,
+btc_bool btc_hd_generate_key(btc_hdnode *node, const char *keypath, const uint8_t *privkeymaster,
                         const uint8_t *chaincode)
 {
     static char delim[] = "/";

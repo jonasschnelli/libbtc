@@ -68,7 +68,7 @@ static void vector_free_data(vector *vec)
     vec->len = 0;
 }
 
-void vector_free(vector *vec, bool free_array)
+void vector_free(vector *vec, btc_bool free_array)
 {
     if (!vec)
         return;
@@ -80,7 +80,7 @@ void vector_free(vector *vec, bool free_array)
     free(vec);
 }
 
-static bool vector_grow(vector *vec, size_t min_sz)
+static btc_bool vector_grow(vector *vec, size_t min_sz)
 {
     size_t new_alloc = vec->alloc;
     while (new_alloc < min_sz)
@@ -110,7 +110,7 @@ ssize_t vector_find(vector *vec, void *data)
     return -1;
 }
 
-bool vector_add(vector *vec, void *data)
+btc_bool vector_add(vector *vec, void *data)
 {
     if (vec->len == vec->alloc)
         if (!vector_grow(vec, vec->len + 1))
@@ -142,7 +142,7 @@ void vector_remove_idx(vector *vec, size_t pos)
     vector_remove_range(vec, pos, 1);
 }
 
-bool vector_remove(vector *vec, void *data)
+btc_bool vector_remove(vector *vec, void *data)
 {
     ssize_t idx = vector_find(vec, data);
     if (idx < 0)
@@ -152,7 +152,7 @@ bool vector_remove(vector *vec, void *data)
     return true;
 }
 
-bool vector_resize(vector *vec, size_t newsz)
+btc_bool vector_resize(vector *vec, size_t newsz)
 {
     unsigned int i;
 

@@ -38,7 +38,7 @@ extern "C" {
 
 typedef struct btc_chain
 {
-    char chainname[8];
+    char chainname[32];
     uint8_t b58prefix_pubkey_address;
     uint8_t b58prefix_script_address;
     uint32_t b58prefix_bip32_privkey;

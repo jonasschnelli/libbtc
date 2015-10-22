@@ -26,7 +26,7 @@ void free_dummy(void *data)
 
 void test_vector()
 {
-    bool res;
+    btc_bool res;
     char str0[] = "string";
     char str1[] = "rumba";
 

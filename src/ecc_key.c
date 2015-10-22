@@ -90,13 +90,13 @@ void btc_pubkey_from_key(btc_key *privkey, btc_pubkey* pubkey_inout)
 }
 
 
-bool btc_key_sign_hash(const btc_key *privkey, const uint8_t *hash, unsigned char *sigout, int *outlen)
+btc_bool btc_key_sign_hash(const btc_key *privkey, const uint8_t *hash, unsigned char *sigout, int *outlen)
 {
     return ecc_sign(privkey->privkey, hash, sigout, (size_t *)outlen);
 }
 
 
-bool btc_pubkey_verify_sig(const btc_pubkey *pubkey, const uint8_t *hash, unsigned char *sigder, int len)
+btc_bool btc_pubkey_verify_sig(const btc_pubkey *pubkey, const uint8_t *hash, unsigned char *sigder, int len)
 {
     return ecc_verify_sig(pubkey->pubkey, pubkey->compressed, hash, sigder, len);
 }

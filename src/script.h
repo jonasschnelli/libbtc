@@ -200,11 +200,11 @@ typedef struct btc_script_op_ {
 } btc_script_op;
 
 //copy a script without the codeseperator ops
-bool btc_script_copy_without_op_codeseperator(const cstring *scriptin, cstring *scriptout);
+btc_bool btc_script_copy_without_op_codeseperator(const cstring *scriptin, cstring *scriptout);
 
 btc_script_op* btc_script_op_new();
 void btc_script_op_free(btc_script_op *script_op);
 void btc_script_op_free_cb(void *data);
-bool btc_script_get_ops(const cstring *script_in, vector *ops_out);
+btc_bool btc_script_get_ops(const cstring *script_in, vector *ops_out);
 
 enum btc_tx_out_type btc_script_classify(vector *ops);

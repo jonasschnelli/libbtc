@@ -44,19 +44,6 @@ if test "x$enable_debug" = xyes; then
 		AC_DEFINE_UNQUOTED([ENABLE_DEBUG],[1],[Define to 1 to enable debung output])
 fi
 
-# check for bool type
-AC_CHECK_TYPE([bool],[
-  AC_DEFINE(HAVE_BOOL_T, 1,
-    [Define to 1 if bool is an available type.])
-], ,[
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_STDBOOL_H
-#include <stdbool.h>
-#endif
-])
-
 AC_ARG_ENABLE(tests,
     AS_HELP_STRING([--enable-tests],[compile tests (default is yes)]),
     [use_tests=$enableval],

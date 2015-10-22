@@ -50,16 +50,16 @@ typedef struct {
 #define btc_hdnode_private_ckd_prime(X, I) btc_hdnode_private_ckd((X), ((I) | 0x80000000))
 
 
-LIBBTC_API bool btc_hdnode_public_ckd(btc_hdnode *inout, uint32_t i);
-LIBBTC_API bool btc_hdnode_from_seed(const uint8_t *seed, int seed_len, btc_hdnode *out);
-LIBBTC_API bool btc_hdnode_private_ckd(btc_hdnode *inout, uint32_t i);
+LIBBTC_API btc_bool btc_hdnode_public_ckd(btc_hdnode *inout, uint32_t i);
+LIBBTC_API btc_bool btc_hdnode_from_seed(const uint8_t *seed, int seed_len, btc_hdnode *out);
+LIBBTC_API btc_bool btc_hdnode_private_ckd(btc_hdnode *inout, uint32_t i);
 LIBBTC_API void btc_hdnode_fill_public_key(btc_hdnode *node);
 LIBBTC_API void btc_hdnode_serialize_public(const btc_hdnode *node, const btc_chain *chain, char *str, int strsize);
 LIBBTC_API void btc_hdnode_serialize_private(const btc_hdnode *node, const btc_chain *chain, char *str, int strsize);
-LIBBTC_API bool btc_hdnode_deserialize(const char *str, const btc_chain *chain, btc_hdnode *node);
+LIBBTC_API btc_bool btc_hdnode_deserialize(const char *str, const btc_chain *chain, btc_hdnode *node);
 
 //!derive btc_hdnode including private key from master private key
-LIBBTC_API bool btc_hd_generate_key(btc_hdnode *node, const char *keypath, const uint8_t *privkeymaster,
+LIBBTC_API btc_bool btc_hd_generate_key(btc_hdnode *node, const char *keypath, const uint8_t *privkeymaster,
                     const uint8_t *chaincode);
 
 #ifdef  __cplusplus

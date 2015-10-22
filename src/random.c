@@ -41,7 +41,7 @@ void random_init(void)
 }
 
 
-bool random_bytes(uint8_t *buf, uint32_t len, uint8_t update_seed)
+btc_bool random_bytes(uint8_t *buf, uint32_t len, uint8_t update_seed)
 {
     (void) update_seed;
     for (uint32_t i = 0; i < len; i++) {
@@ -54,7 +54,7 @@ bool random_bytes(uint8_t *buf, uint32_t len, uint8_t update_seed)
 void random_init(void) { }
 
 
-bool random_bytes(uint8_t *buf, uint32_t len, const uint8_t update_seed)
+btc_bool random_bytes(uint8_t *buf, uint32_t len, const uint8_t update_seed)
 {
     (void)update_seed;//unused
     FILE *frand = fopen(RANDOM_DEVICE, "r");

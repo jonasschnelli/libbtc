@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-bool buffer_equal(const void *a_, const void *b_)
+btc_bool buffer_equal(const void *a_, const void *b_)
 {
 	const struct buffer *a = a_;
 	const struct buffer *b = b_;
