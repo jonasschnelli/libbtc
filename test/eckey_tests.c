@@ -48,6 +48,8 @@ void test_eckey()
     btc_pubkey_from_key(&key, &pubkey);
     assert(btc_pubkey_is_valid(&pubkey) == 1);
 
+    assert(btc_privkey_verify_pubkey(&key, &pubkey) == 1);
+
     unsigned int i;
     for (i = 33; i < BTC_ECKEY_UNCOMPRESSED_LENGTH; i++)
         assert(pubkey.pubkey[i] == 0);
@@ -58,4 +60,7 @@ void test_eckey()
     btc_key_sign_hash(&key, hash, sig, &outlen);
 
     btc_pubkey_verify_sig(&pubkey, hash, sig, outlen);
+
+    btc_privkey_cleanse(&key);
+    btc_pubkey_cleanse(&pubkey);
 }
