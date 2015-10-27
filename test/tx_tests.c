@@ -838,7 +838,7 @@ void test_script_parse()
     char hexbuf[txser->len * 2 + 1];
     utils_bin_to_hex((unsigned char*)txser->str, txser->len, hexbuf);
 
-    u_assert_str_eq(hexbuf, "0000000000014e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088ac00000000");
+    u_assert_str_eq(hexbuf, "0100000000014e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088ac00000000");
     cstr_free(txser, true);
 
     uint8_t txhash[32];
@@ -847,7 +847,7 @@ void test_script_parse()
     utils_bin_to_hex((unsigned char*)txhash, 32, txhashhex);
     utils_reverse_hex(txhashhex, 64);
 
-    u_assert_str_eq(txhashhex, "79a22ba910fd48edf400b5c6dd4b58051f003523ed2bf4e002584134cec2089e");
+    u_assert_str_eq(txhashhex, "b9ca357388af326aeaf17bfa5a59ecc5ce79495e6ad6a07aae794a2e543e58f2");
 
 
     btc_tx_add_address_out(tx, &btc_chain_test, 12345678, "n1e4M744gKSL269jozPwc8edjxxdwn6THc");
@@ -857,13 +857,13 @@ void test_script_parse()
     btc_tx_serialize(txser, tx);
     char hexbuf2[txser->len * 2 + 1];
     utils_bin_to_hex((unsigned char*)txser->str, txser->len, hexbuf2);
-    u_assert_str_eq(hexbuf2, "0000000000024e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088ac4e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088ac00000000");
+    u_assert_str_eq(hexbuf2, "0100000000024e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088ac4e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088ac00000000");
 
     btc_tx_hash(tx, txhash);
     utils_bin_to_hex((unsigned char*)txhash, 32, txhashhex);
     utils_reverse_hex(txhashhex, 64);
 
-    u_assert_str_eq(txhashhex, "5e6f30976c40bb82ef7c57ec143dbbf5591a3da019896164c62d530eecceeba9");
+    u_assert_str_eq(txhashhex, "ad14f77f3b227ef23a98452a2ced172f8c253d6f1671f85e180580ecef841b9c");
 
     cstr_free(txser, true);
 
@@ -873,7 +873,7 @@ void test_script_parse()
     btc_tx_serialize(txser, tx);
     char hexbuf3[txser->len * 2 + 1];
     utils_bin_to_hex((unsigned char*)txser->str, txser->len, hexbuf3);
-    u_assert_str_eq(hexbuf3, "0000000000034e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088ac4e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088aceafc3e340000000017a914f763f798ede75a6ebf4e061b9e68ddb6df0442928700000000");
+    u_assert_str_eq(hexbuf3, "0100000000034e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088ac4e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088aceafc3e340000000017a914f763f798ede75a6ebf4e061b9e68ddb6df0442928700000000");
 
     cstr_free(txser, true);
 
