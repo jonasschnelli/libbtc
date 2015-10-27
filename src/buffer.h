@@ -10,14 +10,12 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-struct buffer
-{
+struct buffer {
     void* p;
     size_t len;
 };
 
-struct const_buffer
-{
+struct const_buffer {
     const void* p;
     size_t len;
 };

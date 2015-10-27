@@ -71,7 +71,7 @@ typedef uint_8t return_type;
 typedef uint_8t length_type;
 
 typedef struct
-{
+    {
     uint_8t ksch[(N_MAX_ROUNDS + 1) * N_BLOCK];
     uint_8t rnd;
 } aes_context;

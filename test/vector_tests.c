@@ -12,8 +12,7 @@
 #include "utils.h"
 #include <btc/vector.h>
 
-struct teststruct
-{
+struct teststruct {
     void* dummy1;
     void* dummy2;
 };

@@ -39,7 +39,7 @@ extern "C" {
 #define BTC_BIP32_CHAINCODE_SIZE 32
 
 typedef struct
-{
+    {
     uint32_t depth;
     uint32_t fingerprint;
     uint32_t child_num;

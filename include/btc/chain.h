@@ -36,8 +36,7 @@ extern "C" {
 #include <stdint.h>
 #include <sys/types.h>
 
-typedef struct btc_chain
-{
+typedef struct btc_chain {
     char chainname[32];
     uint8_t b58prefix_pubkey_address;
     uint8_t b58prefix_script_address;

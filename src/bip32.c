@@ -249,7 +249,7 @@ btc_bool btc_hd_generate_key(btc_hdnode* node, const char* keypath, const uint8_
     static char digits[] = "0123456789";
     uint64_t idx = 0;
     assert(strlens(keypath) < 1024);
-    char* pch, *kp = malloc(strlens(keypath) + 1);
+    char *pch, *kp = malloc(strlens(keypath) + 1);
 
     if (!kp) {
         return false;

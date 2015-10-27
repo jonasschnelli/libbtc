@@ -52,8 +52,6 @@ btc_bool random_bytes(uint8_t* buf, uint32_t len, uint8_t update_seed)
 }
 #elif FILE_RANDOM
 void random_init(void) {}
-
-
 btc_bool random_bytes(uint8_t* buf, uint32_t len, const uint8_t update_seed)
 {
     (void)update_seed; //unused

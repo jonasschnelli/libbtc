@@ -237,9 +237,9 @@ void btc_tx_serialize(cstring* s, const btc_tx* tx)
     ser_u32(s, tx->locktime);
 }
 
-void btc_tx_hash(const btc_tx* tx, uint8_t *hashout)
+void btc_tx_hash(const btc_tx* tx, uint8_t* hashout)
 {
-    cstring *txser = cstr_new_sz(1024);
+    cstring* txser = cstr_new_sz(1024);
     btc_tx_serialize(txser, tx);
 
 
@@ -296,7 +296,7 @@ void btc_tx_copy(btc_tx* dest, const btc_tx* src)
         dest->vin = vector_new(src->vin->len, btc_tx_in_free_cb);
 
         for (i = 0; i < src->vin->len; i++) {
-            btc_tx_in* tx_in_old, *tx_in_new;
+            btc_tx_in *tx_in_old, *tx_in_new;
 
             tx_in_old = vector_idx(src->vin, i);
             tx_in_new = malloc(sizeof(*tx_in_new));
@@ -317,7 +317,7 @@ void btc_tx_copy(btc_tx* dest, const btc_tx* src)
                                 btc_tx_out_free_cb);
 
         for (i = 0; i < src->vout->len; i++) {
-            btc_tx_out* tx_out_old, *tx_out_new;
+            btc_tx_out *tx_out_old, *tx_out_new;
 
             tx_out_old = vector_idx(src->vout, i);
             tx_out_new = malloc(sizeof(*tx_out_new));
@@ -423,20 +423,16 @@ out:
 }
 
 
-btc_bool btc_tx_add_address_out(btc_tx* tx, const btc_chain* chain, int64_t amount, const char *address)
+btc_bool btc_tx_add_address_out(btc_tx* tx, const btc_chain* chain, int64_t amount, const char* address)
 {
-
-    uint8_t buf[strlen(address)*2];
+    uint8_t buf[strlen(address) * 2];
     int r = btc_base58_decode_check(address, buf, sizeof(buf));
     if (r <= 0)
         return false;
 
-    if (buf[0] == chain->b58prefix_pubkey_address)
-    {
+    if (buf[0] == chain->b58prefix_pubkey_address) {
         btc_tx_add_p2pkh_hash160_out(tx, amount, &buf[1]);
-    }
-    else if (buf[0] == chain->b58prefix_script_address)
-    {
+    } else if (buf[0] == chain->b58prefix_script_address) {
         btc_tx_add_p2sh_hash160_out(tx, amount, &buf[1]);
     }
 
@@ -444,7 +440,7 @@ btc_bool btc_tx_add_address_out(btc_tx* tx, const btc_chain* chain, int64_t amou
 }
 
 
-btc_bool btc_tx_add_p2pkh_hash160_out(btc_tx* tx, int64_t amount, uint8_t *hash160)
+btc_bool btc_tx_add_p2pkh_hash160_out(btc_tx* tx, int64_t amount, uint8_t* hash160)
 {
     btc_tx_out* tx_out = btc_tx_out_new();
 
@@ -458,7 +454,7 @@ btc_bool btc_tx_add_p2pkh_hash160_out(btc_tx* tx, int64_t amount, uint8_t *hash1
     return true;
 }
 
-btc_bool btc_tx_add_p2sh_hash160_out(btc_tx* tx, int64_t amount, uint8_t *hash160)
+btc_bool btc_tx_add_p2sh_hash160_out(btc_tx* tx, int64_t amount, uint8_t* hash160)
 {
     btc_tx_out* tx_out = btc_tx_out_new();
 
@@ -472,9 +468,8 @@ btc_bool btc_tx_add_p2sh_hash160_out(btc_tx* tx, int64_t amount, uint8_t *hash16
     return true;
 }
 
-btc_bool btc_tx_add_p2pkh_out(btc_tx* tx, int64_t amount, const btc_pubkey *pubkey)
+btc_bool btc_tx_add_p2pkh_out(btc_tx* tx, int64_t amount, const btc_pubkey* pubkey)
 {
-
     uint8_t hash160[20];
     btc_pubkey_get_hash160(pubkey, hash160);
     return btc_tx_add_p2pkh_hash160_out(tx, amount, hash160);
