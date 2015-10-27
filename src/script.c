@@ -49,31 +49,12 @@ btc_bool btc_script_copy_without_op_codeseperator(const cstring* script_in, cstr
         if (opcode == OP_CODESEPARATOR)
             continue;
 
-        else if (opcode == OP_PUSHDATA1) {
-            uint8_t v8;
-            if (!deser_bytes(&v8, &buf, 1))
-                goto err_out;
-            data_len = v8;
-        } else if (opcode == OP_PUSHDATA2) {
-            uint16_t v16;
-            if (!deser_u16(&v16, &buf))
-                goto err_out;
-            data_len = v16;
-        } else if (opcode == OP_PUSHDATA4) {
-            uint32_t v32;
-            if (!deser_u32(&v32, &buf))
-                goto err_out;
-            data_len = v32;
-        } else {
-            cstr_append_buf(script_out, &opcode, 1);
-            continue;
-        }
 
-        cstr_append_buf(script_out, buf.p, data_len);
-        if (!deser_skip(&buf, data_len))
-            goto err_out;
+        cstr_append_buf(script_out, &opcode, 1);
     }
 
+    return true;
+    
 err_out:
     return false;
 }
@@ -254,7 +235,7 @@ enum btc_tx_out_type btc_script_classify(vector* ops)
     return BTC_TX_NONSTANDARD;
 }
 
-static enum opcodetype btc_encode_op_n(int n)
+enum opcodetype btc_encode_op_n(int n)
 {
     assert(n >= 0 && n <= 16);
     if (n == 0)
@@ -263,13 +244,13 @@ static enum opcodetype btc_encode_op_n(int n)
 }
 
 
-static void btc_script_append_op(cstring* script_in, enum opcodetype op)
+void btc_script_append_op(cstring* script_in, enum opcodetype op)
 {
     cstr_append_buf(script_in, &op, 1);
 }
 
 
-static void btc_script_append_pushdata(cstring* script_in, unsigned char *data, size_t datalen)
+void btc_script_append_pushdata(cstring* script_in, unsigned char *data, size_t datalen)
 {
     if (datalen < OP_PUSHDATA1)
     {
