@@ -29,9 +29,9 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "btc/base58.h"
 #include "btc/tx.h"
 
-#include "script.h"
 #include "serialize.h"
 #include "sha2.h"
 #include "utils.h"
@@ -237,6 +237,17 @@ void btc_tx_serialize(cstring* s, const btc_tx* tx)
     ser_u32(s, tx->locktime);
 }
 
+void btc_tx_hash(const btc_tx* tx, uint8_t *hashout)
+{
+    cstring *txser = cstr_new_sz(1024);
+    btc_tx_serialize(txser, tx);
+
+
+    sha256_Raw((const uint8_t*)txser->str, txser->len, hashout);
+    sha256_Raw(hashout, 32, hashout);
+    cstr_free(txser, true);
+}
+
 
 void btc_tx_in_copy(btc_tx_in* dest, const btc_tx_in* src)
 {
@@ -411,4 +422,62 @@ out:
     btc_tx_free(tx_tmp);
 
     return ret;
+}
+
+
+btc_bool btc_tx_add_address_out(btc_tx* tx, const btc_chain* chain, int64_t amount, const char *address)
+{
+
+    uint8_t buf[strlen(address)*2];
+    int r = btc_base58_decode_check(address, buf, sizeof(buf));
+    if (r <= 0)
+        return false;
+
+    if (buf[0] == chain->b58prefix_pubkey_address)
+    {
+        btc_tx_add_p2pkh_hash160_out(tx, amount, &buf[1]);
+    }
+    else if (buf[0] == chain->b58prefix_script_address)
+    {
+        btc_tx_add_p2sh_hash160_out(tx, amount, &buf[1]);
+    }
+
+    return true;
+}
+
+
+btc_bool btc_tx_add_p2pkh_hash160_out(btc_tx* tx, int64_t amount, uint8_t *hash160)
+{
+    btc_tx_out* tx_out = btc_tx_out_new();
+
+    tx_out->script_pubkey = cstr_new_sz(1024);
+    btc_script_build_p2pkh(tx_out->script_pubkey, hash160);
+
+    tx_out->value = amount;
+
+    vector_add(tx->vout, tx_out);
+
+    return true;
+}
+
+btc_bool btc_tx_add_p2sh_hash160_out(btc_tx* tx, int64_t amount, uint8_t *hash160)
+{
+    btc_tx_out* tx_out = btc_tx_out_new();
+
+    tx_out->script_pubkey = cstr_new_sz(1024);
+    btc_script_build_p2sh(tx_out->script_pubkey, hash160);
+
+    tx_out->value = amount;
+
+    vector_add(tx->vout, tx_out);
+
+    return true;
+}
+
+btc_bool btc_tx_add_p2pkh_out(btc_tx* tx, int64_t amount, const btc_pubkey *pubkey)
+{
+
+    uint8_t hash160[20];
+    btc_pubkey_get_hash160(pubkey, hash160);
+    return btc_tx_add_p2pkh_hash160_out(tx, amount, hash160);
 }
