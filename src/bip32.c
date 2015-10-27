@@ -215,9 +215,12 @@ void btc_hdnode_serialize_private(const btc_hdnode* node, const btc_chain* chain
 // check for validity of curve point in case of public data not performed
 btc_bool btc_hdnode_deserialize(const char* str, const btc_chain* chain, btc_hdnode* node)
 {
-    uint8_t node_data[78];
+    uint8_t node_data[strlen(str)];
     memset(node, 0, sizeof(btc_hdnode));
-    if (!btc_base58_decode_check(str, node_data, sizeof(node_data))) {
+    size_t outlen = 0;
+
+    outlen = btc_base58_decode_check(str, node_data, sizeof(node_data));
+    if (!outlen) {
         return false;
     }
     uint32_t version = read_be(node_data);
