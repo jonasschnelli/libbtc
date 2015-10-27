@@ -24,9 +24,18 @@
 
 */
 
+#ifndef __LIBBTC_SCRIPT_H__
+#define __LIBBTC_SCRIPT_H__
 
-#include "btc/cstr.h"
-#include "btc/vector.h"
+#include "btc.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "cstr.h"
+#include "ecc_key.h"
+#include "vector.h"
 
 /** Signature hash types/flags */
 enum {
@@ -200,9 +209,18 @@ typedef struct btc_script_op_
 //copy a script without the codeseperator ops
 btc_bool btc_script_copy_without_op_codeseperator(const cstring* scriptin, cstring* scriptout);
 
-btc_script_op* btc_script_op_new();
-void btc_script_op_free(btc_script_op* script_op);
+LIBBTC_API btc_script_op* btc_script_op_new();
+LIBBTC_API void btc_script_op_free(btc_script_op* script_op);
 void btc_script_op_free_cb(void* data);
 btc_bool btc_script_get_ops(const cstring* script_in, vector* ops_out);
 
 enum btc_tx_out_type btc_script_classify(vector* ops);
+
+LIBBTC_API btc_bool btc_script_build_multisig(cstring* script_in, unsigned int required_signatures, vector *pubkeys_chars);
+LIBBTC_API btc_bool btc_script_build_p2pkh(cstring* script, const uint8_t *hash160);
+LIBBTC_API btc_bool btc_script_build_p2sh(cstring* script_in, const uint8_t *hash160);
+#ifdef __cplusplus
+}
+#endif
+
+#endif // __LIBBTC_SCRIPT_H__

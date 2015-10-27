@@ -31,7 +31,7 @@
 #include <limits.h>
 #include <stdint.h>
 
-typedef uint8_t btc_bool;
+typedef uint8_t btc_bool; //!serialize, c/c++ save bool
 
 #ifndef true
 #define true 1

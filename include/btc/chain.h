@@ -41,12 +41,13 @@ typedef struct btc_chain
     char chainname[32];
     uint8_t b58prefix_pubkey_address;
     uint8_t b58prefix_script_address;
+    uint8_t b58prefix_secret_address; //!private key
     uint32_t b58prefix_bip32_privkey;
     uint32_t b58prefix_bip32_pubkey;
 } btc_chain;
 
-static const btc_chain btc_chain_main = {"main", 0x6f, 0xc4, 0x0488ADE4, 0x0488B21E};
-static const btc_chain btc_chain_test = {"testnet3", 0x6f, 0xc4, 0x04358394, 0x043587CF};
+static const btc_chain btc_chain_main = {"main", 0x00, 0x05, 0x80, 0x0488ADE4, 0x0488B21E};
+static const btc_chain btc_chain_test = {"testnet3", 0x6f, 0xc4, 0xEF, 0x04358394, 0x043587CF};
 
 #ifdef __cplusplus
 }

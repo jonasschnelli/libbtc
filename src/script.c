@@ -25,8 +25,9 @@
  
 */
 
-#include "script.h"
+#include <btc/script.h>
 
+#include <assert.h>
 #include <string.h>
 
 #include "buffer.h"
@@ -251,4 +252,95 @@ enum btc_tx_out_type btc_script_classify(vector* ops)
         return BTC_TX_MULTISIG;
 
     return BTC_TX_NONSTANDARD;
+}
+
+static enum opcodetype btc_encode_op_n(int n)
+{
+    assert(n >= 0 && n <= 16);
+    if (n == 0)
+        return OP_0;
+    return (enum opcodetype)(OP_1+n-1);
+}
+
+
+static void btc_script_append_op(cstring* script_in, enum opcodetype op)
+{
+    cstr_append_buf(script_in, &op, 1);
+}
+
+
+static void btc_script_append_pushdata(cstring* script_in, unsigned char *data, size_t datalen)
+{
+    if (datalen < OP_PUSHDATA1)
+    {
+        cstr_append_buf(script_in, (unsigned char *)&datalen, 1);
+    }
+    else if (datalen <= 0xff)
+    {
+        btc_script_append_op(script_in, OP_PUSHDATA1);
+        cstr_append_buf(script_in, (unsigned char *)&datalen, 1);
+    }
+    else if (datalen <= 0xffff)
+    {
+        btc_script_append_op(script_in, OP_PUSHDATA2);
+        uint16_t v = htole16(datalen);
+        cstr_append_buf(script_in, &v, sizeof(v));
+    }
+    else
+    {
+        btc_script_append_op(script_in, OP_PUSHDATA4);
+        uint32_t v = htole32(datalen);
+        cstr_append_buf(script_in, &v, sizeof(v));
+    }
+    cstr_append_buf(script_in, data, datalen);
+}
+
+btc_bool btc_script_build_multisig(cstring* script_in, unsigned int required_signatures, vector *pubkeys_chars)
+{
+    cstr_resize(script_in, 0); //clear script
+
+    if(required_signatures > 16 || pubkeys_chars->len > 16)
+        return false;
+    enum opcodetype op_req_sig = btc_encode_op_n(required_signatures);
+    cstr_append_buf(script_in, &op_req_sig, 1);
+
+    int i;
+    for (i = 0; i < (int)pubkeys_chars->len; i++)
+    {
+        btc_pubkey *pkey = pubkeys_chars->data[i];
+        cstr_append_buf(script_in, pkey->pubkey, (pkey->compressed ? BTC_ECKEY_COMPRESSED_LENGTH : BTC_ECKEY_UNCOMPRESSED_LENGTH));
+    }
+
+    enum opcodetype op_pub_len = btc_encode_op_n(pubkeys_chars->len);
+    cstr_append_buf(script_in, &op_pub_len, 1);
+
+    enum opcodetype op_checkmultisig = OP_CHECKMULTISIG;
+    cstr_append_buf(script_in, &op_checkmultisig, 1);
+
+    return true;
+}
+
+btc_bool btc_script_build_p2pkh(cstring* script_in, const uint8_t *hash160)
+{
+    cstr_resize(script_in, 0); //clear script
+
+    btc_script_append_op(script_in, OP_DUP);
+    btc_script_append_op(script_in, OP_HASH160);
+
+
+    btc_script_append_pushdata(script_in, hash160, 20);
+    btc_script_append_op(script_in, OP_EQUALVERIFY);
+    btc_script_append_op(script_in, OP_CHECKSIG);
+
+    return true;
+}
+
+btc_bool btc_script_build_p2sh(cstring* script_in, const uint8_t *hash160)
+{
+    cstr_resize(script_in, 0); //clear script
+    btc_script_append_op(script_in, OP_HASH160);
+    btc_script_append_pushdata(script_in, hash160, 20);
+    btc_script_append_op(script_in, OP_EQUAL);
+
+    return true;
 }

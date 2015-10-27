@@ -12,7 +12,9 @@
 #include <btc/tx.h>
 
 #include <btc/cstr.h>
-#include "script.h"
+#include <btc/ecc_key.h>
+#include <btc/script.h>
+#include "utest.h"
 #include "utils.h"
 
 
@@ -786,4 +788,95 @@ void test_script_parse()
         cstr_free(script, true);
         vector_free(vec, true);
     }
+
+    vector *pubkeys = vector_new(3, free);
+    for(i=0;i<3;i++)
+    {
+        btc_key key;
+        btc_privkey_init(&key);
+        btc_privkey_gen(&key);
+
+        btc_pubkey *pubkey = malloc(sizeof(btc_pubkey));
+        btc_pubkey_init(pubkey);
+        btc_pubkey_from_key(&key, pubkey);
+        assert(btc_pubkey_is_valid(pubkey) == 1);
+
+        vector_add(pubkeys, pubkey);
+    }
+
+    cstring* new_script = cstr_new_sz(1024);
+    btc_script_build_multisig(new_script, 2, pubkeys);
+
+    u_assert_int_eq(new_script->str[0], 0x52); //2
+    u_assert_int_eq(new_script->str[new_script->len-2], 0x53); //3
+    u_assert_int_eq( ((char)new_script->str[new_script->len-1] == (char)OP_CHECKMULTISIG), 1);
+    cstr_free(new_script, true);
+
+    btc_pubkey *pubkey = pubkeys->data[0];
+    cstring* p2pkh = cstr_new_sz(1024);
+    btc_script_build_p2pkh(p2pkh, pubkey);
+    u_assert_int_eq(p2pkh->str[0], (char)OP_DUP); //2
+    u_assert_int_eq(p2pkh->str[1], (char)OP_HASH160); //2
+    u_assert_int_eq( ((char)p2pkh->str[p2pkh->len-1] == (char)OP_CHECKSIG), 1);
+    cstr_free(p2pkh, true);
+
+
+
+    uint8_t pubkeydat[33] = {0x65,0x61,0x32,0x35,0x36,0x63,0x65,0x30,0x31,0x32,0x37,0x32,0x64,0x31,0x32,0x35,0x65,0x35,0x37,0x37,0x63,0x30,0x61,0x30,0x39,0x35,0x37,0x30,0x61,0x37,0x31,0x33,0x36};
+
+    btc_pubkey pubkeytx;
+    btc_pubkey_init(&pubkeytx);
+    memcpy(&pubkeytx.pubkey, pubkeydat, 33);
+    pubkeytx.compressed = true;
+
+    btc_tx* tx = btc_tx_new();
+    btc_tx_add_p2pkh_out(tx, 12345678, &pubkeytx);
+
+    cstring* txser = cstr_new_sz(1024);
+    btc_tx_serialize(txser, tx);
+
+    char hexbuf[txser->len * 2 + 1];
+    utils_bin_to_hex((unsigned char*)txser->str, txser->len, hexbuf);
+
+    u_assert_str_eq(hexbuf, "0000000000014e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088ac00000000");
+    cstr_free(txser, true);
+
+    uint8_t txhash[32];
+    btc_tx_hash(tx, txhash);
+    char txhashhex[65];
+    utils_bin_to_hex((unsigned char*)txhash, 32, txhashhex);
+    utils_reverse_hex(txhashhex, 64);
+
+    u_assert_str_eq(txhashhex, "79a22ba910fd48edf400b5c6dd4b58051f003523ed2bf4e002584134cec2089e");
+
+
+    btc_tx_add_address_out(tx, &btc_chain_test, 12345678, "n1e4M744gKSL269jozPwc8edjxxdwn6THc");
+
+
+    txser = cstr_new_sz(1024);
+    btc_tx_serialize(txser, tx);
+    char hexbuf2[txser->len * 2 + 1];
+    utils_bin_to_hex((unsigned char*)txser->str, txser->len, hexbuf2);
+    u_assert_str_eq(hexbuf2, "0000000000024e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088ac4e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088ac00000000");
+
+    btc_tx_hash(tx, txhash);
+    utils_bin_to_hex((unsigned char*)txhash, 32, txhashhex);
+    utils_reverse_hex(txhashhex, 64);
+
+    u_assert_str_eq(txhashhex, "5e6f30976c40bb82ef7c57ec143dbbf5591a3da019896164c62d530eecceeba9");
+
+    cstr_free(txser, true);
+
+
+    btc_tx_add_address_out(tx, &btc_chain_test, 876543210, "2NFoJeWNrABZQ3YCWdbX9wGEnRge7kDeGzQ");
+    txser = cstr_new_sz(1024);
+    btc_tx_serialize(txser, tx);
+    char hexbuf3[txser->len * 2 + 1];
+    utils_bin_to_hex((unsigned char*)txser->str, txser->len, hexbuf3);
+    u_assert_str_eq(hexbuf3, "0000000000034e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088ac4e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088aceafc3e340000000017a914f763f798ede75a6ebf4e061b9e68ddb6df0442928700000000");
+
+    cstr_free(txser, true);
+
+    vector_free(pubkeys, true);
+    btc_tx_free(tx);
 }

@@ -19,7 +19,8 @@ include_HEADERS = include/btc/btc.h \
 	include/btc/chain.h \
 	include/btc/hash.h \
 	include/btc/vector.h \
-	include/btc/cstr.h
+	include/btc/cstr.h \
+	include/btc/script.h
 
 noinst_HEADERS = \
 	src/sha2.h \
@@ -27,8 +28,7 @@ noinst_HEADERS = \
 	src/ripemd160.h \
 	src/random.h \
 	src/buffer.h \
-	src/serialize.h \
-	src/script.h
+	src/serialize.h
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libbtc.pc
