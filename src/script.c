@@ -308,7 +308,7 @@ btc_bool btc_script_build_multisig(cstring* script_in, unsigned int required_sig
     for (i = 0; i < (int)pubkeys_chars->len; i++)
     {
         btc_pubkey *pkey = pubkeys_chars->data[i];
-        cstr_append_buf(script_in, pkey->pubkey, (pkey->compressed ? BTC_ECKEY_COMPRESSED_LENGTH : BTC_ECKEY_UNCOMPRESSED_LENGTH));
+        btc_script_append_pushdata(script_in, pkey->pubkey, (pkey->compressed ? BTC_ECKEY_COMPRESSED_LENGTH : BTC_ECKEY_UNCOMPRESSED_LENGTH));
     }
 
     enum opcodetype op_pub_len = btc_encode_op_n(pubkeys_chars->len);

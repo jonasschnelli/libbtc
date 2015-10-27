@@ -69,7 +69,7 @@ btc_tx_in* btc_tx_in_new()
     btc_tx_in* tx_in;
     tx_in = calloc(1, sizeof(*tx_in));
     memset(&tx_in->prevout, 0, sizeof(tx_in->prevout));
-
+    tx_in->sequence = UINT32_MAX;
     return tx_in;
 }
 
@@ -127,7 +127,7 @@ btc_tx* btc_tx_new()
     tx = calloc(1, sizeof(*tx));
     tx->vin = vector_new(8, btc_tx_in_free_cb);
     tx->vout = vector_new(8, btc_tx_out_free_cb);
-    tx->version = 0;
+    tx->version = 1;
     tx->locktime = 0;
     return tx;
 }
@@ -410,8 +410,6 @@ btc_bool btc_tx_sighash(const btc_tx* tx_to, const cstring* fromPubKey, unsigned
     btc_tx_serialize(s, tx_tmp);
     char hextest[4096];
     ser_s32(s, hashtype);
-
-    utils_bin_to_hex((unsigned char*)s->str, s->len, hextest);
 
     sha256_Raw((const uint8_t*)s->str, s->len, hash);
     sha256_Raw(hash, 32, hash);
