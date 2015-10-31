@@ -74,7 +74,8 @@ tests_SOURCES = \
 	test/utils_tests.c \
 	test/serialize_tests.c \
 	test/tx_tests.c \
-	test/eckey_tests.c
+	test/eckey_tests.c \
+	test/aes_tests.c
 
 tests_CFLAGS = -I$(top_srcdir)/include
 tests_CPPFLAGS = -I$(top_srcdir)/src

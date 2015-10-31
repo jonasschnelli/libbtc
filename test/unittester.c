@@ -46,6 +46,7 @@ extern void test_vector();
 extern void test_cstr();
 extern void test_buffer();
 extern void test_utils();
+extern void test_aes();
 extern void test_serialize();
 extern void test_tx_serialization();
 extern void test_tx_sighash();
@@ -70,6 +71,7 @@ int main()
     test_bitcoin_hash();
     test_base58check();
     test_utils();
+    test_aes();
 
     test_bip32();
     test_ecc();
