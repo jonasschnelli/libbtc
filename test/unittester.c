@@ -64,26 +64,26 @@ int main()
 {
     ecc_start();
 
-    test_random();
-    test_sha_256();
-    test_sha_512();
-    test_sha_hmac();
-    test_bitcoin_hash();
-    test_base58check();
-    test_utils();
-    test_aes();
+    u_run_test(test_random);
+    u_run_test(test_sha_256);
+    u_run_test(test_sha_512);
+    u_run_test(test_sha_hmac);
+    u_run_test(test_bitcoin_hash);
+    u_run_test(test_base58check);
+    u_run_test(test_utils);
+    u_run_test(test_aes);
 
-    test_bip32();
-    test_ecc();
-    test_vector();
-    test_cstr();
-    test_buffer();
-    test_serialize();
-    test_tx_serialization();
-    test_tx_sighash();
-    test_script_parse();
+    u_run_test(test_bip32);
+    u_run_test(test_ecc);
+    u_run_test(test_vector);
+    u_run_test(test_cstr);
+    u_run_test(test_buffer);
+    u_run_test(test_serialize);
+    u_run_test(test_tx_serialization);
+    u_run_test(test_tx_sighash);
+    u_run_test(test_script_parse);
 
-    test_eckey();
+    u_run_test(test_eckey);
 
     ecc_stop();
     return 0;

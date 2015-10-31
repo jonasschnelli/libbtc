@@ -51,9 +51,6 @@ libbtc_la_SOURCES = \
 	src/ecc_key.c \
 	src/aes.c
 
-libbtc_la_LDFLAGS = \
-	-version-info 1:0:0 \
-	-no-undefined
 libbtc_la_CFLAGS = -I$(top_srcdir)/include
 libbtc_la_LIBADD = $(LIBSECP256K1)
 

@@ -66,6 +66,12 @@ if test "x$random_device" = x"/dev/random"; then
     AC_DEFINE([RANDOM_DEVICE],["/dev/random"],[Define to set random file handle])
 fi
 
+if test "$host" = "mingw"; then
+  # -static is interpreted by libtool, where it has a different meaning.
+  # In libtool-speak, it's -all-static.
+  AX_CHECK_LINK_FLAG([[-static]],[LIBTOOL_APP_LDFLAGS="$LIBTOOL_APP_LDFLAGS -all-static"])
+fi
+     
 AC_CONFIG_FILES([Makefile libbtc.pc])
 AC_SUBST(LIBTOOL_APP_LDFLAGS)
 AC_SUBST(BUILD_EXEEXT)
