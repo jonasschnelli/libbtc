@@ -21,13 +21,13 @@ include_HEADERS = include/btc/btc.h \
 	include/btc/vector.h \
 	include/btc/cstr.h \
 	include/btc/script.h \
-	include/btc/aes.h
+	include/btc/aes.h \
+	include/btc/random.h
 
 noinst_HEADERS = \
 	src/sha2.h \
 	src/utils.h \
 	src/ripemd160.h \
-	src/random.h \
 	src/buffer.h \
 	src/serialize.h
 

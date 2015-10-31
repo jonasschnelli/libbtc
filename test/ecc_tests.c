@@ -10,8 +10,8 @@
 #include <assert.h>
 
 #include <btc/ecc.h>
+#include <btc/random.h>
 
-#include "random.h"
 #include "utest.h"
 #include "utils.h"
 

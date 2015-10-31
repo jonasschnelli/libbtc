@@ -24,7 +24,7 @@
 
 */
 
-#include "random.h"
+#include "btc/random.h"
 
 #include "libbtc-config.h"
 
@@ -51,6 +51,7 @@ btc_bool random_bytes(uint8_t* buf, uint32_t len, uint8_t update_seed)
     return true;
 }
 #elif FILE_RANDOM
+//TODO: WIN32 Random
 void random_init(void) {}
 btc_bool random_bytes(uint8_t* buf, uint32_t len, const uint8_t update_seed)
 {
