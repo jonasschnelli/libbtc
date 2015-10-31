@@ -33,8 +33,15 @@
  cipher state.
  */
 
-#ifndef AES_H
-#define AES_H
+#ifndef __LIBBTC_AES_H__
+#define __LIBBTC_AES_H__
+
+#include "btc.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 #if 1
 #define AES_ENC_PREKEYED /* AES encryption with a precomputed key schedule  */
@@ -86,18 +93,18 @@ typedef struct
 
 #if defined(AES_ENC_PREKEYED) || defined(AES_DEC_PREKEYED)
 
-return_type aes_set_key(const unsigned char key[],
+LIBBTC_API return_type aes_set_key(const unsigned char key[],
                         length_type keylen,
                         aes_context ctx[1]);
 #endif
 
 #if defined(AES_ENC_PREKEYED)
 
-return_type aes_encrypt(const unsigned char in[N_BLOCK],
+LIBBTC_API return_type aes_encrypt(const unsigned char in[N_BLOCK],
                         unsigned char out[N_BLOCK],
                         const aes_context ctx[1]);
 
-return_type aes_cbc_encrypt(const unsigned char* in,
+LIBBTC_API return_type aes_cbc_encrypt(const unsigned char* in,
                             unsigned char* out,
                             int n_block,
                             unsigned char iv[N_BLOCK],
@@ -106,11 +113,11 @@ return_type aes_cbc_encrypt(const unsigned char* in,
 
 #if defined(AES_DEC_PREKEYED)
 
-return_type aes_decrypt(const unsigned char in[N_BLOCK],
+LIBBTC_API return_type aes_decrypt(const unsigned char in[N_BLOCK],
                         unsigned char out[N_BLOCK],
                         const aes_context ctx[1]);
 
-return_type aes_cbc_decrypt(const unsigned char* in,
+LIBBTC_API return_type aes_cbc_decrypt(const unsigned char* in,
                             unsigned char* out,
                             int n_block,
                             unsigned char iv[N_BLOCK],
@@ -138,32 +145,36 @@ return_type aes_cbc_decrypt(const unsigned char* in,
 */
 
 #if defined(AES_ENC_128_OTFK)
-void aes_encrypt_128(const unsigned char in[N_BLOCK],
+LIBBTC_API void aes_encrypt_128(const unsigned char in[N_BLOCK],
                      unsigned char out[N_BLOCK],
                      const unsigned char key[N_BLOCK],
                      uint_8t o_key[N_BLOCK]);
 #endif
 
 #if defined(AES_DEC_128_OTFK)
-void aes_decrypt_128(const unsigned char in[N_BLOCK],
+LIBBTC_API void aes_decrypt_128(const unsigned char in[N_BLOCK],
                      unsigned char out[N_BLOCK],
                      const unsigned char key[N_BLOCK],
                      unsigned char o_key[N_BLOCK]);
 #endif
 
 #if defined(AES_ENC_256_OTFK)
-void aes_encrypt_256(const unsigned char in[N_BLOCK],
+LIBBTC_API void aes_encrypt_256(const unsigned char in[N_BLOCK],
                      unsigned char out[N_BLOCK],
                      const unsigned char key[2 * N_BLOCK],
                      unsigned char o_key[2 * N_BLOCK]);
 #endif
 
 #if defined(AES_DEC_256_OTFK)
-void aes_decrypt_256(const unsigned char in[N_BLOCK],
+LIBBTC_API void aes_decrypt_256(const unsigned char in[N_BLOCK],
                      unsigned char out[N_BLOCK],
                      const unsigned char key[2 * N_BLOCK],
                      unsigned char o_key[2 * N_BLOCK]);
 #endif
 
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif //__LIBBTC_AES_H__

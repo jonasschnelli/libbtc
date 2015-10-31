@@ -68,7 +68,7 @@
 #define VERSION_1
 #endif
 
-#include "aes.h"
+#include "btc/aes.h"
 
 #if defined(HAVE_UINT_32T)
 //typedef unsigned long uint_32t;
