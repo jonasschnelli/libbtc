@@ -5,8 +5,7 @@
 #include <string.h>
 
 #include "btc/btc.h"
-
-#include "random.h"
+#include "btc/random.h"
 
 static secp256k1_context* secp256k1_ctx = NULL;
 

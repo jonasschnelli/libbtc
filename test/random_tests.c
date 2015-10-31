@@ -4,7 +4,7 @@
 * file COPYING or http://www.opensource.org/licenses/mit-license.php.*
 **********************************************************************/
 
-#include "random.h"
+#include <btc/random.h>
 
 #include <stdio.h>
 #include <stdlib.h>

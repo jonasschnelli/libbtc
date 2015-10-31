@@ -33,8 +33,8 @@
 
 #include "btc/ecc.h"
 #include "btc/hash.h"
+#include "btc/random.h"
 
-#include "random.h"
 #include "ripemd160.h"
 #include "utils.h"
 

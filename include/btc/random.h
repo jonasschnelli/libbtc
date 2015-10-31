@@ -25,15 +25,23 @@
 */
 
 
-#ifndef _RANDOM_H_
-#define _RANDOM_H_
+#ifndef __LIBBTC_RANDOM_H__
+#define __LIBBTC_RANDOM_H__
+
+#include "btc.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "btc/btc.h"
+LIBBTC_API void random_init(void);
+LIBBTC_API btc_bool random_bytes(uint8_t* buf, uint32_t len, const uint8_t update_seed);
 
-void random_init(void);
-btc_bool random_bytes(uint8_t* buf, uint32_t len, const uint8_t update_seed);
-
+#ifdef __cplusplus
+}
 #endif
+
+#endif //__LIBBTC_TX_H__
