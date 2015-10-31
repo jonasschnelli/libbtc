@@ -145,7 +145,7 @@ void test_base58check()
         assert(strcmp(strn, *str) == 0);
 
         r = btc_base58_decode_check(strn, rawn, sizeof(rawn));
-        assert(r == (int)len+4);
+        assert(r == (int)len + 4);
 
         raw += 2;
         str += 2;

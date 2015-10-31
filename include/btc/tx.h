@@ -45,34 +45,29 @@ extern "C" {
 #include "vector.h"
 
 
-typedef struct btc_script_
-{
+typedef struct btc_script_ {
     int* data;
     size_t limit;   // Total size of the vector
     size_t current; //Number of vectors in it at present
 } btc_script;
 
-typedef struct btc_tx_outpoint_
-{
+typedef struct btc_tx_outpoint_ {
     uint256 hash;
     uint32_t n;
 } btc_tx_outpoint;
 
-typedef struct btc_tx_in_
-{
+typedef struct btc_tx_in_ {
     btc_tx_outpoint prevout;
     cstring* script_sig;
     uint32_t sequence;
 } btc_tx_in;
 
-typedef struct btc_tx_out_
-{
+typedef struct btc_tx_out_ {
     int64_t value;
     cstring* script_pubkey;
 } btc_tx_out;
 
-typedef struct btc_tx_
-{
+typedef struct btc_tx_ {
     uint32_t version;
     vector* vin;
     vector* vout;
@@ -101,14 +96,14 @@ LIBBTC_API int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inl
 //!serialize a lbc bitcoin data structure into a p2p serialized buffer
 LIBBTC_API void btc_tx_serialize(cstring* s, const btc_tx* tx);
 
-LIBBTC_API void btc_tx_hash(const btc_tx* tx, uint8_t *hashout);
+LIBBTC_API void btc_tx_hash(const btc_tx* tx, uint8_t* hashout);
 
 LIBBTC_API btc_bool btc_tx_sighash(const btc_tx* tx_to, const cstring* fromPubKey, unsigned int in_num, int hashtype, uint8_t* hash);
 
-LIBBTC_API btc_bool btc_tx_add_address_out(btc_tx* tx, const btc_chain* chain, int64_t amount, const char *address);
-LIBBTC_API btc_bool btc_tx_add_p2sh_hash160_out(btc_tx* tx, int64_t amount, uint8_t *hash160);
-LIBBTC_API btc_bool btc_tx_add_p2pkh_hash160_out(btc_tx* tx, int64_t amount, uint8_t *hash160);
-LIBBTC_API btc_bool btc_tx_add_p2pkh_out(btc_tx* tx, int64_t amount, const btc_pubkey *pubkey);
+LIBBTC_API btc_bool btc_tx_add_address_out(btc_tx* tx, const btc_chain* chain, int64_t amount, const char* address);
+LIBBTC_API btc_bool btc_tx_add_p2sh_hash160_out(btc_tx* tx, int64_t amount, uint8_t* hash160);
+LIBBTC_API btc_bool btc_tx_add_p2pkh_hash160_out(btc_tx* tx, int64_t amount, uint8_t* hash160);
+LIBBTC_API btc_bool btc_tx_add_p2pkh_out(btc_tx* tx, int64_t amount, const btc_pubkey* pubkey);
 #ifdef __cplusplus
 }
 #endif

@@ -36,8 +36,7 @@ extern "C" {
 #include <stdlib.h>
 #include <sys/types.h>
 
-typedef struct vector
-{
+typedef struct vector {
     void** data;  /* array of pointers */
     size_t len;   /* array element count */
     size_t alloc; /* allocated array elements */
