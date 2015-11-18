@@ -6,26 +6,47 @@ os:
 compiler:
     - clang
     - gcc
+    - x86_64-w64-mingw32-gcc
 
 addons:
   apt:
     packages:
-    - valgrind
+        - valgrind
+        - binutils-mingw-w64
+        - gcc-mingw-w64
+        - wine
 
 before_install:
   - pip install --user cpp-coveralls
   - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew install valgrind; fi
-  
+
 matrix:
     fast_finish:
         - true
+    exclude:
+      - os: osx
+        compiler: x86_64-w64-mingw32-gcc
+
+before_script:
+    - ./autogen.sh
+    - if [ "$CC" == i686-w64-mingw32-gcc ]; then
+          export CROSS_COMPILE=${CC%%gcc}; unset CC;
+          ./configure mingw $CONFIG_OPTS -Wno-pedantic-ms-format;
+      elif [ "$CC" == x86_64-w64-mingw32-gcc ]; then
+          export CROSS_COMPILE=${CC%%gcc}; unset CC;
+          LIBTOOL_APP_LDFLAGS='-all-static' LDFLAGS='-static' ./configure --host=x86_64-w64-mingw32 --disable-shared --enable-static;
+      else
+          ./configure CFLAGS='-fprofile-arcs -ftest-coverage';
+      fi
 
 script: 
-    - ./autogen.sh
-    - ./configure CFLAGS='-fprofile-arcs -ftest-coverage'
     - make
     - if [ ${CC} = gcc ] || [ "${TRAVIS_OS_NAME}" = "osx" ]; then valgrind --leak-check=full --error-exitcode=1 ./tests; fi;
-    - make check
-    
+    - if [ "$CROSS_COMPILE" ]; then
+          wine tests.exe
+      else
+          make check;
+      fi
+
 after_success:
   - coveralls --verbose -i src -x c -e src/secp256k1 -r $TRAVIS_BUILD_DIR -b $TRAVIS_BUILD_DIR --gcov-options '\-lp'

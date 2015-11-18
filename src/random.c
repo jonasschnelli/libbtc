@@ -33,6 +33,10 @@
 #include <stdio.h>
 #include <time.h>
 
+#ifdef WIN32
+#include <windows.h>
+#include <wincrypt.h>
+#endif
 
 #ifdef TESTING
 void random_init(void)
@@ -51,10 +55,17 @@ btc_bool random_bytes(uint8_t* buf, uint32_t len, uint8_t update_seed)
     return true;
 }
 #elif FILE_RANDOM
-//TODO: WIN32 Random
 void random_init(void) {}
 btc_bool random_bytes(uint8_t* buf, uint32_t len, const uint8_t update_seed)
 {
+#ifdef WIN32
+    HCRYPTPROV hProvider;
+    int ret = CryptAcquireContextW(&hProvider, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
+    assert(ret);
+    ret = CryptGenRandom(hProvider, 32, buf);
+    assert(ret);
+    CryptReleaseContext(hProvider, 0);
+#else
     (void)update_seed; //unused
     FILE* frand = fopen(RANDOM_DEVICE, "r");
     if (!frand) {
@@ -65,6 +76,7 @@ btc_bool random_bytes(uint8_t* buf, uint32_t len, const uint8_t update_seed)
     assert(len_read == len);
     fclose(frand);
     return true;
+#endif
 }
 #else
 //provide extern interface
