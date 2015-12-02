@@ -815,7 +815,7 @@ void test_script_parse()
     cstr_free(p2pkh, true);
 
 
-    uint8_t pubkeydat[33] = {0x65, 0x61, 0x32, 0x35, 0x36, 0x63, 0x65, 0x30, 0x31, 0x32, 0x37, 0x32, 0x64, 0x31, 0x32, 0x35, 0x65, 0x35, 0x37, 0x37, 0x63, 0x30, 0x61, 0x30, 0x39, 0x35, 0x37, 0x30, 0x61, 0x37, 0x31, 0x33, 0x36};
+    uint8_t pubkeydat[33] = {0x02,0xd0,0x03,0xdf,0xea,0xf0,0x76,0x2e,0xd1,0xcd,0xbb,0x1d,0x54,0x2b,0x0a,0x26,0x17,0x49,0xe3,0xff,0x81,0x09,0x64,0xef,0x90,0x64,0xd7,0x97,0xd5,0x78,0xa1,0x21,0x94};
 
     btc_pubkey pubkeytx;
     btc_pubkey_init(&pubkeytx);
@@ -823,7 +823,7 @@ void test_script_parse()
     pubkeytx.compressed = true;
 
     btc_tx* tx = btc_tx_new();
-    btc_tx_add_p2pkh_out(tx, 12345678, &pubkeytx);
+    btc_tx_add_p2pkh_out(tx, 1000000000, &pubkeytx);
 
     cstring* txser = cstr_new_sz(1024);
     btc_tx_serialize(txser, tx);
@@ -831,7 +831,7 @@ void test_script_parse()
     char hexbuf[txser->len * 2 + 1];
     utils_bin_to_hex((unsigned char*)txser->str, txser->len, hexbuf);
 
-    u_assert_str_eq(hexbuf, "0100000000014e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088ac00000000");
+    u_assert_str_eq(hexbuf, "01000000000100ca9a3b000000001976a91457b78cc8347175aee968eaa91846e840ef36ff9288ac00000000");
     cstr_free(txser, true);
 
     uint8_t txhash[32];
@@ -840,7 +840,7 @@ void test_script_parse()
     utils_bin_to_hex((unsigned char*)txhash, 32, txhashhex);
     utils_reverse_hex(txhashhex, 64);
 
-    u_assert_str_eq(txhashhex, "b9ca357388af326aeaf17bfa5a59ecc5ce79495e6ad6a07aae794a2e543e58f2");
+    u_assert_str_eq(txhashhex, "41a86af25423391b1d9d78df1143e3a237f20db27511d8b72e25f2dec7a81d80");
 
 
     btc_tx_add_address_out(tx, &btc_chain_test, 12345678, "n1e4M744gKSL269jozPwc8edjxxdwn6THc");
@@ -850,13 +850,13 @@ void test_script_parse()
     btc_tx_serialize(txser, tx);
     char hexbuf2[txser->len * 2 + 1];
     utils_bin_to_hex((unsigned char*)txser->str, txser->len, hexbuf2);
-    u_assert_str_eq(hexbuf2, "0100000000024e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088ac4e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088ac00000000");
+    u_assert_str_eq(hexbuf2, "01000000000200ca9a3b000000001976a91457b78cc8347175aee968eaa91846e840ef36ff9288ac4e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088ac00000000");
 
     btc_tx_hash(tx, txhash);
     utils_bin_to_hex((unsigned char*)txhash, 32, txhashhex);
     utils_reverse_hex(txhashhex, 64);
 
-    u_assert_str_eq(txhashhex, "ad14f77f3b227ef23a98452a2ced172f8c253d6f1671f85e180580ecef841b9c");
+    u_assert_str_eq(txhashhex, "6a56c7415dc6e3695b4b6b27bdfec5124ed70e0a615d5aa0d8cf0b5e8b72fd76");
 
     cstr_free(txser, true);
 
@@ -866,7 +866,7 @@ void test_script_parse()
     btc_tx_serialize(txser, tx);
     char hexbuf3[txser->len * 2 + 1];
     utils_bin_to_hex((unsigned char*)txser->str, txser->len, hexbuf3);
-    u_assert_str_eq(hexbuf3, "0100000000034e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088ac4e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088aceafc3e340000000017a914f763f798ede75a6ebf4e061b9e68ddb6df0442928700000000");
+    u_assert_str_eq(hexbuf3, "01000000000300ca9a3b000000001976a91457b78cc8347175aee968eaa91846e840ef36ff9288ac4e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088aceafc3e340000000017a914f763f798ede75a6ebf4e061b9e68ddb6df0442928700000000");
 
     cstr_free(txser, true);
 
