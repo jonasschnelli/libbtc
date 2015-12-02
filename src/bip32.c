@@ -32,6 +32,7 @@
 #include <inttypes.h>
 
 #include "btc/base58.h"
+#include "btc/hash.h"
 #include "btc/ecc.h"
 
 #include "ripemd160.h"
@@ -209,6 +210,17 @@ void btc_hdnode_serialize_public(const btc_hdnode* node, const btc_chain* chain,
 void btc_hdnode_serialize_private(const btc_hdnode* node, const btc_chain* chain, char* str, int strsize)
 {
     btc_hdnode_serialize(node, chain->b58prefix_bip32_privkey, 0, str, strsize);
+}
+
+
+void btc_hdnode_get_p2pkh_address(const btc_hdnode* node, const btc_chain* chain, char* str, int strsize)
+{
+    uint8_t hashout[32];
+    uint8_t hash160[21];
+    hash160[0] = chain->b58prefix_pubkey_address;
+    btc_hash_sngl_sha256(node->public_key, BTC_ECKEY_COMPRESSED_LENGTH, hashout);
+    ripemd160(hashout, 32, hash160+1);
+    btc_base58_encode_check(hash160, 21, str, strsize);
 }
 
 
