@@ -39,6 +39,10 @@ void test_bip32()
     r = btc_hdnode_deserialize(str, &btc_chain_main, &node2);
     u_assert_int_eq(r, true);
     u_assert_mem_eq(&node, &node2, sizeof(btc_hdnode));
+
+    btc_hdnode_get_p2pkh_address(&node, &btc_chain_main, str, sizeof(str));
+    u_assert_str_eq(str, "15mKKb2eos1hWa6tisdPwwDC1a5J1y9nma");
+
     btc_hdnode_serialize_public(&node, &btc_chain_main, str, sizeof(str));
     u_assert_str_eq(str,
                     "xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8");
@@ -68,6 +72,10 @@ void test_bip32()
     r = btc_hdnode_deserialize(str, &btc_chain_main, &node2);
     u_assert_int_eq(r, true);
     u_assert_mem_eq(&node, &node2, sizeof(btc_hdnode));
+
+    btc_hdnode_get_p2pkh_address(&node, &btc_chain_main, str, sizeof(str));
+    u_assert_str_eq(str, "19Q2WoS5hSS6T8GjhK8KZLMgmWaq4neXrh");
+
     btc_hdnode_serialize_public(&node, &btc_chain_main, str, sizeof(str));
     u_assert_str_eq(str,
                     "xpub68Gmy5EdvgibQVfPdqkBBCHxA5htiqg55crXYuXoQRKfDBFA1WEjWgP6LHhwBZeNK1VTsfTFUHCdrfp1bgwQ9xv5ski8PX9rL2dZXvgGDnw");
@@ -97,6 +105,8 @@ void test_bip32()
     r = btc_hdnode_deserialize(str, &btc_chain_main, &node2);
     u_assert_int_eq(r, true);
     u_assert_mem_eq(&node, &node2, sizeof(btc_hdnode));
+    btc_hdnode_get_p2pkh_address(&node, &btc_chain_main, str, sizeof(str));
+    u_assert_str_eq(str, "1JQheacLPdM5ySCkrZkV66G2ApAXe1mqLj");
     btc_hdnode_serialize_public(&node, &btc_chain_main, str, sizeof(str));
     u_assert_str_eq(str,
                     "xpub6ASuArnXKPbfEwhqN6e3mwBcDTgzisQN1wXN9BJcM47sSikHjJf3UFHKkNAWbWMiGj7Wf5uMash7SyYq527Hqck2AxYysAA7xmALppuCkwQ");
@@ -125,6 +135,8 @@ void test_bip32()
     r = btc_hdnode_deserialize(str, &btc_chain_main, &node2);
     u_assert_int_eq(r, true);
     u_assert_mem_eq(&node, &node2, sizeof(btc_hdnode));
+    btc_hdnode_get_p2pkh_address(&node, &btc_chain_main, str, sizeof(str));
+    u_assert_str_eq(str, "1NjxqbA9aZWnh17q1UW3rB4EPu79wDXj7x");
     btc_hdnode_serialize_public(&node, &btc_chain_main, str, sizeof(str));
     u_assert_str_eq(str,
                     "xpub6D4BDPcP2GT577Vvch3R8wDkScZWzQzMMUm3PWbmWvVJrZwQY4VUNgqFJPMM3No2dFDFGTsxxpG5uJh7n7epu4trkrX7x7DogT5Uv6fcLW5");
@@ -153,6 +165,8 @@ void test_bip32()
     r = btc_hdnode_deserialize(str, &btc_chain_main, &node2);
     u_assert_int_eq(r, true);
     u_assert_mem_eq(&node, &node2, sizeof(btc_hdnode));
+    btc_hdnode_get_p2pkh_address(&node, &btc_chain_main, str, sizeof(str));
+    u_assert_str_eq(str, "1LjmJcdPnDHhNTUgrWyhLGnRDKxQjoxAgt");
     btc_hdnode_serialize_public(&node, &btc_chain_main, str, sizeof(str));
     u_assert_str_eq(str,
                     "xpub6FHa3pjLCk84BayeJxFW2SP4XRrFd1JYnxeLeU8EqN3vDfZmbqBqaGJAyiLjTAwm6ZLRQUMv1ZACTj37sR62cfN7fe5JnJ7dh8zL4fiyLHV");
@@ -180,6 +194,8 @@ void test_bip32()
     r = btc_hdnode_deserialize(str, &btc_chain_main, &node2);
     u_assert_int_eq(r, true);
     u_assert_mem_eq(&node, &node2, sizeof(btc_hdnode));
+    btc_hdnode_get_p2pkh_address(&node, &btc_chain_main, str, sizeof(str));
+    u_assert_str_eq(str, "1LZiqrop2HGR4qrH1ULZPyBpU6AUP49Uam");
     btc_hdnode_serialize_public(&node, &btc_chain_main, str, sizeof(str));
     u_assert_str_eq(str,
                     "xpub6H1LXWLaKsWFhvm6RVpEL9P4KfRZSW7abD2ttkWP3SSQvnyA8FSVqNTEcYFgJS2UaFcxupHiYkro49S8yGasTvXEYBVPamhGW6cFJodrTHy");
@@ -208,6 +224,8 @@ void test_bip32()
     r = btc_hdnode_deserialize(str_pub_ckd_tn, &btc_chain_test, &node4);
     r = btc_hdnode_public_ckd(&node4, 123);
     u_assert_int_eq(r, true);
+    btc_hdnode_get_p2pkh_address(&node4, &btc_chain_test, str, sizeof(str));
+    u_assert_str_eq(str, "mp4VkLBrnetj5LkhyNqtgkBzJwRBqhTbaa");
     btc_hdnode_serialize_public(&node4, &btc_chain_test, str, sizeof(str));
     u_assert_str_eq(str, "tpubD8MQJFN9LVzG8pktwoQ7ApWWKLfUUhonQkeXe8gqi9tFMtMdC34g6Ntj5K6V1hdzR3to2z7dGnQbXaoZSsFkVky7TFWZjmC9Ez4Gog6ujaD");
 }
