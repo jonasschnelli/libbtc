@@ -43,7 +43,7 @@ void ecc_get_pubkey(const uint8_t* private_key, uint8_t* public_key, size_t* in_
         return;
     }
 
-    if (!secp256k1_ec_pubkey_serialize(secp256k1_ctx, public_key, in_outlen, &pubkey, compressed)) {
+    if (!secp256k1_ec_pubkey_serialize(secp256k1_ctx, public_key, in_outlen, &pubkey, compressed ? SECP256K1_EC_COMPRESSED : SECP256K1_EC_UNCOMPRESSED)) {
         return;
     }
 
@@ -58,7 +58,7 @@ btc_bool ecc_private_key_tweak_add(uint8_t* private_key, const uint8_t* tweak)
 
 btc_bool ecc_public_key_tweak_add(uint8_t* public_key_inout, const uint8_t* tweak)
 {
-    size_t out;
+    size_t out = BTC_ECKEY_COMPRESSED_LENGTH;
     secp256k1_pubkey pubkey;
 
     assert(secp256k1_ctx);
@@ -104,6 +104,21 @@ btc_bool ecc_sign(const uint8_t* private_key, const uint8_t* hash, unsigned char
         return 0;
 
     if (!secp256k1_ecdsa_signature_serialize_der(secp256k1_ctx, sigder, outlen, &sig))
+        return 0;
+
+    return 1;
+}
+
+btc_bool ecc_sign_compact(const uint8_t* private_key, const uint8_t* hash, unsigned char* sigder, size_t* outlen)
+{
+    assert(secp256k1_ctx);
+
+    secp256k1_ecdsa_signature sig;
+    if (!secp256k1_ecdsa_sign(secp256k1_ctx, &sig, hash, private_key, secp256k1_nonce_function_rfc6979, NULL))
+        return 0;
+
+    *outlen = 64;
+    if (!secp256k1_ecdsa_signature_serialize_compact(secp256k1_ctx, sigder, &sig))
         return 0;
 
     return 1;
