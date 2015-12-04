@@ -135,6 +135,11 @@ btc_bool btc_key_sign_hash(const btc_key* privkey, const uint8_t* hash, unsigned
     return ecc_sign(privkey->privkey, hash, sigout, outlen);
 }
 
+btc_bool btc_key_sign_hash_compact(const btc_key* privkey, const uint8_t* hash, unsigned char* sigout, size_t* outlen)
+{
+    return ecc_sign_compact(privkey->privkey, hash, sigout, outlen);
+}
+
 
 btc_bool btc_pubkey_verify_sig(const btc_pubkey* pubkey, const uint8_t* hash, unsigned char* sigder, int len)
 {

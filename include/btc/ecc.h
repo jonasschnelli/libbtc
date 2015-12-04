@@ -57,6 +57,7 @@ LIBBTC_API btc_bool ecc_verify_privatekey(const uint8_t* private_key);
 LIBBTC_API btc_bool ecc_verify_pubkey(const uint8_t* public_key, btc_bool compressed);
 
 LIBBTC_API btc_bool ecc_sign(const uint8_t* private_key, const uint8_t* hash, unsigned char* sigder, size_t* outlen);
+LIBBTC_API btc_bool ecc_sign_compact(const uint8_t* private_key, const uint8_t* hash, unsigned char* sigder, size_t* outlen);
 LIBBTC_API btc_bool ecc_verify_sig(const uint8_t* public_key, btc_bool compressed, const uint8_t* hash, unsigned char* sigder, size_t siglen);
 
 #ifdef __cplusplus
