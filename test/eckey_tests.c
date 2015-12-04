@@ -59,6 +59,10 @@ void test_eckey()
     size_t outlen = 74;
     btc_key_sign_hash(&key, hash, sig, &outlen);
 
+    unsigned char sigcmp[64];
+    size_t outlencmp = 64;
+    btc_key_sign_hash_compact(&key, hash, sigcmp, &outlencmp);
+
     btc_pubkey_verify_sig(&pubkey, hash, sig, outlen);
 
     btc_privkey_cleanse(&key);
