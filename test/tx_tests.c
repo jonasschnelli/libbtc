@@ -873,3 +873,23 @@ void test_script_parse()
     vector_free(pubkeys, true);
     btc_tx_free(tx);
 }
+
+void test_script_op_codeseperator()
+{
+    char scripthex[] =   "ab00270025512102e485fdaa062387c0bbb5ab711a093b6635299ec155b7b852fce6b992d5adbfec51ae";
+    char scripthexGoal[] = "00270025512102e485fdaa062387c0bbb5ab711a093b6635299ec155b7b852fce6b992d5adbfec51ae";
+    uint8_t script_data[sizeof(scripthex) / 2];
+    int outlen;
+    utils_hex_to_bin(scripthex, script_data, strlen(scripthex), &outlen);
+
+    cstring* script = cstr_new_buf(script_data, outlen);
+
+    cstring* new_script = cstr_new_sz(script->len);
+    btc_script_copy_without_op_codeseperator(script, new_script);
+
+    char hexbuf[new_script->len * 2 + 1];
+    utils_bin_to_hex((unsigned char*)new_script->str, new_script->len, hexbuf);
+    assert(strcmp(hexbuf, scripthexGoal) == 0);
+    cstr_free(new_script, true);
+    cstr_free(script, true);
+}

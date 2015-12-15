@@ -82,6 +82,7 @@ int main()
     u_run_test(test_tx_serialization);
     u_run_test(test_tx_sighash);
     u_run_test(test_script_parse);
+    u_run_test(test_script_op_codeseperator);
 
     u_run_test(test_eckey);
 

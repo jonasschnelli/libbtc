@@ -44,13 +44,46 @@ btc_bool btc_script_copy_without_op_codeseperator(const cstring* script_in, cstr
         if (!deser_bytes(&opcode, &buf, 1))
             goto err_out;
 
-        uint32_t data_len;
+        uint32_t data_len = 0;
 
-        if (opcode == OP_CODESEPARATOR)
+        if (opcode < OP_PUSHDATA1 && opcode > OP_0) {
+            data_len = opcode;
+            cstr_append_buf(script_out, &opcode, 1);
+        }
+        else if (opcode == OP_PUSHDATA1) {
+            uint8_t v8;
+            if (!deser_bytes(&v8, &buf, 1))
+                goto err_out;
+            cstr_append_buf(script_out, &opcode, 1);
+            cstr_append_buf(script_out, &v8, 1);
+            data_len = v8;
+        } else if (opcode == OP_PUSHDATA2) {
+            uint16_t v16;
+            if (!deser_u16(&v16, &buf))
+                goto err_out;
+            cstr_append_buf(script_out, &opcode, 1);
+            cstr_append_buf(script_out, &v16, 2);
+            data_len = v16;
+        } else if (opcode == OP_PUSHDATA4) {
+            uint32_t v32;
+            if (!deser_u32(&v32, &buf))
+                goto err_out;
+            cstr_append_buf(script_out, &opcode, 1);
+            cstr_append_buf(script_out, &v32, 5);
+            data_len = v32;
+        }
+        else if (opcode == OP_CODESEPARATOR)
             continue;
 
-
-        cstr_append_buf(script_out, &opcode, 1);
+        if (data_len > 0)
+        {
+            assert(data_len < 16777215); //limit max push to 0xFFFFFF
+            unsigned char bufpush[data_len];
+            deser_bytes(&bufpush, &buf, data_len);
+            cstr_append_buf(script_out, &bufpush, data_len);
+        }
+        else
+            cstr_append_buf(script_out, &opcode, 1);
     }
 
     return true;
