@@ -118,6 +118,16 @@ void btc_pubkey_get_hash160(const btc_pubkey* pubkey, uint8_t* hash160)
 }
 
 
+btc_bool btc_pubkey_get_hex(const btc_pubkey* pubkey, char* str, size_t *strsize)
+{
+    if (*strsize < BTC_ECKEY_COMPRESSED_LENGTH*2)
+        return false;
+    utils_bin_to_hex((unsigned char *)pubkey->pubkey, BTC_ECKEY_COMPRESSED_LENGTH, str);
+    *strsize = BTC_ECKEY_COMPRESSED_LENGTH*2;
+    return true;
+}
+
+
 void btc_pubkey_from_key(btc_key* privkey, btc_pubkey* pubkey_inout)
 {
     if (pubkey_inout == NULL || privkey == NULL)
@@ -134,6 +144,7 @@ btc_bool btc_key_sign_hash(const btc_key* privkey, const uint8_t* hash, unsigned
 {
     return ecc_sign(privkey->privkey, hash, sigout, outlen);
 }
+
 
 btc_bool btc_key_sign_hash_compact(const btc_key* privkey, const uint8_t* hash, unsigned char* sigout, size_t* outlen)
 {

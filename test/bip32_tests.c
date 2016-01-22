@@ -226,6 +226,14 @@ void test_bip32()
     u_assert_int_eq(r, true);
     btc_hdnode_get_p2pkh_address(&node4, &btc_chain_test, str, sizeof(str));
     u_assert_str_eq(str, "mp4VkLBrnetj5LkhyNqtgkBzJwRBqhTbaa");
+    size_t size = sizeof(str);
+    size_t sizeSmall = 55;
+    r = btc_hdnode_get_pub_hex(&node4, str, &sizeSmall);
+    u_assert_int_eq(r, false);
+    r = btc_hdnode_get_pub_hex(&node4, str, &size);
+    u_assert_int_eq(size, 66);
+    u_assert_int_eq(r, true);
+    u_assert_str_eq(str, "0391a9964e79f39cebf9b59eb2151b500bd462e589682d6ceebe8e15970bfebf8b");
     btc_hdnode_serialize_public(&node4, &btc_chain_test, str, sizeof(str));
     u_assert_str_eq(str, "tpubD8MQJFN9LVzG8pktwoQ7ApWWKLfUUhonQkeXe8gqi9tFMtMdC34g6Ntj5K6V1hdzR3to2z7dGnQbXaoZSsFkVky7TFWZjmC9Ez4Gog6ujaD");
 }

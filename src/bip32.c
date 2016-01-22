@@ -34,6 +34,7 @@
 #include "btc/base58.h"
 #include "btc/hash.h"
 #include "btc/ecc.h"
+#include "btc/ecc_key.h"
 
 #include "ripemd160.h"
 #include "sha2.h"
@@ -221,6 +222,16 @@ void btc_hdnode_get_p2pkh_address(const btc_hdnode* node, const btc_chain* chain
     btc_hash_sngl_sha256(node->public_key, BTC_ECKEY_COMPRESSED_LENGTH, hashout);
     ripemd160(hashout, 32, hash160+1);
     btc_base58_encode_check(hash160, 21, str, strsize);
+}
+
+btc_bool btc_hdnode_get_pub_hex(const btc_hdnode* node, char* str, size_t *strsize)
+{
+    btc_pubkey pubkey;
+    btc_pubkey_init(&pubkey);
+    memcpy(&pubkey.pubkey, node->public_key, BTC_ECKEY_COMPRESSED_LENGTH);
+    pubkey.compressed = true;
+
+    return btc_pubkey_get_hex(&pubkey, str, strsize);
 }
 
 

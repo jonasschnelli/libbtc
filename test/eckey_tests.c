@@ -32,6 +32,7 @@
 
 #include <btc/ecc_key.h>
 
+#include "utest.h"
 #include "utils.h"
 
 void test_eckey()
@@ -65,6 +66,16 @@ void test_eckey()
 
     btc_pubkey_verify_sig(&pubkey, hash, sig, outlen);
 
+
+    size_t size = 66;
+    char str[size];
+    int r = btc_pubkey_get_hex(&pubkey, str, &size);
+    u_assert_int_eq(r, true);
+    u_assert_int_eq(size, 66);
+
+    size = 50;
+    r = btc_pubkey_get_hex(&pubkey, str, &size);
+    u_assert_int_eq(r, false);
     btc_privkey_cleanse(&key);
     btc_pubkey_cleanse(&pubkey);
 }
