@@ -5,9 +5,6 @@
 
 #include "serialize.h"
 
-#include <stdint.h>
-#include <string.h>
-
 #include "btc/cstr.h"
 
 void ser_bytes(cstring* s, const void* p, size_t len)
@@ -120,6 +117,17 @@ btc_bool deser_u16(uint16_t* vo, struct const_buffer* buf)
         return false;
 
     *vo = le16toh(v);
+    return true;
+}
+
+btc_bool deser_i32(int32_t* vo, struct const_buffer* buf)
+{
+    int32_t v;
+
+    if (!deser_bytes(&v, buf, sizeof(v)))
+        return false;
+
+    *vo = le32toh(v);
     return true;
 }
 
