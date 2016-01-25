@@ -10,6 +10,8 @@
 #include <assert.h>
 
 #include <btc/ecc.h>
+#include <btc/ecc_key.h>
+#include <btc/hash.h>
 #include <btc/random.h>
 
 #include "utest.h"
@@ -41,4 +43,22 @@ void test_ecc()
 
     u_assert_int_eq(ecc_verify_pubkey(pub_key33_invalid, 1), 0);
     u_assert_int_eq(ecc_verify_pubkey(pub_key65_invalid, 0), 0);
+
+    btc_key key;
+    btc_privkey_init(&key);
+    assert(btc_privkey_is_valid(&key) == 0);
+    btc_privkey_gen(&key);
+
+    uint8_t* hash = utils_hex_to_uint8((const char*)"26db47a48a10b9b0b697b793f5c0231aa35fe192c9d063d7b03a55e3c302850a");
+    unsigned char sig[74];
+    size_t outlen = 74;
+    btc_key_sign_hash(&key, hash, sig, &outlen);
+
+    uint8_t sigcomp[64];
+    unsigned char sigder[74];
+    size_t sigderlen = 74;
+    u_assert_int_eq(ecc_der_to_compact(sig, outlen, sigcomp), true);
+    u_assert_int_eq(ecc_compact_to_der(sigcomp, sigder, &sigderlen),  true);
+    u_assert_int_eq(outlen, sigderlen);
+    u_assert_int_eq(memcmp(sig,sigder,sigderlen), 0);
 }

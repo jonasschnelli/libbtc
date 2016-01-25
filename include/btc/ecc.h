@@ -56,8 +56,19 @@ LIBBTC_API btc_bool ecc_verify_privatekey(const uint8_t* private_key);
 //!verifies a given public key (compressed[33] or uncompressed[65] bytes)
 LIBBTC_API btc_bool ecc_verify_pubkey(const uint8_t* public_key, btc_bool compressed);
 
+//!create a DER signature (72-74 bytes) with private key
 LIBBTC_API btc_bool ecc_sign(const uint8_t* private_key, const uint8_t* hash, unsigned char* sigder, size_t* outlen);
-LIBBTC_API btc_bool ecc_sign_compact(const uint8_t* private_key, const uint8_t* hash, unsigned char* sigder, size_t* outlen);
+
+//!create a compact (64bytes) signature with private key
+LIBBTC_API btc_bool ecc_sign_compact(const uint8_t* private_key, const uint8_t* hash, unsigned char* sigcomp, size_t* outlen);
+
+//!convert compact signature to DER
+LIBBTC_API btc_bool ecc_compact_to_der(unsigned char* sigcomp_in, unsigned char* sigder_out, size_t *sigder_len_out);
+
+//!convert DER signature to compact
+LIBBTC_API btc_bool ecc_der_to_compact(unsigned char* sigder_in, size_t sigder_len, unsigned char* sigcomp_out);
+
+//!verify DER signature with public key
 LIBBTC_API btc_bool ecc_verify_sig(const uint8_t* public_key, btc_bool compressed, const uint8_t* hash, unsigned char* sigder, size_t siglen);
 
 #ifdef __cplusplus

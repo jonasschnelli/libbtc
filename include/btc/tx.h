@@ -68,7 +68,7 @@ typedef struct btc_tx_out_ {
 } btc_tx_out;
 
 typedef struct btc_tx_ {
-    uint32_t version;
+    int32_t version;
     vector* vin;
     vector* vout;
     uint32_t locktime;
