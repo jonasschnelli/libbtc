@@ -23,12 +23,12 @@ void test_ecc()
     memset(r_buf, 0, 32);
     random_init();
 
-    while (ecc_verify_privatekey(r_buf) == 0) {
+    while (btc_ecc_verify_privatekey(r_buf) == 0) {
         random_bytes(r_buf, 32, 0);
     }
 
     memset(r_buf, 0xFF, 32);
-    u_assert_int_eq(ecc_verify_privatekey(r_buf), 0); //secp256k1 overflow
+    u_assert_int_eq(btc_ecc_verify_privatekey(r_buf), 0); //secp256k1 overflow
 
     uint8_t pub_key33[33], pub_key33_invalid[33], pub_key65[65], pub_key65_invalid[65];
 
@@ -38,11 +38,11 @@ void test_ecc()
     memcpy(pub_key65_invalid, utils_hex_to_uint8("044054fd18aeb277aeedea01d3f3986ff4e5be18092a04339dcf4e524e2c0a09746c7083ed2097011b1223a17a644e81f59aa3de22dac119fd980b39999f29a244"), 65);
 
 
-    u_assert_int_eq(ecc_verify_pubkey(pub_key33, 1), 1);
-    u_assert_int_eq(ecc_verify_pubkey(pub_key65, 0), 1);
+    u_assert_int_eq(btc_ecc_verify_pubkey(pub_key33, 1), 1);
+    u_assert_int_eq(btc_ecc_verify_pubkey(pub_key65, 0), 1);
 
-    u_assert_int_eq(ecc_verify_pubkey(pub_key33_invalid, 1), 0);
-    u_assert_int_eq(ecc_verify_pubkey(pub_key65_invalid, 0), 0);
+    u_assert_int_eq(btc_ecc_verify_pubkey(pub_key33_invalid, 1), 0);
+    u_assert_int_eq(btc_ecc_verify_pubkey(pub_key65_invalid, 0), 0);
 
     btc_key key;
     btc_privkey_init(&key);
@@ -57,8 +57,8 @@ void test_ecc()
     uint8_t sigcomp[64];
     unsigned char sigder[74];
     size_t sigderlen = 74;
-    u_assert_int_eq(ecc_der_to_compact(sig, outlen, sigcomp), true);
-    u_assert_int_eq(ecc_compact_to_der(sigcomp, sigder, &sigderlen),  true);
+    u_assert_int_eq(btc_ecc_der_to_compact(sig, outlen, sigcomp), true);
+    u_assert_int_eq(btc_ecc_compact_to_der(sigcomp, sigder, &sigderlen),  true);
     u_assert_int_eq(outlen, sigderlen);
     u_assert_int_eq(memcmp(sig,sigder,sigderlen), 0);
 }

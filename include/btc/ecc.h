@@ -36,40 +36,40 @@ extern "C" {
 #include <stdint.h>
 
 //!init static ecc context
-LIBBTC_API void ecc_start(void);
+LIBBTC_API void btc_ecc_start(void);
 
 //!destroys the static ecc context
-LIBBTC_API void ecc_stop(void);
+LIBBTC_API void btc_ecc_stop(void);
 
 //!get public key from given private key
-LIBBTC_API void ecc_get_pubkey(const uint8_t* private_key, uint8_t* public_key, size_t* public_key_len, btc_bool compressed);
+LIBBTC_API void btc_ecc_get_pubkey(const uint8_t* private_key, uint8_t* public_key, size_t* public_key_len, btc_bool compressed);
 
 //!ec mul tweak on given private key
-LIBBTC_API btc_bool ecc_private_key_tweak_add(uint8_t* private_key, const uint8_t* tweak);
+LIBBTC_API btc_bool btc_ecc_private_key_tweak_add(uint8_t* private_key, const uint8_t* tweak);
 
 //!ec mul tweak on given public key
-LIBBTC_API btc_bool ecc_public_key_tweak_add(uint8_t* public_key_inout, const uint8_t* tweak);
+LIBBTC_API btc_bool btc_ecc_public_key_tweak_add(uint8_t* public_key_inout, const uint8_t* tweak);
 
 //!verifies a given 32byte key
-LIBBTC_API btc_bool ecc_verify_privatekey(const uint8_t* private_key);
+LIBBTC_API btc_bool btc_ecc_verify_privatekey(const uint8_t* private_key);
 
 //!verifies a given public key (compressed[33] or uncompressed[65] bytes)
-LIBBTC_API btc_bool ecc_verify_pubkey(const uint8_t* public_key, btc_bool compressed);
+LIBBTC_API btc_bool btc_ecc_verify_pubkey(const uint8_t* public_key, btc_bool compressed);
 
 //!create a DER signature (72-74 bytes) with private key
-LIBBTC_API btc_bool ecc_sign(const uint8_t* private_key, const uint8_t* hash, unsigned char* sigder, size_t* outlen);
+LIBBTC_API btc_bool btc_ecc_sign(const uint8_t* private_key, const uint8_t* hash, unsigned char* sigder, size_t* outlen);
 
 //!create a compact (64bytes) signature with private key
-LIBBTC_API btc_bool ecc_sign_compact(const uint8_t* private_key, const uint8_t* hash, unsigned char* sigcomp, size_t* outlen);
+LIBBTC_API btc_bool btc_ecc_sign_compact(const uint8_t* private_key, const uint8_t* hash, unsigned char* sigcomp, size_t* outlen);
 
 //!convert compact signature to DER
-LIBBTC_API btc_bool ecc_compact_to_der(unsigned char* sigcomp_in, unsigned char* sigder_out, size_t *sigder_len_out);
+LIBBTC_API btc_bool btc_ecc_compact_to_der(unsigned char* sigcomp_in, unsigned char* sigder_out, size_t *sigder_len_out);
 
 //!convert DER signature to compact
-LIBBTC_API btc_bool ecc_der_to_compact(unsigned char* sigder_in, size_t sigder_len, unsigned char* sigcomp_out);
+LIBBTC_API btc_bool btc_ecc_der_to_compact(unsigned char* sigder_in, size_t sigder_len, unsigned char* sigcomp_out);
 
 //!verify DER signature with public key
-LIBBTC_API btc_bool ecc_verify_sig(const uint8_t* public_key, btc_bool compressed, const uint8_t* hash, unsigned char* sigder, size_t siglen);
+LIBBTC_API btc_bool btc_ecc_verify_sig(const uint8_t* public_key, btc_bool compressed, const uint8_t* hash, unsigned char* sigder, size_t siglen);
 
 #ifdef __cplusplus
 }

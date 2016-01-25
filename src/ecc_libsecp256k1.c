@@ -9,7 +9,7 @@
 
 static secp256k1_context* secp256k1_ctx = NULL;
 
-void ecc_start(void)
+void btc_ecc_start(void)
 {
     secp256k1_ctx = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
     assert(secp256k1_ctx != NULL);
@@ -21,7 +21,7 @@ void ecc_start(void)
 }
 
 
-void ecc_stop(void)
+void btc_ecc_stop(void)
 {
     secp256k1_context* ctx = secp256k1_ctx;
     secp256k1_ctx = NULL;
@@ -32,7 +32,7 @@ void ecc_stop(void)
 }
 
 
-void ecc_get_pubkey(const uint8_t* private_key, uint8_t* public_key, size_t* in_outlen, btc_bool compressed)
+void btc_ecc_get_pubkey(const uint8_t* private_key, uint8_t* public_key, size_t* in_outlen, btc_bool compressed)
 {
     secp256k1_pubkey pubkey;
     assert(secp256k1_ctx);
@@ -50,13 +50,13 @@ void ecc_get_pubkey(const uint8_t* private_key, uint8_t* public_key, size_t* in_
     return;
 }
 
-btc_bool ecc_private_key_tweak_add(uint8_t* private_key, const uint8_t* tweak)
+btc_bool btc_ecc_private_key_tweak_add(uint8_t* private_key, const uint8_t* tweak)
 {
     assert(secp256k1_ctx);
     return secp256k1_ec_privkey_tweak_add(secp256k1_ctx, (unsigned char*)private_key, (const unsigned char*)tweak);
 }
 
-btc_bool ecc_public_key_tweak_add(uint8_t* public_key_inout, const uint8_t* tweak)
+btc_bool btc_ecc_public_key_tweak_add(uint8_t* public_key_inout, const uint8_t* tweak)
 {
     size_t out = BTC_ECKEY_COMPRESSED_LENGTH;
     secp256k1_pubkey pubkey;
@@ -75,13 +75,13 @@ btc_bool ecc_public_key_tweak_add(uint8_t* public_key_inout, const uint8_t* twea
 }
 
 
-btc_bool ecc_verify_privatekey(const uint8_t* private_key)
+btc_bool btc_ecc_verify_privatekey(const uint8_t* private_key)
 {
     assert(secp256k1_ctx);
     return secp256k1_ec_seckey_verify(secp256k1_ctx, (const unsigned char*)private_key);
 }
 
-btc_bool ecc_verify_pubkey(const uint8_t* public_key, btc_bool compressed)
+btc_bool btc_ecc_verify_pubkey(const uint8_t* public_key, btc_bool compressed)
 {
     secp256k1_pubkey pubkey;
 
@@ -95,7 +95,7 @@ btc_bool ecc_verify_pubkey(const uint8_t* public_key, btc_bool compressed)
     return true;
 }
 
-btc_bool ecc_sign(const uint8_t* private_key, const uint8_t* hash, unsigned char* sigder, size_t* outlen)
+btc_bool btc_ecc_sign(const uint8_t* private_key, const uint8_t* hash, unsigned char* sigder, size_t* outlen)
 {
     assert(secp256k1_ctx);
 
@@ -109,7 +109,7 @@ btc_bool ecc_sign(const uint8_t* private_key, const uint8_t* hash, unsigned char
     return 1;
 }
 
-btc_bool ecc_sign_compact(const uint8_t* private_key, const uint8_t* hash, unsigned char* sigder, size_t* outlen)
+btc_bool btc_ecc_sign_compact(const uint8_t* private_key, const uint8_t* hash, unsigned char* sigder, size_t* outlen)
 {
     assert(secp256k1_ctx);
 
@@ -124,7 +124,7 @@ btc_bool ecc_sign_compact(const uint8_t* private_key, const uint8_t* hash, unsig
     return 1;
 }
 
-btc_bool ecc_verify_sig(const uint8_t* public_key, btc_bool compressed, const uint8_t* hash, unsigned char* sigder, size_t siglen)
+btc_bool btc_ecc_verify_sig(const uint8_t* public_key, btc_bool compressed, const uint8_t* hash, unsigned char* sigder, size_t siglen)
 {
     assert(secp256k1_ctx);
 
@@ -140,7 +140,7 @@ btc_bool ecc_verify_sig(const uint8_t* public_key, btc_bool compressed, const ui
     return secp256k1_ecdsa_verify(secp256k1_ctx, &sig, hash, &pubkey);
 }
 
-btc_bool ecc_compact_to_der(unsigned char* sigcomp_in, unsigned char* sigder_out, size_t* sigder_len_out)
+btc_bool btc_ecc_compact_to_der(unsigned char* sigcomp_in, unsigned char* sigder_out, size_t* sigder_len_out)
 {
     assert(secp256k1_ctx);
 
@@ -151,7 +151,7 @@ btc_bool ecc_compact_to_der(unsigned char* sigcomp_in, unsigned char* sigder_out
     return secp256k1_ecdsa_signature_serialize_der(secp256k1_ctx, sigder_out, sigder_len_out, &sig);
 }
 
-btc_bool ecc_der_to_compact(unsigned char* sigder_in, size_t sigder_len, unsigned char* sigcomp_out)
+btc_bool btc_ecc_der_to_compact(unsigned char* sigder_in, size_t sigder_len, unsigned char* sigcomp_out)
 {
     assert(secp256k1_ctx);
 
