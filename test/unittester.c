@@ -51,18 +51,19 @@ extern void test_serialize();
 extern void test_tx_serialization();
 extern void test_tx_sighash();
 extern void test_script_parse();
+extern void test_script_op_codeseperator();
 extern void test_eckey();
 
 
-extern void ecc_start();
-extern void ecc_stop();
+extern void btc_ecc_start();
+extern void btc_ecc_stop();
 
 int U_TESTS_RUN = 0;
 int U_TESTS_FAIL = 0;
 
 int main()
 {
-    ecc_start();
+    btc_ecc_start();
 
     u_run_test(test_random);
     u_run_test(test_sha_256);
@@ -86,6 +87,6 @@ int main()
 
     u_run_test(test_eckey);
 
-    ecc_stop();
+    btc_ecc_stop();
     return 0;
 }
