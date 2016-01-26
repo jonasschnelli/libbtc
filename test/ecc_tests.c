@@ -58,7 +58,7 @@ void test_ecc()
     unsigned char sigder[74];
     size_t sigderlen = 74;
     u_assert_int_eq(btc_ecc_der_to_compact(sig, outlen, sigcomp), true);
-    u_assert_int_eq(btc_ecc_compact_to_der(sigcomp, sigder, &sigderlen),  true);
+    u_assert_int_eq(btc_ecc_compact_to_der_normalized(sigcomp, sigder, &sigderlen),  true);
     u_assert_int_eq(outlen, sigderlen);
     u_assert_int_eq(memcmp(sig,sigder,sigderlen), 0);
 }

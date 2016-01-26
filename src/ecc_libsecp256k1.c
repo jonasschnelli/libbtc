@@ -140,13 +140,16 @@ btc_bool btc_ecc_verify_sig(const uint8_t* public_key, btc_bool compressed, cons
     return secp256k1_ecdsa_verify(secp256k1_ctx, &sig, hash, &pubkey);
 }
 
-btc_bool btc_ecc_compact_to_der(unsigned char* sigcomp_in, unsigned char* sigder_out, size_t* sigder_len_out)
+btc_bool btc_ecc_compact_to_der_normalized(unsigned char* sigcomp_in, unsigned char* sigder_out, size_t* sigder_len_out)
 {
     assert(secp256k1_ctx);
 
     secp256k1_ecdsa_signature sig;
     if (!secp256k1_ecdsa_signature_parse_compact(secp256k1_ctx, &sig, sigcomp_in))
         return false;
+
+    secp256k1_ecdsa_signature sigNorm;
+    secp256k1_ecdsa_signature_normalize(secp256k1_ctx, &sigNorm, &sig);
 
     return secp256k1_ecdsa_signature_serialize_der(secp256k1_ctx, sigder_out, sigder_len_out, &sig);
 }
