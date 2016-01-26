@@ -151,7 +151,7 @@ btc_bool btc_ecc_compact_to_der_normalized(unsigned char* sigcomp_in, unsigned c
     secp256k1_ecdsa_signature sigNorm;
     secp256k1_ecdsa_signature_normalize(secp256k1_ctx, &sigNorm, &sig);
 
-    return secp256k1_ecdsa_signature_serialize_der(secp256k1_ctx, sigder_out, sigder_len_out, &sig);
+    return secp256k1_ecdsa_signature_serialize_der(secp256k1_ctx, sigder_out, sigder_len_out, &sigNorm);
 }
 
 btc_bool btc_ecc_der_to_compact(unsigned char* sigder_in, size_t sigder_len, unsigned char* sigcomp_out)
