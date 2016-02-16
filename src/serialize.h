@@ -39,6 +39,7 @@
 extern void ser_bytes(cstring* s, const void* p, size_t len);
 extern void ser_u16(cstring* s, uint16_t v_);
 extern void ser_u32(cstring* s, uint32_t v_);
+extern void ser_i32(cstring* s, int32_t v_);
 extern void ser_u64(cstring* s, uint64_t v_);
 static inline void ser_u256(cstring* s, const unsigned char* v_)
 {

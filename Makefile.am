@@ -12,6 +12,7 @@ $(LIBSECP256K1): $(wildcard src/secp256k1/src/*) $(wildcard src/secp256k1/includ
 lib_LTLIBRARIES = libbtc.la
 include_HEADERS = include/btc/btc.h \
 	include/btc/tx.h \
+	include/btc/block.h \
 	include/btc/base58.h \
 	include/btc/bip32.h \
 	include/btc/ecc_key.h \
@@ -36,6 +37,7 @@ pkgconfig_DATA = libbtc.pc
 
 libbtc_la_SOURCES = \
 	src/sha2.c \
+	src/block.c \
 	src/utils.c \
 	src/base58.c \
 	src/ripemd160.c \
@@ -61,6 +63,7 @@ tests_SOURCES = \
 	test/utest.h \
 	test/unittester.c \
 	test/sha2_tests.c \
+	test/block_tests.c \
 	test/base58check_tests.c \
 	test/bip32_tests.c \
 	test/random_tests.c \
