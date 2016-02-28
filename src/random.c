@@ -62,7 +62,7 @@ btc_bool random_bytes(uint8_t* buf, uint32_t len, const uint8_t update_seed)
     HCRYPTPROV hProvider;
     int ret = CryptAcquireContextW(&hProvider, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
     assert(ret);
-    ret = CryptGenRandom(hProvider, 32, buf);
+    ret = CryptGenRandom(hProvider, len, buf);
     assert(ret);
     CryptReleaseContext(hProvider, 0);
 #else
