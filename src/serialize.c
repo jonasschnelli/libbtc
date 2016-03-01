@@ -26,8 +26,7 @@ void ser_u32(cstring* s, uint32_t v_)
 
 void ser_i32(cstring* s, int32_t v_)
 {
-    int32_t v = htole32(v_);
-    cstr_append_buf(s, &v, sizeof(v));
+    ser_u32(s, (uint32_t) v_);
 }
 
 void ser_u64(cstring* s, uint64_t v_)
