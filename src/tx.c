@@ -209,7 +209,7 @@ void btc_tx_out_serialize(cstring* s, const btc_tx_out* tx_out)
 
 void btc_tx_serialize(cstring* s, const btc_tx* tx)
 {
-    ser_u32(s, tx->version);
+    ser_i32(s, tx->version);
 
     ser_varlen(s, tx->vin ? tx->vin->len : 0);
 
