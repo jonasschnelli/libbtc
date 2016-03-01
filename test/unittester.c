@@ -51,6 +51,7 @@ extern void test_aes();
 extern void test_serialize();
 extern void test_tx_serialization();
 extern void test_tx_sighash();
+extern void test_tx_negative_version();
 extern void test_script_parse();
 extern void test_script_op_codeseperator();
 extern void test_eckey();
