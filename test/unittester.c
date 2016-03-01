@@ -83,6 +83,7 @@ int main()
     u_run_test(test_serialize);
     u_run_test(test_tx_serialization);
     u_run_test(test_tx_sighash);
+    u_run_test(test_tx_negative_version);
     u_run_test(test_block_header);
     u_run_test(test_script_parse);
     u_run_test(test_script_op_codeseperator);
