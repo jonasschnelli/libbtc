@@ -40,6 +40,7 @@ extern void test_sha_512();
 extern void test_sha_hmac();
 extern void test_bitcoin_hash();
 extern void test_base58check();
+extern void test_block_header();
 extern void test_bip32();
 extern void test_ecc();
 extern void test_vector();
@@ -50,6 +51,7 @@ extern void test_aes();
 extern void test_serialize();
 extern void test_tx_serialization();
 extern void test_tx_sighash();
+extern void test_tx_negative_version();
 extern void test_script_parse();
 extern void test_script_op_codeseperator();
 extern void test_eckey();
@@ -82,6 +84,8 @@ int main()
     u_run_test(test_serialize);
     u_run_test(test_tx_serialization);
     u_run_test(test_tx_sighash);
+    u_run_test(test_tx_negative_version);
+    u_run_test(test_block_header);
     u_run_test(test_script_parse);
     u_run_test(test_script_op_codeseperator);
 

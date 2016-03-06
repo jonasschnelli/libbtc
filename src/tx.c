@@ -159,7 +159,7 @@ int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx*
     struct const_buffer buf = {tx_serialized, inlen};
 
     //tx needs to be initialized
-    deser_u32(&tx->version, &buf);
+    deser_i32(&tx->version, &buf);
     uint32_t vlen;
     if (!deser_varlen(&vlen, &buf))
         return false;
@@ -209,7 +209,7 @@ void btc_tx_out_serialize(cstring* s, const btc_tx_out* tx_out)
 
 void btc_tx_serialize(cstring* s, const btc_tx* tx)
 {
-    ser_u32(s, tx->version);
+    ser_i32(s, tx->version);
 
     ser_varlen(s, tx->vin ? tx->vin->len : 0);
 

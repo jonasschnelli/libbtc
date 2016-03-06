@@ -735,6 +735,24 @@ void test_tx_sighash()
     }
 }
 
+
+void test_tx_negative_version()
+{
+    char txhex[] =   "ffffffff0100000000000000000000000000000000000000000000000000000000000000000000000000ffffffff0100e1f505000000000000000000";
+    int32_t versionGoal = -1;
+
+    uint8_t tx_data[sizeof(txhex) / 2];
+    int outlen;
+    utils_hex_to_bin(txhex, tx_data, strlen(txhex), &outlen);
+
+    btc_tx* tx = btc_tx_new();
+    btc_tx_deserialize(tx_data, sizeof(txhex) / 2, tx);
+    u_assert_int_eq(versionGoal, tx->version);
+
+    btc_tx_free(tx);
+}
+
+
 struct script_test {
     char script[32];
 };

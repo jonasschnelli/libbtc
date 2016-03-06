@@ -86,4 +86,16 @@ void test_serialize()
     cstr_free(deser_test, true);
 
     cstr_free(s2, true);
+
+    struct const_buffer buf3 = {NULL, 0};
+    uint16_t u16;
+    uint32_t u32;
+    uint64_t u64;
+    int32_t i32;
+
+    assert(deser_u16(&u16, &buf3) == false);
+    assert(deser_u32(&u32, &buf3) == false);
+    assert(deser_u64(&u64, &buf3) == false);
+    assert(deser_i32(&i32, &buf3) == false);
+
 }
