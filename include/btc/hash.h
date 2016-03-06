@@ -36,7 +36,6 @@ extern "C" {
 
 #include <stdint.h>
 #include <stddef.h>
-#include <stdint.h>
 
 #include "cstr.h"
 #include "vector.h"
