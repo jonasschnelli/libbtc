@@ -46,7 +46,7 @@ void test_block_header()
         // Check the copies are the same
         btc_block_header* header_copy = btc_block_header_new();
         btc_block_header_copy(header_copy, header);
-        assert(memcpy(header_copy, header, sizeof(header_copy)));
+        assert(memcmp(header_copy, header, sizeof(*header_copy)) == 0);
 
         // Check the serialized form matches
         btc_block_header_serialize(serialized, header);
