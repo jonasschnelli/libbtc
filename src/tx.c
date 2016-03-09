@@ -408,7 +408,6 @@ btc_bool btc_tx_sighash(const btc_tx* tx_to, const cstring* fromPubKey, unsigned
 
     cstring* s = cstr_new_sz(512);
     btc_tx_serialize(s, tx_tmp);
-    char hextest[4096];
     ser_s32(s, hashtype);
 
     sha256_Raw((const uint8_t*)s->str, s->len, hash);
