@@ -34,14 +34,19 @@
 extern "C" {
 #endif
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
+#include <string.h>
 
 #include "cstr.h"
 #include "vector.h"
 
 typedef uint8_t uint256[32];
 
+LIBBTC_API static inline btc_bool btc_hash_is_empty(uint256 hash)
+{
+    return hash[0] == 0 && !memcmp(hash, hash + 1, 19);
+}
 //bitcoin double sha256 hash
 LIBBTC_API void btc_hash(const unsigned char* datain, size_t length, uint256 hashout);
 
