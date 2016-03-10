@@ -103,6 +103,9 @@ LIBBTC_API btc_bool btc_tx_add_address_out(btc_tx* tx, const btc_chain* chain, i
 LIBBTC_API btc_bool btc_tx_add_p2sh_hash160_out(btc_tx* tx, int64_t amount, uint8_t* hash160);
 LIBBTC_API btc_bool btc_tx_add_p2pkh_hash160_out(btc_tx* tx, int64_t amount, uint8_t* hash160);
 LIBBTC_API btc_bool btc_tx_add_p2pkh_out(btc_tx* tx, int64_t amount, const btc_pubkey* pubkey);
+
+LIBBTC_API btc_bool btc_tx_outpoint_is_null(btc_tx_outpoint* tx);
+LIBBTC_API btc_bool btc_tx_is_coinbase(btc_tx* tx);
 #ifdef __cplusplus
 }
 #endif

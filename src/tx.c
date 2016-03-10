@@ -24,6 +24,7 @@
 
 */
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
@@ -471,4 +472,21 @@ btc_bool btc_tx_add_p2pkh_out(btc_tx* tx, int64_t amount, const btc_pubkey* pubk
     uint8_t hash160[20];
     btc_pubkey_get_hash160(pubkey, hash160);
     return btc_tx_add_p2pkh_hash160_out(tx, amount, hash160);
+}
+
+btc_bool btc_tx_outpoint_is_null(btc_tx_outpoint* tx)
+{
+    return true;
+}
+
+btc_bool btc_tx_is_coinbase(btc_tx* tx)
+{
+    if (tx->vin->len == 1)
+    {
+        btc_tx_in *vin = vector_idx(tx->vin, 0);
+
+        if (btc_hash_is_empty(vin->prevout.hash) && vin->prevout.n == UINT32_MAX)
+            return true;
+    }
+    return false;
 }
