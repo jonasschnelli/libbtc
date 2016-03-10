@@ -213,7 +213,10 @@ LIBBTC_API void btc_script_op_free(btc_script_op* script_op);
 void btc_script_op_free_cb(void* data);
 btc_bool btc_script_get_ops(const cstring* script_in, vector* ops_out);
 
-LIBBTC_API enum btc_tx_out_type btc_script_classify(vector* ops);
+LIBBTC_API enum btc_tx_out_type btc_script_classify_ops(vector* ops);
+LIBBTC_API enum btc_tx_out_type btc_script_classify(cstring* script, vector *data_out);
+LIBBTC_API btc_bool btc_script_extract_pkh(cstring* script, uint8_t *data);
+
 LIBBTC_API enum opcodetype btc_encode_op_n(int n);
 LIBBTC_API void btc_script_append_op(cstring* script_in, enum opcodetype op);
 LIBBTC_API void btc_script_append_pushdata(cstring* script_in, unsigned char* data, size_t datalen);
@@ -221,6 +224,8 @@ LIBBTC_API void btc_script_append_pushdata(cstring* script_in, unsigned char* da
 LIBBTC_API btc_bool btc_script_build_multisig(cstring* script_in, unsigned int required_signatures, vector* pubkeys_chars);
 LIBBTC_API btc_bool btc_script_build_p2pkh(cstring* script, const uint8_t* hash160);
 LIBBTC_API btc_bool btc_script_build_p2sh(cstring* script_in, const uint8_t* hash160);
+
+LIBBTC_API enum txnouttype btc_script_get_type(cstring* script_in);
 #ifdef __cplusplus
 }
 #endif

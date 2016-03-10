@@ -9,6 +9,8 @@
 #include <string.h>
 #include <assert.h>
 
+#include <btc/hash.h>
+
 #include "sha2.h"
 #include "utils.h"
 
