@@ -83,6 +83,18 @@ tests_LDFLAGS = -static
 TESTS = tests
 endif
 
+if WITH_WALLET
+include_HEADERS += \
+	include/btc/logdb.h
+	
+libbtc_la_SOURCES += \
+	src/logdb.c
+
+if USE_TESTS
+tests_SOURCES += \
+	test/logdb_tests.c
+endif
+endif
 
 clean-local:
 	-$(MAKE) -C src/secp256k1 clean

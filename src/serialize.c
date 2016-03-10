@@ -4,8 +4,9 @@
  */
 
 #include "serialize.h"
-
 #include "btc/cstr.h"
+
+#include <string.h>
 
 void ser_bytes(cstring* s, const void* p, size_t len)
 {
@@ -187,6 +188,59 @@ btc_bool deser_varlen(uint32_t* lo, struct const_buffer* buf)
     *lo = len;
     return true;
 }
+
+btc_bool deser_varlen_file(uint32_t* lo, FILE *file, uint8_t *rawdata, size_t *buflen_inout)
+{
+    uint32_t len;
+
+    // check min size of the buffer
+    if (*buflen_inout < sizeof(len))
+        return false;
+
+    unsigned char c;
+    if (fread(&c, 1, 1, file) != 1)
+        return false;
+
+    rawdata[0] = c;
+    *buflen_inout = 1;
+
+    const unsigned char bufp[sizeof(uint64_t)];
+    struct const_buffer buf = { (void *)bufp, sizeof(uint64_t)};
+
+    if (c == 253) {
+        uint16_t v16;
+        if (fread((void *)buf.p, 1, sizeof(v16), file) != sizeof(v16))
+            return false;
+        memcpy(rawdata+1, buf.p, sizeof(v16));
+        *buflen_inout += sizeof(v16);
+        if (!deser_u16(&v16, &buf))
+            return false;
+        len = v16;
+    } else if (c == 254) {
+        uint32_t v32;
+        if (fread((void *)buf.p, 1, sizeof(v32), file) != sizeof(v32))
+            return false;
+        memcpy(rawdata+1, buf.p, sizeof(v32));
+        *buflen_inout += sizeof(v32);
+        if (!deser_u32(&v32, &buf))
+            return false;
+        len = v32;
+    } else if (c == 255) {
+        uint64_t v64;
+        if (fread((void *)buf.p, 1, sizeof(v64), file) != sizeof(v64))
+            return false;
+        memcpy(rawdata+1, buf.p, sizeof(uint32_t)); //warning, truncate!
+        *buflen_inout += sizeof(uint32_t);
+        if (!deser_u64(&v64, &buf))
+            return false;
+        len = (uint32_t)v64; /* WARNING: truncate */
+    } else
+        len = c;
+
+    *lo = len;
+    return true;
+}
+
 
 btc_bool deser_str(char* so, struct const_buffer* buf, size_t maxlen)
 {

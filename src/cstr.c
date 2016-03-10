@@ -115,6 +115,11 @@ btc_bool cstr_append_buf(cstring* s, const void* buf, size_t sz)
     return true;
 }
 
+btc_bool cstr_append_cstr(cstring* s, cstring *append)
+{
+    return cstr_append_buf(s, append->str, append->len);
+}
+
 btc_bool cstr_equal(const cstring* a, const cstring* b)
 {
     if (a == b)

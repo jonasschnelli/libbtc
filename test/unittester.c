@@ -56,6 +56,9 @@ extern void test_script_parse();
 extern void test_script_op_codeseperator();
 extern void test_eckey();
 
+#ifdef WITH_WALLET
+extern void test_logdb();
+#endif
 
 extern void btc_ecc_start();
 extern void btc_ecc_stop();
@@ -90,6 +93,10 @@ int main()
     u_run_test(test_script_op_codeseperator);
 
     u_run_test(test_eckey);
+
+#ifdef WITH_WALLET
+    u_run_test(test_logdb);
+#endif
 
     btc_ecc_stop();
     return 0;

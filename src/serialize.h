@@ -77,6 +77,7 @@ static inline btc_bool deser_u256(uint8_t* vo, struct const_buffer* buf)
 }
 
 extern btc_bool deser_varlen(uint32_t* lo, struct const_buffer* buf);
+extern btc_bool deser_varlen_file(uint32_t* lo, FILE *file, uint8_t *rawdata, size_t *buflen_inout);
 extern btc_bool deser_str(char* so, struct const_buffer* buf, size_t maxlen);
 extern btc_bool deser_varstr(cstring** so, struct const_buffer* buf);
 
