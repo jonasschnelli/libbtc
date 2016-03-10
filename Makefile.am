@@ -23,8 +23,7 @@ include_HEADERS = include/btc/btc.h \
 	include/btc/cstr.h \
 	include/btc/script.h \
 	include/btc/aes.h \
-	include/btc/random.h \
-	include/btc/logdb.h
+	include/btc/random.h
 
 noinst_HEADERS = \
 	src/sha2.h \
@@ -52,8 +51,7 @@ libbtc_la_SOURCES = \
 	src/tx.c \
 	src/script.c \
 	src/ecc_key.c \
-	src/aes.c \
-	src/logdb.c
+	src/aes.c
 
 libbtc_la_CFLAGS = -I$(top_srcdir)/include
 libbtc_la_LIBADD = $(LIBSECP256K1)
@@ -77,8 +75,7 @@ tests_SOURCES = \
 	test/serialize_tests.c \
 	test/tx_tests.c \
 	test/eckey_tests.c \
-	test/aes_tests.c \
-	test/logdb_tests.c
+	test/aes_tests.c
 
 tests_CFLAGS = -I$(top_srcdir)/include
 tests_CPPFLAGS = -I$(top_srcdir)/src
@@ -86,6 +83,18 @@ tests_LDFLAGS = -static
 TESTS = tests
 endif
 
+if WITH_WALLET
+include_HEADERS += \
+	include/btc/logdb.h
+	
+libbtc_la_SOURCES += \
+	src/logdb.c
+
+if USE_TESTS
+tests_SOURCES += \
+	test/logdb_tests.c
+endif
+endif
 
 clean-local:
 	-$(MAKE) -C src/secp256k1 clean
