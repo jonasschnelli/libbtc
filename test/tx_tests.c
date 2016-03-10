@@ -720,8 +720,12 @@ void test_tx_sighash()
 
         vector* vec = vector_new(10, btc_script_op_free_cb);
         btc_script_get_ops(script, vec);
-        enum btc_tx_out_type type = btc_script_classify(vec);
+        enum btc_tx_out_type type = btc_script_classify_ops(vec);
         vector_free(vec, true);
+
+        enum btc_tx_out_type type2 = btc_script_classify(script, NULL);
+        assert(type == type2);
+
         cstr_free(script, true);
 
         char hexbuf[65];
@@ -775,7 +779,7 @@ void test_script_parse()
         cstring* script = cstr_new_buf(script_data, outlen);
         vector* vec = vector_new(10, btc_script_op_free_cb);
         btc_script_get_ops(script, vec);
-        enum btc_tx_out_type type = btc_script_classify(vec);
+        enum btc_tx_out_type type = btc_script_classify_ops(vec);
 
         assert(type == test->type);
         assert(vec->len == (size_t)test->opcodes);
@@ -793,7 +797,7 @@ void test_script_parse()
         cstring* script = cstr_new_buf(script_data, outlen);
         vector* vec = vector_new(10, btc_script_op_free_cb);
         btc_script_get_ops(script, vec);
-        enum btc_tx_out_type type = btc_script_classify(vec);
+        enum btc_tx_out_type type = btc_script_classify_ops(vec);
 
         cstring* new_script = cstr_new_sz(script->len);
         btc_script_copy_without_op_codeseperator(script, new_script);
@@ -826,7 +830,7 @@ void test_script_parse()
 
     btc_pubkey* pubkey = pubkeys->data[0];
     cstring* p2pkh = cstr_new_sz(1024);
-    btc_script_build_p2pkh(p2pkh, pubkey);
+    btc_script_build_p2pkh(p2pkh, pubkey->pubkey);
     u_assert_int_eq(p2pkh->str[0], (char)OP_DUP);     //2
     u_assert_int_eq(p2pkh->str[1], (char)OP_HASH160); //2
     u_assert_int_eq(((char)p2pkh->str[p2pkh->len - 1] == (char)OP_CHECKSIG), 1);

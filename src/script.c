@@ -161,7 +161,7 @@ btc_bool btc_script_get_ops(const cstring* script_in, vector* ops_out)
         }
 
         op->data = calloc(1, data_len);
-        memcpy(op->data, &buf.p, data_len);
+        memcpy(op->data, buf.p, data_len);
         op->datalen = data_len;
 
         vector_add(ops_out, op);
@@ -213,14 +213,26 @@ btc_bool btc_script_is_pubkey(vector* ops)
 }
 
 // OP_DUP, OP_HASH160, OP_PUBKEYHASH, OP_EQUALVERIFY, OP_CHECKSIG,
-btc_bool btc_script_is_pubkeyhash(vector* ops)
+btc_bool btc_script_is_pubkeyhash(vector* ops, vector *data_out)
 {
-    return ((ops->len == 5) &&
+    if ((ops->len == 5) &&
             btc_script_is_op(vector_idx(ops, 0), OP_DUP) &&
             btc_script_is_op(vector_idx(ops, 1), OP_HASH160) &&
             btc_script_is_op_pubkeyhash(vector_idx(ops, 2)) &&
             btc_script_is_op(vector_idx(ops, 3), OP_EQUALVERIFY) &&
-            btc_script_is_op(vector_idx(ops, 4), OP_CHECKSIG));
+            btc_script_is_op(vector_idx(ops, 4), OP_CHECKSIG))
+    {
+        if (data_out)
+        {
+            //copy the data (hash160) in case of a non empty vector
+            const btc_script_op *op = vector_idx(ops, 2);
+            uint8_t *buffer = calloc(1, 20);
+            memcpy(buffer, op->data, 20);
+            vector_add(data_out, buffer);
+        }
+        return true;
+    }
+    return false;
 }
 
 // OP_HASH160, OP_PUBKEYHASH, OP_EQUAL
@@ -254,9 +266,9 @@ btc_bool btc_script_is_multisig(vector* ops)
     return true;
 }
 
-enum btc_tx_out_type btc_script_classify(vector* ops)
+enum btc_tx_out_type btc_script_classify_ops(vector* ops)
 {
-    if (btc_script_is_pubkeyhash(ops))
+    if (btc_script_is_pubkeyhash(ops, NULL))
         return BTC_TX_PUBKEYHASH;
     if (btc_script_is_scripthash(ops))
         return BTC_TX_SCRIPTHASH;
@@ -266,6 +278,46 @@ enum btc_tx_out_type btc_script_classify(vector* ops)
         return BTC_TX_MULTISIG;
 
     return BTC_TX_NONSTANDARD;
+}
+
+enum btc_tx_out_type btc_script_classify(cstring* script, vector *data_out)
+{
+    //INFO: could be speed up by not forming a vector
+    //      and directly parse the script cstring
+
+    enum btc_tx_out_type tx_out_type = BTC_TX_NONSTANDARD;
+    vector* ops = vector_new(10, btc_script_op_free_cb);
+    btc_script_get_ops(script, ops);
+
+    if (btc_script_is_pubkeyhash(ops, data_out))
+        tx_out_type = BTC_TX_PUBKEYHASH;
+    if (btc_script_is_scripthash(ops))
+        tx_out_type = BTC_TX_SCRIPTHASH;
+    if (btc_script_is_pubkey(ops))
+        tx_out_type = BTC_TX_PUBKEY;
+    if (btc_script_is_multisig(ops))
+        tx_out_type = BTC_TX_MULTISIG;
+
+    vector_free(ops, true);
+    return tx_out_type;
+}
+
+btc_bool btc_script_extract_pkh(cstring* script, uint8_t *data)
+{
+    // expected that data is a 20byte buffer
+
+    btc_bool suc = false;
+
+    vector* ops = vector_new(10, btc_script_op_free_cb);
+    btc_script_get_ops(script, ops);
+    btc_script_op* op = vector_idx(ops, 2);
+    if (op && btc_script_is_op_pubkeyhash(op))
+    {
+        memcpy(data, op->data, 20);
+        suc = true;
+    }
+    vector_free(ops, true);
+    return suc;
 }
 
 enum opcodetype btc_encode_op_n(int n)
@@ -334,7 +386,7 @@ btc_bool btc_script_build_p2pkh(cstring* script_in, const uint8_t* hash160)
     btc_script_append_op(script_in, OP_HASH160);
 
 
-    btc_script_append_pushdata(script_in, hash160, 20);
+    btc_script_append_pushdata(script_in, (unsigned char *)hash160, 20);
     btc_script_append_op(script_in, OP_EQUALVERIFY);
     btc_script_append_op(script_in, OP_CHECKSIG);
 
@@ -345,7 +397,7 @@ btc_bool btc_script_build_p2sh(cstring* script_in, const uint8_t* hash160)
 {
     cstr_resize(script_in, 0); //clear script
     btc_script_append_op(script_in, OP_HASH160);
-    btc_script_append_pushdata(script_in, hash160, 20);
+    btc_script_append_pushdata(script_in, (unsigned char *)hash160, 20);
     btc_script_append_op(script_in, OP_EQUAL);
 
     return true;
