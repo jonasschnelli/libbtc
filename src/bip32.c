@@ -59,6 +59,34 @@ static uint32_t read_be(const uint8_t* data)
            (((uint32_t)data[3]));
 }
 
+btc_hdnode* btc_hdnode_new()
+{
+    btc_hdnode *hdnode;
+    hdnode = calloc(1, sizeof(*hdnode));
+    return hdnode;
+}
+
+btc_hdnode* btc_hdnode_copy(btc_hdnode* hdnode)
+{
+    btc_hdnode* newnode = btc_hdnode_new();
+
+    newnode->depth          = hdnode->depth;
+    newnode->fingerprint    = hdnode->fingerprint;
+    newnode->child_num      = hdnode->child_num;
+    memcpy(newnode->chain_code, hdnode->chain_code, sizeof(hdnode->chain_code));
+    memcpy(newnode->private_key, hdnode->private_key, sizeof(hdnode->private_key));
+    memcpy(newnode->public_key, hdnode->public_key, sizeof(hdnode->public_key));
+
+    return newnode;
+}
+
+void btc_hdnode_free(btc_hdnode* hdnode)
+{
+    memset(hdnode->chain_code, 0, sizeof(hdnode->chain_code));
+    memset(hdnode->private_key, 0, sizeof(hdnode->private_key));
+    memset(hdnode->public_key, 0, sizeof(hdnode->public_key));
+    free(hdnode);
+}
 
 btc_bool btc_hdnode_from_seed(const uint8_t* seed, int seed_len, btc_hdnode* out)
 {
@@ -214,13 +242,18 @@ void btc_hdnode_serialize_private(const btc_hdnode* node, const btc_chain* chain
 }
 
 
-void btc_hdnode_get_p2pkh_address(const btc_hdnode* node, const btc_chain* chain, char* str, int strsize)
+void btc_hdnode_get_hash160(const btc_hdnode* node, uint8_t *hash160_out)
 {
     uint8_t hashout[32];
+    btc_hash_sngl_sha256(node->public_key, BTC_ECKEY_COMPRESSED_LENGTH, hashout);
+    ripemd160(hashout, 32, hash160_out);
+}
+
+void btc_hdnode_get_p2pkh_address(const btc_hdnode* node, const btc_chain* chain, char* str, int strsize)
+{
     uint8_t hash160[21];
     hash160[0] = chain->b58prefix_pubkey_address;
-    btc_hash_sngl_sha256(node->public_key, BTC_ECKEY_COMPRESSED_LENGTH, hashout);
-    ripemd160(hashout, 32, hash160+1);
+    btc_hdnode_get_hash160(node, hash160+1);
     btc_base58_encode_check(hash160, 21, str, strsize);
 }
 

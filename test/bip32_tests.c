@@ -236,4 +236,14 @@ void test_bip32()
     u_assert_str_eq(str, "0391a9964e79f39cebf9b59eb2151b500bd462e589682d6ceebe8e15970bfebf8b");
     btc_hdnode_serialize_public(&node4, &btc_chain_test, str, sizeof(str));
     u_assert_str_eq(str, "tpubD8MQJFN9LVzG8pktwoQ7ApWWKLfUUhonQkeXe8gqi9tFMtMdC34g6Ntj5K6V1hdzR3to2z7dGnQbXaoZSsFkVky7TFWZjmC9Ez4Gog6ujaD");
+
+    btc_hdnode *nodeheap;
+    nodeheap = btc_hdnode_new();
+    btc_hdnode *nodeheap_copy = btc_hdnode_copy(nodeheap);
+
+    u_assert_int_eq(memcmp(nodeheap->private_key, nodeheap_copy->private_key, 32), 0);
+    u_assert_int_eq(memcmp(nodeheap->public_key, nodeheap_copy->public_key, 33), 0)
+
+    btc_hdnode_free(nodeheap);
+    btc_hdnode_free(nodeheap_copy);
 }
