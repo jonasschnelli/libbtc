@@ -30,7 +30,7 @@
 
 
 #include "btc/block.h"
-#include "serialize.h"
+#include <logdb/serialize.h>
 #include "sha2.h"
 #include "utils.h"
 #include "../include/btc/block.h"

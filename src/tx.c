@@ -32,7 +32,7 @@
 #include "btc/base58.h"
 #include "btc/tx.h"
 
-#include "serialize.h"
+#include <logdb/serialize.h>
 #include "sha2.h"
 #include "utils.h"
 

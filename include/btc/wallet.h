@@ -33,7 +33,8 @@
 extern "C" {
 #endif
 
-#include "logdb.h"
+#include <logdb/logdb.h>
+#include <logdb/logdb_file.h>
 #include "bip32.h"
 #include "tx.h"
 
@@ -42,7 +43,7 @@ extern "C" {
 
 /** single key/value record */
 typedef struct btc_wallet {
-    btc_log_db *db;
+    logdb_log_db *db;
     btc_hdnode *masterkey;
     uint32_t next_childindex; //cached next child index
     const btc_chain* chain;
@@ -64,7 +65,7 @@ LIBBTC_API btc_wallet* btc_wallet_new();
 LIBBTC_API void btc_wallet_free(btc_wallet *wallet);
 
 /** load the wallet, sets masterkey, sets next_childindex */
-LIBBTC_API btc_bool btc_wallet_load(btc_wallet *wallet, const char *file_path, enum btc_logdb_error *error);
+LIBBTC_API btc_bool btc_wallet_load(btc_wallet *wallet, const char *file_path, enum logdb_error *error);
 
 /** writes the wallet state to disk */
 LIBBTC_API btc_bool btc_wallet_flush(btc_wallet *wallet);

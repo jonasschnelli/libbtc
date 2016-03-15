@@ -38,7 +38,7 @@ extern "C" {
 #include <stdint.h>
 #include <string.h>
 
-#include "cstr.h"
+#include <logdb/cstr.h>
 #include "vector.h"
 
 typedef uint8_t uint256[32];

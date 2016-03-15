@@ -9,8 +9,8 @@
 #include <string.h>
 #include <assert.h>
 
-#include <btc/cstr.h>
-#include "serialize.h"
+#include <logdb/cstr.h>
+#include <logdb/serialize.h>
 #include "utils.h"
 
 void test_serialize()

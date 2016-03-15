@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-#include "cstr.h"
+#include <logdb/cstr.h>
 #include "ecc_key.h"
 #include "vector.h"
 

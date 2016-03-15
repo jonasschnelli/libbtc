@@ -38,7 +38,7 @@ extern "C" {
 #include <stddef.h>
 
 #include "chain.h"
-#include "cstr.h"
+#include <logdb/cstr.h>
 #include "hash.h"
 #include "script.h"
 #include "vector.h"

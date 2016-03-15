@@ -26,7 +26,10 @@
 
 #include "btc/wallet.h"
 #include "btc/base58.h"
-#include "serialize.h"
+#include <logdb/logdb.h>
+#include <logdb/logdb_file.h>
+#include <logdb/logdb_rec.h>
+#include <logdb/serialize.h>
 
 #include <assert.h>
 #include <stdint.h>
@@ -46,7 +49,7 @@ btc_wallet* btc_wallet_new()
 {
     btc_wallet* wallet;
     wallet = calloc(1, sizeof(*wallet));
-    wallet->db = btc_logdb_new();
+    wallet->db = logdb_new();
     wallet->masterkey = NULL;
     wallet->chain = &btc_chain_main;
     wallet->spends = vector_new(10, free);
@@ -60,7 +63,7 @@ void btc_wallet_free(btc_wallet *wallet)
 
     if (wallet->db)
     {
-        btc_logdb_free(wallet->db);
+        logdb_free(wallet->db);
         wallet->db = NULL;
     }
 
@@ -76,7 +79,7 @@ void btc_wallet_free(btc_wallet *wallet)
     free(wallet);
 }
 
-btc_bool btc_wallet_load(btc_wallet *wallet, const char *file_path, enum btc_logdb_error *error)
+btc_bool btc_wallet_load(btc_wallet *wallet, const char *file_path, enum logdb_error *error)
 {
     if (!wallet)
         return false;
@@ -95,14 +98,14 @@ btc_bool btc_wallet_load(btc_wallet *wallet, const char *file_path, enum btc_log
     if (stat(file_path, &buffer) == 0)
         create = false;
 
-    enum btc_logdb_error db_error = 0;
-    if (!btc_logdb_load(wallet->db, file_path, create, &db_error))
+    enum logdb_error db_error = 0;
+    if (!logdb_load(wallet->db, file_path, create, &db_error))
     {
         *error = db_error;
         return false;
     }
 
-    btc_logdb_record *rec = wallet->db->head;
+    logdb_record *rec = wallet->db->memdb_head;
     btc_bool child_cache_set = false;
     while (rec)
     {
@@ -134,7 +137,7 @@ btc_bool btc_wallet_load(btc_wallet *wallet, const char *file_path, enum btc_log
 
 btc_bool btc_wallet_flush(btc_wallet *wallet)
 {
-    return btc_logdb_flush(wallet->db);
+    return logdb_flush(wallet->db);
 }
 
 void btc_wallet_set_master_key_copy(btc_wallet *wallet, btc_hdnode *masterkey)
@@ -162,7 +165,7 @@ void btc_wallet_set_master_key_copy(btc_wallet *wallet, btc_hdnode *masterkey)
 
     struct buffer buf_key = {key, sizeof(key)};
     struct buffer buf_val = {str, strlen(str)};
-    btc_logdb_append(wallet->db, &buf_key, &buf_val);
+    logdb_append(wallet->db, &buf_key, &buf_val);
 }
 
 btc_hdnode* btc_wallet_next_key_new(btc_wallet *wallet)
@@ -184,8 +187,8 @@ btc_hdnode* btc_wallet_next_key_new(btc_wallet *wallet)
 
     struct buffer buf_key = {key, sizeof(key)};
     struct buffer buf_val = {str, strlen(str)};
-    btc_logdb_append(wallet->db, &buf_key, &buf_val);
-    btc_logdb_flush(wallet->db);
+    logdb_append(wallet->db, &buf_key, &buf_val);
+    logdb_flush(wallet->db);
 
     //increase the in-memory counter (cache)
     wallet->next_childindex++;
@@ -195,7 +198,7 @@ btc_hdnode* btc_wallet_next_key_new(btc_wallet *wallet)
 
 void btc_wallet_get_addresses(btc_wallet *wallet, vector *addr_out)
 {
-    btc_logdb_record *rec = wallet->db->head;
+    logdb_record *rec = wallet->db->memdb_head;
 
     //keep a pointer to the keys already added
     vector *keys_added = vector_new(32, NULL);
@@ -235,7 +238,7 @@ void btc_wallet_find_hdnode_byaddr(btc_wallet *wallet, const char *search_addr, 
     if (!wallet || !search_addr)
         return;
 
-    btc_logdb_record *rec = wallet->db->head;
+    logdb_record *rec = wallet->db->memdb_head;
 
     //move to the bottom of the records list
     while (rec->prev)
@@ -306,7 +309,7 @@ btc_bool btc_wallet_add_wtx(btc_wallet *wallet, btc_wtx *wtx)
 
     struct buffer buf_key = {key, sizeof(key)};
     struct buffer buf_val = {txser->str, txser->len};
-    btc_logdb_append(wallet->db, &buf_key, &buf_val);
+    logdb_append(wallet->db, &buf_key, &buf_val);
 
     //add to spends
     btc_wallet_add_to_spent(wallet, wtx);
@@ -321,7 +324,7 @@ btc_bool btc_wallet_have_key(btc_wallet *wallet, uint8_t *hash160)
     if (!wallet)
         return false;
 
-    btc_logdb_record *rec = wallet->db->head;
+    logdb_record *rec = wallet->db->memdb_head;
     while (rec)
     {
         if (rec->mode == RECORD_TYPE_WRITE &&
@@ -345,7 +348,7 @@ int64_t btc_wallet_get_balance(btc_wallet *wallet)
 
     int64_t credit = 0;
 
-    btc_logdb_record *rec = wallet->db->head;
+    logdb_record *rec = wallet->db->memdb_head;
     vector *keys_added = vector_new(32, NULL);
     //move to the bottom of the records list
     while (rec->prev)
@@ -454,7 +457,7 @@ btc_bool btc_wallet_get_unspent(btc_wallet *wallet, vector *unspents)
     if (!wallet)
         return false;
 
-    btc_logdb_record *rec = wallet->db->head;
+    logdb_record *rec = wallet->db->memdb_head;
 
     //move to the bottom of the records list
     while (rec->prev)

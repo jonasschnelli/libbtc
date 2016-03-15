@@ -12,7 +12,7 @@ extern "C" {
 #include <stdint.h>
 #include <sys/types.h>
 #include "hash.h"
-#include "cstr.h"
+#include <logdb/cstr.h>
 
 typedef struct btc_block_header_ {
     int32_t version;

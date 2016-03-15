@@ -7,6 +7,9 @@
 #include <btc/wallet.h>
 #include <btc/base58.h>
 
+#include <logdb/logdb.h>
+#include <logdb/logdb_file.h>
+
 #include "utest.h"
 #include "utils.h"
 #include <unistd.h>
@@ -17,7 +20,7 @@ void test_wallet()
 {
     unlink(wallettmpfile);
     btc_wallet *wallet = btc_wallet_new();
-    enum btc_logdb_error error;
+    enum logdb_error error;
     u_assert_int_eq(btc_wallet_load(wallet, wallettmpfile, &error), true);
 
     char *xpriv = "xprv9uHRZZhk6KAJC1avXpDAp4MDc3sQKNxDiPvvkX8Br5ngLNv1TxvUxt4cV1rGL5hj6KCesnDYUhd7oWgT11eZG7XnxHrnYeSvkzY7d2bhkJ7";
@@ -52,7 +55,7 @@ void test_wallet()
 
     uint8_t hash160[20];
     btc_hdnode_get_hash160(node2, hash160);
-    u_assert_int_eq(memcmp(wallet->db->head->key->str+5, hash160, 20), 0);
+    u_assert_int_eq(memcmp(wallet->db->memdb_head->key->str+5, hash160, 20), 0);
 
     vector *addrs = vector_new(1, free);
     btc_wallet_get_addresses(wallet, addrs);

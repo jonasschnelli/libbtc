@@ -44,11 +44,8 @@ extern void test_block_header();
 extern void test_bip32();
 extern void test_ecc();
 extern void test_vector();
-extern void test_cstr();
-extern void test_buffer();
 extern void test_utils();
 extern void test_aes();
-extern void test_serialize();
 extern void test_tx_serialization();
 extern void test_tx_sighash();
 extern void test_tx_negative_version();
@@ -83,9 +80,6 @@ int main()
     u_run_test(test_bip32);
     u_run_test(test_ecc);
     u_run_test(test_vector);
-    u_run_test(test_cstr);
-    u_run_test(test_buffer);
-    u_run_test(test_serialize);
     u_run_test(test_tx_serialization);
     u_run_test(test_tx_sighash);
     u_run_test(test_tx_negative_version);
@@ -96,7 +90,6 @@ int main()
     u_run_test(test_eckey);
 
 #ifdef WITH_WALLET
-    u_run_test(test_logdb);
     u_run_test(test_wallet);
 #endif
 

@@ -11,7 +11,7 @@
 
 #include <btc/block.h>
 
-#include <btc/cstr.h>
+#include <logdb/cstr.h>
 #include <btc/ecc_key.h>
 #include "utils.h"
 
