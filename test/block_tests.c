@@ -13,7 +13,7 @@
 
 #include <logdb/cstr.h>
 #include <btc/ecc_key.h>
-#include "utils.h"
+#include <logdb/utils.h>
 
 struct blockheadertest {
     char hexheader[160];

@@ -27,7 +27,6 @@
 #include "btc/wallet.h"
 #include "btc/base58.h"
 #include <logdb/logdb.h>
-#include <logdb/logdb_file.h>
 #include <logdb/logdb_rec.h>
 #include <logdb/serialize.h>
 
@@ -45,14 +44,85 @@ static const char *hdkey_key = "hdkey";
 static const char *hdmasterkey_key = "mstkey";
 static const char *tx_key = "tx";
 
+
+/* static interface */
+static logdb_memmapper btc_wallet_db_mapper = {
+    btc_wallet_logdb_append_cb,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+};
+/* ==================== */
+/* txes rbtree callback */
+/* ==================== */
+void btc_rbtree_wtxes_free_key(void* a) {
+    /* keys are cstrings that needs to be released by the rbtree */
+    cstring *key = (cstring *)a;
+    cstr_free(key, true);
+}
+
+void btc_rbtree_wtxes_free_value(void *a){
+    /* free the wallet transaction */
+    btc_wtx *wtx = (btc_wtx *)a;
+    btc_wallet_wtx_free(wtx);
+}
+
+int btc_rbtree_wtxes_compare(const void* a,const void* b) {
+    return cstr_compare((cstring *)a, (cstring *)b);
+}
+
+void btc_rbtree_wtxes_print_key(const void* a) {
+    printf("%i",*(int*)a);
+}
+
+void btc_rbtree_wtxes_print_value(void* a) {
+    UNUSED(a);
+}
+
+/* ====================== */
+/* hdkeys rbtree callback */
+/* ====================== */
+void btc_rbtree_hdkey_free_key(void* a) {
+    /* keys are cstrings that needs to be released by the rbtree */
+    cstring *key = (cstring *)a;
+    cstr_free(key, true);
+}
+
+void btc_rbtree_hdkey_free_value(void *a){
+    /* free the hdnode */
+    btc_hdnode *node = (btc_hdnode *)a;
+    btc_hdnode_free(node);
+}
+
+int btc_rbtree_hdkey_compare(const void* a,const void* b) {
+    return cstr_compare((cstring *)a, (cstring *)b);
+}
+
+void btc_rbtree_hdkey_print_key(const void* a) {
+    printf("%i",*(int*)a);
+}
+
+void btc_rbtree_hdkey_print_value(void* a) {
+    UNUSED(a);
+}
+
+/*
+ ==========================================================
+*/
+
 btc_wallet* btc_wallet_new()
 {
     btc_wallet* wallet;
     wallet = calloc(1, sizeof(*wallet));
     wallet->db = logdb_new();
+    logdb_set_memmapper(wallet->db, &btc_wallet_db_mapper, wallet);
     wallet->masterkey = NULL;
     wallet->chain = &btc_chain_main;
     wallet->spends = vector_new(10, free);
+
+    wallet->wtxes_rbtree = RBTreeCreate(btc_rbtree_wtxes_compare,btc_rbtree_wtxes_free_key,btc_rbtree_wtxes_free_value,btc_rbtree_wtxes_print_key,btc_rbtree_wtxes_print_value);
+    wallet->hdkeys_rbtree = RBTreeCreate(btc_rbtree_hdkey_compare,btc_rbtree_hdkey_free_key,btc_rbtree_hdkey_free_value,btc_rbtree_hdkey_print_key,btc_rbtree_hdkey_print_value);
     return wallet;
 }
 
@@ -76,7 +146,62 @@ void btc_wallet_free(btc_wallet *wallet)
     if (wallet->masterkey)
         free(wallet->masterkey);
 
+    RBTreeDestroy(wallet->wtxes_rbtree);
+    RBTreeDestroy(wallet->hdkeys_rbtree);
+
     free(wallet);
+}
+
+void btc_wallet_logdb_append_cb(void* ctx, logdb_bool load_phase, logdb_record *rec)
+{
+    btc_wallet* wallet = (btc_wallet*)ctx;
+    if (load_phase)
+    {
+        if (wallet->masterkey == NULL && rec->mode == RECORD_TYPE_WRITE && rec->key->len > strlen(hdmasterkey_key) && memcmp(rec->key->str, hdmasterkey_key, strlen(hdmasterkey_key)) == 0)
+        {
+            wallet->masterkey = btc_hdnode_new();
+            btc_hdnode_deserialize(rec->value->str, wallet->chain, wallet->masterkey);
+        }
+//        if (child_cache_set == false && rec->key->len > strlen(hdkey_key) && memcmp(rec->key->str, hdkey_key, strlen(hdkey_key)) == 0)
+//        {
+//            btc_hdnode node;
+//            btc_hdnode_deserialize(rec->value->str, wallet->chain, &node);
+//            wallet->next_childindex = node.child_num+1;
+//            child_cache_set = true;
+//        }
+        if (rec->key->len == strlen(hdkey_key)+20 && memcmp(rec->key->str, hdkey_key, strlen(hdkey_key)) == 0)
+        {
+            btc_hdnode *hdnode = btc_hdnode_new();
+            btc_hdnode_deserialize(rec->value->str, wallet->chain, hdnode);
+
+            /* rip out the hash from the record key (avoid re-SHA256) */
+            cstring *keyhash160 = cstr_new_buf(rec->key->str+strlen(hdkey_key),20);
+
+            /* add hdnode to the rbtree */
+            RBTreeInsert(wallet->hdkeys_rbtree,keyhash160,hdnode);
+
+            if (hdnode->child_num+1 > wallet->next_childindex)
+                wallet->next_childindex = hdnode->child_num+1;
+        }
+
+        if (rec->key->len == strlen(tx_key)+SHA256_DIGEST_LENGTH && memcmp(rec->key->str, tx_key, strlen(tx_key)) == 0)
+        {
+            btc_wtx *wtx = btc_wallet_wtx_new();
+            struct const_buffer buf = {rec->value->str, rec->value->len};
+
+            /* deserialize transaction */
+            btc_wallet_wtx_deserialize(wtx, &buf);
+
+            /* rip out the hash from the record key (avoid re-SHA256) */
+            cstring *wtxhash = cstr_new_buf(rec->key->str+strlen(tx_key),SHA256_DIGEST_LENGTH);
+
+            /* add wtx to the rbtree */
+            RBTreeInsert(wallet->wtxes_rbtree,wtxhash,wtx);
+
+            /* add to spends */
+            btc_wallet_add_to_spent(wallet, wtx);
+        }
+    }
 }
 
 btc_bool btc_wallet_load(btc_wallet *wallet, const char *file_path, enum logdb_error *error)
@@ -103,33 +228,6 @@ btc_bool btc_wallet_load(btc_wallet *wallet, const char *file_path, enum logdb_e
     {
         *error = db_error;
         return false;
-    }
-
-    logdb_record *rec = wallet->db->memdb_head;
-    btc_bool child_cache_set = false;
-    while (rec)
-    {
-        if (wallet->masterkey == NULL && rec->mode == RECORD_TYPE_WRITE && rec->key->len > strlen(hdmasterkey_key) && memcmp(rec->key->str, hdmasterkey_key, strlen(hdmasterkey_key)) == 0)
-        {
-            wallet->masterkey = btc_hdnode_new();
-            btc_hdnode_deserialize(rec->value->str, wallet->chain, wallet->masterkey);
-        }
-        if (child_cache_set == false && rec->key->len > strlen(hdkey_key) && memcmp(rec->key->str, hdkey_key, strlen(hdkey_key)) == 0)
-        {
-            btc_hdnode node;
-            btc_hdnode_deserialize(rec->value->str, wallet->chain, &node);
-            wallet->next_childindex = node.child_num+1;
-            child_cache_set = true;
-        }
-        if (rec->key->len == strlen(tx_key)+SHA256_DIGEST_LENGTH && memcmp(rec->key->str, tx_key, strlen(tx_key)) == 0)
-        {
-            btc_wtx *wtx = btc_wallet_wtx_new();
-            struct const_buffer buf = {rec->value->str, rec->value->len};
-            btc_wallet_wtx_deserialize(wtx, &buf);
-            btc_wallet_add_to_spent(wallet, wtx);
-            btc_wallet_wtx_free(wtx);
-        }
-        rec = rec->prev;
     }
 
     return true;
@@ -190,6 +288,10 @@ btc_hdnode* btc_wallet_next_key_new(btc_wallet *wallet)
     logdb_append(wallet->db, &buf_key, &buf_val);
     logdb_flush(wallet->db);
 
+    //add key to the rbtree
+    cstring *hdnodehash = cstr_new_buf(((char *)buf_key.p)+strlen(hdkey_key),20);
+    RBTreeInsert(wallet->hdkeys_rbtree,hdnodehash,btc_hdnode_copy(node));
+
     //increase the in-memory counter (cache)
     wallet->next_childindex++;
 
@@ -198,73 +300,42 @@ btc_hdnode* btc_wallet_next_key_new(btc_wallet *wallet)
 
 void btc_wallet_get_addresses(btc_wallet *wallet, vector *addr_out)
 {
-    logdb_record *rec = wallet->db->memdb_head;
+    rb_red_blk_node* hdkey_rbtree_node;
 
-    //keep a pointer to the keys already added
-    vector *keys_added = vector_new(32, NULL);
-
-    //move to the bottom of the records list
-    while (rec->prev)
-        rec = rec->prev;
-
-    //TODO: avoid old/deleted records
-    while (rec)
-    {
-        if (rec->mode == RECORD_TYPE_WRITE &&
-            rec->key &&
-            vector_find(keys_added, rec->key) == -1 && //<-- only if key was not already added to the vector
-            rec->key->len > strlen(hdkey_key) &&
-            memcmp(rec->key->str, hdkey_key, strlen(hdkey_key)) == 0) //<-- only hdkey records
-        {
-            uint8_t hash160[21];
-            hash160[0] = wallet->chain->b58prefix_pubkey_address;
-            memcpy(hash160+1, rec->key->str+strlen(hdkey_key), 20);
-
-            size_t addrsize = 98;
-            char *addr = calloc(1, addrsize);
-            btc_base58_encode_check(hash160, 21, addr, addrsize);
-            vector_add(addr_out, addr);
-            vector_add(keys_added, rec->key);
-        }
-
-        rec = rec->next;
-    }
-
-    vector_free(keys_added, true);
-}
-
-void btc_wallet_find_hdnode_byaddr(btc_wallet *wallet, const char *search_addr, btc_hdnode *node_out)
-{
-    if (!wallet || !search_addr)
+    if (!wallet)
         return;
 
-    logdb_record *rec = wallet->db->memdb_head;
-
-    //move to the bottom of the records list
-    while (rec->prev)
+    while((hdkey_rbtree_node = rbtree_enumerate_next(wallet->hdkeys_rbtree)))
     {
-        if (rec->mode == RECORD_TYPE_WRITE && rec->key && rec->key->len > strlen(hdkey_key))
-        {
-            //generate base58(hash160)
-            uint8_t hash160[21];
-            hash160[0] = wallet->chain->b58prefix_pubkey_address;
-            memcpy(hash160+1, rec->key->str+strlen(hdkey_key), 20);
+        cstring *key = hdkey_rbtree_node->key;
+        uint8_t hash160[21];
+        hash160[0] = wallet->chain->b58prefix_pubkey_address;
+        memcpy(hash160+1, key->str, 20);
 
-            size_t addrsize = 98;
-            char addr[addrsize];
-            btc_base58_encode_check(hash160, 21, addr, addrsize);
-            if (strcmp(search_addr, addr) == 0)
-            {
-                //found, deserialize
-                btc_hdnode_deserialize(rec->value->str, wallet->chain, node_out);
-                return;
-            }
-        }
-        rec = rec->prev;
+        size_t addrsize = 98;
+        char *addr = calloc(1, addrsize);
+        btc_base58_encode_check(hash160, 21, addr, addrsize);
+        vector_add(addr_out, addr);
     }
+}
 
-    //not found
-    node_out = NULL;
+btc_hdnode * btc_wallet_find_hdnode_byaddr(btc_wallet *wallet, const char *search_addr)
+{
+    if (!wallet || !search_addr)
+        return NULL;
+
+    uint8_t hashdata[strlen(search_addr)];
+    memset(hashdata, 0, 20);
+    btc_base58_decode_check(search_addr, hashdata, strlen(search_addr));
+
+    cstring keyhash160;
+    keyhash160.str = (char *)hashdata+1;
+    keyhash160.len = 20;
+    rb_red_blk_node* node = RBExactQuery(wallet->hdkeys_rbtree, &keyhash160);
+    if (node && node->info)
+        return (btc_hdnode *)node->info;
+    else
+        return NULL;
 }
 
 btc_wtx* btc_wallet_wtx_new()
@@ -275,6 +346,15 @@ btc_wtx* btc_wallet_wtx_new()
     wtx->tx = btc_tx_new();
 
     return wtx;
+}
+
+btc_wtx* btc_wallet_wtx_copy(btc_wtx* wtx)
+{
+    btc_wtx* wtx_copy;
+    wtx_copy = btc_wallet_wtx_new();
+    btc_tx_copy(wtx_copy->tx, wtx->tx);
+
+    return wtx_copy;
 }
 
 void btc_wallet_wtx_free(btc_wtx* wtx)
@@ -324,46 +404,46 @@ btc_bool btc_wallet_have_key(btc_wallet *wallet, uint8_t *hash160)
     if (!wallet)
         return false;
 
-    logdb_record *rec = wallet->db->memdb_head;
-    while (rec)
-    {
-        if (rec->mode == RECORD_TYPE_WRITE &&
-            rec->key &&
-            rec->key->len == strlen(hdkey_key)+20 &&
-            memcmp(rec->key->str, hdkey_key, strlen(hdkey_key)) == 0 &&
-            memcmp(rec->key->str+strlen(hdkey_key), hash160, 20) == 0)
-        {
-            //key found
-            return true;
-        }
-        rec = rec->prev;
-    }
+    cstring keyhash160;
+    keyhash160.str = (char *)hash160;
+    keyhash160.len = 20;
+    rb_red_blk_node* node = RBExactQuery(wallet->hdkeys_rbtree, &keyhash160);
+    if (node && node->info)
+        return true;
+
     return false;
 }
 
 int64_t btc_wallet_get_balance(btc_wallet *wallet)
 {
+    rb_red_blk_node* hdkey_rbtree_node;
+    int64_t credit = 0;
+
     if (!wallet)
         return false;
 
-    int64_t credit = 0;
-
-    logdb_record *rec = wallet->db->memdb_head;
-    vector *keys_added = vector_new(32, NULL);
-    //move to the bottom of the records list
-    while (rec->prev)
+    while((hdkey_rbtree_node = rbtree_enumerate_next(wallet->wtxes_rbtree)))
     {
-        if (rec->mode == RECORD_TYPE_WRITE && rec->key && vector_find(keys_added, rec->key) == -1 && rec->key->len == strlen(tx_key)+SHA256_DIGEST_LENGTH)
-        {
-            btc_wtx *wtx = btc_wallet_wtx_new();
-            struct const_buffer buf = {rec->value->str, rec->value->len};
-            btc_wallet_wtx_deserialize(wtx, &buf);
-
-            credit += btc_wallet_wtx_get_credit(wallet, wtx);
-            vector_add(keys_added, rec->key);
-        }
-        rec = rec->prev;
+        btc_wtx *wtx = hdkey_rbtree_node->info;
+        credit += btc_wallet_wtx_get_credit(wallet, wtx);
     }
+
+//    logdb_record *rec = wallet->db->memdb_head;
+//    vector *keys_added = vector_new(32, NULL);
+//    //move to the bottom of the records list
+//    while (rec->prev)
+//    {
+//        if (rec->mode == RECORD_TYPE_WRITE && rec->key && vector_find(keys_added, rec->key) == -1 && rec->key->len == strlen(tx_key)+SHA256_DIGEST_LENGTH)
+//        {
+//            btc_wtx *wtx = btc_wallet_wtx_new();
+//            struct const_buffer buf = {rec->value->str, rec->value->len};
+//            btc_wallet_wtx_deserialize(wtx, &buf);
+//
+//            credit += btc_wallet_wtx_get_credit(wallet, wtx);
+//            vector_add(keys_added, rec->key);
+//        }
+//        rec = rec->prev;
+//    }
 
     return credit;
 }
@@ -454,54 +534,39 @@ btc_bool btc_wallet_is_spent(btc_wallet *wallet, uint256 hash, uint32_t n)
 
 btc_bool btc_wallet_get_unspent(btc_wallet *wallet, vector *unspents)
 {
+    rb_red_blk_node* hdkey_rbtree_node;
+
     if (!wallet)
         return false;
 
-    logdb_record *rec = wallet->db->memdb_head;
-
-    //move to the bottom of the records list
-    while (rec->prev)
+    while((hdkey_rbtree_node = rbtree_enumerate_next(wallet->wtxes_rbtree)))
     {
-        if (rec->mode == RECORD_TYPE_WRITE && rec->key && rec->key->len == strlen(tx_key)+SHA256_DIGEST_LENGTH)
-        {
-            /* requires deserializing
-               this might be slow, but will allow to only have one disk->memory mapping
-               a speed up would be possible by keeping a array/map of btc_wtx on the heap
-            */
-            btc_wtx *wtx = btc_wallet_wtx_new();
-            struct const_buffer buf = {rec->value->str, rec->value->len};
-            btc_wallet_wtx_deserialize(wtx, &buf);
+        btc_wtx *wtx = hdkey_rbtree_node->info;
+        cstring *key = hdkey_rbtree_node->key;
+        uint8_t *hash = (uint8_t *)key->str;
 
-            uint8_t *hash = (uint8_t *)rec->key->str+strlen(tx_key); //pointer to the hash (db)
+        unsigned int i = 0;
+        if (wtx->tx->vout) {
+            for (i = 0; i < wtx->tx->vout->len; i++) {
+                btc_tx_out* tx_out;
+                tx_out = vector_idx(wtx->tx->vout, i);
 
-            unsigned int i = 0;
-            if (wtx->tx->vout) {
-                for (i = 0; i < wtx->tx->vout->len; i++) {
-                    btc_tx_out* tx_out;
-                    tx_out = vector_idx(wtx->tx->vout, i);
-
-                    if (!btc_wallet_is_spent(wallet, hash, i))
+                if (!btc_wallet_is_spent(wallet, hash, i))
+                {
+                    if (btc_wallet_txout_is_mine(wallet, tx_out))
                     {
-                        if (btc_wallet_txout_is_mine(wallet, tx_out))
-                        {
-                            btc_output *output = btc_wallet_output_new();
-
-                            //lame copy of wtx
-                            struct const_buffer buf2 = {rec->value->str, rec->value->len};
-                            btc_wallet_wtx_deserialize(output->wtx, &buf2);
-                            output->i = i;
-                            vector_add(unspents, output);
-                        }
+                        btc_output *output = btc_wallet_output_new();
+                        btc_wallet_wtx_free(output->wtx);
+                        output->wtx = btc_wallet_wtx_copy(wtx);
+                        output->i = i;
+                        vector_add(unspents, output);
                     }
                 }
             }
-
-            btc_wallet_wtx_free(wtx);
         }
-        rec = rec->prev;
     }
 
-    return false;
+    return true;
 }
 
 btc_output* btc_wallet_output_new()

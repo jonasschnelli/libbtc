@@ -34,7 +34,7 @@ extern "C" {
 #endif
 
 #include <logdb/logdb.h>
-#include <logdb/logdb_file.h>
+#include <logdb/logdb_core.h>
 #include "bip32.h"
 #include "tx.h"
 
@@ -49,6 +49,9 @@ typedef struct btc_wallet {
     const btc_chain* chain;
     uint32_t bestblockheight;
     vector *spends;
+
+    rb_red_blk_tree *wtxes_rbtree;
+    rb_red_blk_tree *hdkeys_rbtree;
 } btc_wallet;
 
 typedef struct btc_wtx_ {
@@ -63,6 +66,11 @@ typedef struct btc_output_ {
 
 LIBBTC_API btc_wallet* btc_wallet_new();
 LIBBTC_API void btc_wallet_free(btc_wallet *wallet);
+
+
+/** logdb callback for memory mapping a new */
+void btc_wallet_logdb_append_cb(void* ctx, logdb_bool load_phase, logdb_record *rec);
+cstring * logdb_llistdb_find_cb(logdb_log_db* db, struct buffer *key);
 
 /** load the wallet, sets masterkey, sets next_childindex */
 LIBBTC_API btc_bool btc_wallet_load(btc_wallet *wallet, const char *file_path, enum logdb_error *error);
@@ -81,7 +89,7 @@ LIBBTC_API btc_hdnode* btc_wallet_next_key_new(btc_wallet *wallet);
 LIBBTC_API void btc_wallet_get_addresses(btc_wallet *wallet, vector *addr_out);
 
 /** searches after a hdnode by given P2PKH (base58(hash160)) address */
-LIBBTC_API void btc_wallet_find_hdnode_byaddr(btc_wallet *wallet, const char *search_addr, btc_hdnode *node_out);
+LIBBTC_API btc_hdnode * btc_wallet_find_hdnode_byaddr(btc_wallet *wallet, const char *search_addr);
 
 LIBBTC_API btc_wtx* btc_wallet_wtx_new();
 LIBBTC_API void btc_wallet_wtx_free(btc_wtx* wtx);

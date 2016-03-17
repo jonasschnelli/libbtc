@@ -11,7 +11,7 @@
 
 #include <logdb/cstr.h>
 #include <logdb/serialize.h>
-#include "utils.h"
+#include <logdb/utils.h>
 
 void test_serialize()
 {

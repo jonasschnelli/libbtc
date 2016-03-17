@@ -10,7 +10,7 @@
 #include <assert.h>
 
 #include <btc/aes.h>
-#include "utils.h"
+#include <logdb/utils.h>
 #include "utest.h"
 
 struct nist_aes_test_vector

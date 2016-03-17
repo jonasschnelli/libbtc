@@ -35,16 +35,12 @@
     } while (0)
 
 extern void test_random();
-extern void test_sha_256();
-extern void test_sha_512();
-extern void test_sha_hmac();
 extern void test_bitcoin_hash();
 extern void test_base58check();
 extern void test_block_header();
 extern void test_bip32();
 extern void test_ecc();
 extern void test_vector();
-extern void test_utils();
 extern void test_aes();
 extern void test_tx_serialization();
 extern void test_tx_sighash();
@@ -69,12 +65,8 @@ int main()
     btc_ecc_start();
 
     u_run_test(test_random);
-    u_run_test(test_sha_256);
-    u_run_test(test_sha_512);
-    u_run_test(test_sha_hmac);
     u_run_test(test_bitcoin_hash);
     u_run_test(test_base58check);
-    u_run_test(test_utils);
     u_run_test(test_aes);
 
     u_run_test(test_bip32);

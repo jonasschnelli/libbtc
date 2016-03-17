@@ -9,7 +9,7 @@
 #include <btc/ecc_key.h>
 
 #include "utest.h"
-#include "utils.h"
+#include <logdb/utils.h>
 #include <unistd.h>
 
 struct txtest {

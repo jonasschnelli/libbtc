@@ -8,10 +8,9 @@
 #include <btc/base58.h>
 
 #include <logdb/logdb.h>
-#include <logdb/logdb_file.h>
 
 #include "utest.h"
-#include "utils.h"
+#include <logdb/utils.h>
 #include <unistd.h>
 
 static const char *wallettmpfile = "/tmp/dummy";
@@ -54,15 +53,12 @@ void test_wallet()
     u_assert_int_eq(memcmp(node2->private_key, node3->private_key, sizeof(node2->private_key)), 0);
 
     uint8_t hash160[20];
-    btc_hdnode_get_hash160(node2, hash160);
-    u_assert_int_eq(memcmp(wallet->db->memdb_head->key->str+5, hash160, 20), 0);
 
     vector *addrs = vector_new(1, free);
     btc_wallet_get_addresses(wallet, addrs);
-
-    u_assert_int_eq(addrs->len, 2);
-    u_assert_int_eq(strcmp(addrs->data[0],"1JQheacLPdM5ySCkrZkV66G2ApAXe1mqLj"), 0)
-    u_assert_int_eq(strcmp(addrs->data[1],"1LZaBnH11M2yN5ZNiK67yUbaspfX6XKmRr"), 0)
+    u_assert_int_eq(addrs->len, 4);
+    u_assert_int_eq(strcmp(addrs->data[3],"1JQheacLPdM5ySCkrZkV66G2ApAXe1mqLj"), 0)
+    u_assert_int_eq(strcmp(addrs->data[0],"1LZaBnH11M2yN5ZNiK67yUbaspfX6XKmRr"), 0)
 
     vector_free(addrs, true);
     btc_wallet_flush(wallet);
@@ -75,13 +71,12 @@ void test_wallet()
     addrs = vector_new(1, free);
     btc_wallet_get_addresses(wallet, addrs);
 
-    u_assert_int_eq(addrs->len, 2);
-    u_assert_int_eq(strcmp(addrs->data[0],"1JQheacLPdM5ySCkrZkV66G2ApAXe1mqLj"), 0)
-    u_assert_int_eq(strcmp(addrs->data[1],"1LZaBnH11M2yN5ZNiK67yUbaspfX6XKmRr"), 0)
+    u_assert_int_eq(addrs->len, 4);
+    u_assert_int_eq(strcmp(addrs->data[3],"1JQheacLPdM5ySCkrZkV66G2ApAXe1mqLj"), 0)
+    u_assert_int_eq(strcmp(addrs->data[0],"1LZaBnH11M2yN5ZNiK67yUbaspfX6XKmRr"), 0)
 
     // get a hdnode and compare
-    btc_hdnode *checknode = btc_hdnode_new();
-    btc_wallet_find_hdnode_byaddr(wallet, addrs->data[0], checknode);
+    btc_hdnode *checknode = btc_wallet_find_hdnode_byaddr(wallet, addrs->data[0]);
 
     hash160[0] = wallet->chain->b58prefix_pubkey_address;
     btc_hdnode_get_hash160(checknode, hash160+1);
@@ -90,7 +85,6 @@ void test_wallet()
     char addr[addrsize];
     btc_base58_encode_check(hash160, 21, addr, addrsize);
     u_assert_int_eq(strcmp(addr, addrs->data[0]), 0);
-    btc_hdnode_free(checknode);
     vector_free(addrs, true);
 
     // add some txes
@@ -113,6 +107,7 @@ void test_wallet()
     u_assert_uint32_eq(amount, 0);
     wallet->bestblockheight = 200;
     amount = btc_wallet_wtx_get_credit(wallet, wtx);
+
     u_assert_uint32_eq(amount, 2504815547);
     btc_wallet_wtx_free(wtx);
 
@@ -121,7 +116,7 @@ void test_wallet()
     utils_hex_to_bin(hextx_ntx, tx_data_n, strlen(hextx_ntx), &outlen);
     wtx = btc_wallet_wtx_new();
     btc_tx_deserialize(tx_data_n, outlen, wtx->tx);
-
+    
     // add normal tx
     wtx->height = 0;
     btc_wallet_add_wtx(wallet, wtx);
@@ -137,10 +132,15 @@ void test_wallet()
     wallet = btc_wallet_new();
     u_assert_int_eq(btc_wallet_load(wallet, wallettmpfile, &error), true);
 
+    amount = btc_wallet_get_balance(wallet);
+
     vector *unspents = vector_new(10, (void (*)(void*))btc_wallet_output_free);
     btc_wallet_get_unspent(wallet, unspents);
 
+    amount = btc_wallet_get_balance(wallet);
+
     unsigned int i;
+    unsigned int found = 0;
     for (i = 0; i < unspents->len; i++)
     {
         btc_output *output = unspents->data[i];
@@ -149,12 +149,13 @@ void test_wallet()
         char str[65];
         utils_bin_to_hex(hash, 32, str);
         utils_reverse_hex(str, 64);
-        if (i == 0)
-            u_assert_int_eq(strcmp(str, "963b8b8e2d2025b64fd8144557604e98d2fa67a5386f8a06597d810f27ab60d7"), 0);
-        if (i == 1)
-            u_assert_int_eq(strcmp(str, "b99c4c532643a376c440b3cc612ec2fd96c15d1f50a6c40b112e4fd0c880d661"), 0);
+        if (strcmp(str, "963b8b8e2d2025b64fd8144557604e98d2fa67a5386f8a06597d810f27ab60d7") == 0)
+            found++;
+        if (strcmp(str, "b99c4c532643a376c440b3cc612ec2fd96c15d1f50a6c40b112e4fd0c880d661") == 0)
+            found++;
     }
     vector_free(unspents, true);
+    u_assert_int_eq(found, 2);
 
     amount = btc_wallet_get_balance(wallet);
     u_assert_uint32_eq(amount, 13326620644);

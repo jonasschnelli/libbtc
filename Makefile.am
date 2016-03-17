@@ -30,17 +30,13 @@ include_HEADERS = include/btc/btc.h \
 	include/btc/random.h
 
 noinst_HEADERS = \
-	src/sha2.h \
-	src/utils.h \
 	src/ripemd160.h
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libbtc.pc
 
 libbtc_la_SOURCES = \
-	src/sha2.c \
 	src/block.c \
-	src/utils.c \
 	src/base58.c \
 	src/ripemd160.c \
 	src/bip32.c \
@@ -61,14 +57,13 @@ tests_LDADD = libbtc.la
 tests_SOURCES = \
 	test/utest.h \
 	test/unittester.c \
-	test/sha2_tests.c \
+	test/hash_tests.c \
 	test/block_tests.c \
 	test/base58check_tests.c \
 	test/bip32_tests.c \
 	test/random_tests.c \
 	test/ecc_tests.c \
 	test/vector_tests.c \
-	test/utils_tests.c \
 	test/tx_tests.c \
 	test/eckey_tests.c \
 	test/aes_tests.c
