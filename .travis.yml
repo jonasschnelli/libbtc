@@ -28,6 +28,7 @@ matrix:
         compiler: x86_64-w64-mingw32-gcc
 
 before_script:
+    - git submodule init && git submodule update
     - ./autogen.sh
     - if [ "$CC" == i686-w64-mingw32-gcc ]; then
           export CROSS_COMPILE=${CC%%gcc}; unset CC;
