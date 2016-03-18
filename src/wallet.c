@@ -72,13 +72,6 @@ int btc_rbtree_wtxes_compare(const void* a,const void* b) {
     return cstr_compare((cstring *)a, (cstring *)b);
 }
 
-void btc_rbtree_wtxes_print_key(const void* a) {
-    printf("%i",*(int*)a);
-}
-
-void btc_rbtree_wtxes_print_value(void* a) {
-    UNUSED(a);
-}
 
 /* ====================== */
 /* hdkeys rbtree callback */
@@ -99,18 +92,76 @@ int btc_rbtree_hdkey_compare(const void* a,const void* b) {
     return cstr_compare((cstring *)a, (cstring *)b);
 }
 
-void btc_rbtree_hdkey_print_key(const void* a) {
-    printf("%i",*(int*)a);
+/*
+ ==========================================================
+ WALLET TRANSACTION (WTX) FUNCTIONS
+ ==========================================================
+*/
+
+btc_wtx* btc_wallet_wtx_new()
+{
+    btc_wtx* wtx;
+    wtx = calloc(1, sizeof(*wtx));
+    wtx->height = 0;
+    wtx->tx = btc_tx_new();
+
+    return wtx;
 }
 
-void btc_rbtree_hdkey_print_value(void* a) {
-    UNUSED(a);
+btc_wtx* btc_wallet_wtx_copy(btc_wtx* wtx)
+{
+    btc_wtx* wtx_copy;
+    wtx_copy = btc_wallet_wtx_new();
+    btc_tx_copy(wtx_copy->tx, wtx->tx);
+
+    return wtx_copy;
+}
+
+void btc_wallet_wtx_free(btc_wtx* wtx)
+{
+    btc_tx_free(wtx->tx);
+    free(wtx);
+}
+
+void btc_wallet_wtx_serialize(cstring* s, const btc_wtx* wtx)
+{
+    ser_u32(s, wtx->height);
+    btc_tx_serialize(s, wtx->tx);
+}
+
+btc_bool btc_wallet_wtx_deserialize(btc_wtx* wtx, struct const_buffer* buf)
+{
+    deser_u32(&wtx->height, buf);
+    return btc_tx_deserialize(buf->p, buf->len, wtx->tx);
 }
 
 /*
  ==========================================================
-*/
+ WALLET OUTPUT (prev wtx + n) FUNCTIONS
+ ==========================================================
+ */
 
+btc_output* btc_wallet_output_new()
+{
+    btc_output* output;
+    output = calloc(1, sizeof(*output));
+    output->i = 0;
+    output->wtx = btc_wallet_wtx_new();
+
+    return output;
+}
+
+void btc_wallet_output_free(btc_output* output)
+{
+    btc_wallet_wtx_free(output->wtx);
+    free(output);
+}
+
+/*
+ ==========================================================
+ WALLET CORE FUNCTIONS
+ ==========================================================
+ */
 btc_wallet* btc_wallet_new()
 {
     btc_wallet* wallet;
@@ -121,8 +172,8 @@ btc_wallet* btc_wallet_new()
     wallet->chain = &btc_chain_main;
     wallet->spends = vector_new(10, free);
 
-    wallet->wtxes_rbtree = RBTreeCreate(btc_rbtree_wtxes_compare,btc_rbtree_wtxes_free_key,btc_rbtree_wtxes_free_value,btc_rbtree_wtxes_print_key,btc_rbtree_wtxes_print_value);
-    wallet->hdkeys_rbtree = RBTreeCreate(btc_rbtree_hdkey_compare,btc_rbtree_hdkey_free_key,btc_rbtree_hdkey_free_value,btc_rbtree_hdkey_print_key,btc_rbtree_hdkey_print_value);
+    wallet->wtxes_rbtree = RBTreeCreate(btc_rbtree_wtxes_compare,btc_rbtree_wtxes_free_key,btc_rbtree_wtxes_free_value,NULL,NULL);
+    wallet->hdkeys_rbtree = RBTreeCreate(btc_rbtree_hdkey_compare,btc_rbtree_hdkey_free_key,btc_rbtree_hdkey_free_value,NULL,NULL);
     return wallet;
 }
 
@@ -162,13 +213,6 @@ void btc_wallet_logdb_append_cb(void* ctx, logdb_bool load_phase, logdb_record *
             wallet->masterkey = btc_hdnode_new();
             btc_hdnode_deserialize(rec->value->str, wallet->chain, wallet->masterkey);
         }
-//        if (child_cache_set == false && rec->key->len > strlen(hdkey_key) && memcmp(rec->key->str, hdkey_key, strlen(hdkey_key)) == 0)
-//        {
-//            btc_hdnode node;
-//            btc_hdnode_deserialize(rec->value->str, wallet->chain, &node);
-//            wallet->next_childindex = node.child_num+1;
-//            child_cache_set = true;
-//        }
         if (rec->key->len == strlen(hdkey_key)+20 && memcmp(rec->key->str, hdkey_key, strlen(hdkey_key)) == 0)
         {
             btc_hdnode *hdnode = btc_hdnode_new();
@@ -338,43 +382,6 @@ btc_hdnode * btc_wallet_find_hdnode_byaddr(btc_wallet *wallet, const char *searc
         return NULL;
 }
 
-btc_wtx* btc_wallet_wtx_new()
-{
-    btc_wtx* wtx;
-    wtx = calloc(1, sizeof(*wtx));
-    wtx->height = 0;
-    wtx->tx = btc_tx_new();
-
-    return wtx;
-}
-
-btc_wtx* btc_wallet_wtx_copy(btc_wtx* wtx)
-{
-    btc_wtx* wtx_copy;
-    wtx_copy = btc_wallet_wtx_new();
-    btc_tx_copy(wtx_copy->tx, wtx->tx);
-
-    return wtx_copy;
-}
-
-void btc_wallet_wtx_free(btc_wtx* wtx)
-{
-    btc_tx_free(wtx->tx);
-    free(wtx);
-}
-
-void btc_wallet_wtx_serialize(cstring* s, const btc_wtx* wtx)
-{
-    ser_u32(s, wtx->height);
-    btc_tx_serialize(s, wtx->tx);
-}
-
-btc_bool btc_wallet_wtx_deserialize(btc_wtx* wtx, struct const_buffer* buf)
-{
-    deser_u32(&wtx->height, buf);
-    return btc_tx_deserialize(buf->p, buf->len, wtx->tx);
-}
-
 btc_bool btc_wallet_add_wtx(btc_wallet *wallet, btc_wtx *wtx)
 {
     if (!wallet || !wtx)
@@ -422,28 +429,12 @@ int64_t btc_wallet_get_balance(btc_wallet *wallet)
     if (!wallet)
         return false;
 
+    // enumerate over the rbtree, calculate balance
     while((hdkey_rbtree_node = rbtree_enumerate_next(wallet->wtxes_rbtree)))
     {
         btc_wtx *wtx = hdkey_rbtree_node->info;
         credit += btc_wallet_wtx_get_credit(wallet, wtx);
     }
-
-//    logdb_record *rec = wallet->db->memdb_head;
-//    vector *keys_added = vector_new(32, NULL);
-//    //move to the bottom of the records list
-//    while (rec->prev)
-//    {
-//        if (rec->mode == RECORD_TYPE_WRITE && rec->key && vector_find(keys_added, rec->key) == -1 && rec->key->len == strlen(tx_key)+SHA256_DIGEST_LENGTH)
-//        {
-//            btc_wtx *wtx = btc_wallet_wtx_new();
-//            struct const_buffer buf = {rec->value->str, rec->value->len};
-//            btc_wallet_wtx_deserialize(wtx, &buf);
-//
-//            credit += btc_wallet_wtx_get_credit(wallet, wtx);
-//            vector_add(keys_added, rec->key);
-//        }
-//        rec = rec->prev;
-//    }
 
     return credit;
 }
@@ -479,7 +470,7 @@ btc_bool btc_wallet_txout_is_mine(btc_wallet *wallet, btc_tx_out *tx_out)
 {
     btc_bool ismine = false;
 
-    vector *vec = vector_new(3, free);
+    vector *vec = vector_new(16, free);
     enum btc_tx_out_type type2 = btc_script_classify(tx_out->script_pubkey, vec);
 
     //TODO: Multisig, etc.
@@ -567,20 +558,4 @@ btc_bool btc_wallet_get_unspent(btc_wallet *wallet, vector *unspents)
     }
 
     return true;
-}
-
-btc_output* btc_wallet_output_new()
-{
-    btc_output* output;
-    output = calloc(1, sizeof(*output));
-    output->i = 0;
-    output->wtx = btc_wallet_wtx_new();
-
-    return output;
-}
-
-void btc_wallet_output_free(btc_output* output)
-{
-    btc_wallet_wtx_free(output->wtx);
-    free(output);
 }

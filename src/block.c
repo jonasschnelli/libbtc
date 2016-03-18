@@ -55,7 +55,6 @@ void btc_block_header_free(btc_block_header* header)
     header->timestamp = 0;
     header->nonce = 0;
     free(header);
-
 }
 
 int btc_block_header_deserialize(const unsigned char* header_serialized, size_t headerilen, btc_block_header* header)
