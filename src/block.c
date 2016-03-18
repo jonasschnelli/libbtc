@@ -30,9 +30,9 @@
 
 
 #include "btc/block.h"
-#include "serialize.h"
-#include "sha2.h"
-#include "utils.h"
+#include <logdb/serialize.h>
+#include <logdb/sha2.h>
+#include <logdb/utils.h>
 #include "../include/btc/block.h"
 
 btc_block_header* btc_block_header_new()
@@ -55,14 +55,13 @@ void btc_block_header_free(btc_block_header* header)
     header->timestamp = 0;
     header->nonce = 0;
     free(header);
-
 }
 
 int btc_block_header_deserialize(const unsigned char* header_serialized, size_t headerilen, btc_block_header* header)
 {
     struct const_buffer buf = {header_serialized, headerilen};
 
-    if (!deser_i32(&header->version, &buf))
+    if (!deser_s32(&header->version, &buf))
         return false;
     if (!deser_u256(header->hashPrevBlock, &buf))
         return false;
@@ -80,7 +79,7 @@ int btc_block_header_deserialize(const unsigned char* header_serialized, size_t 
 
 void btc_block_header_serialize(cstring* s, const btc_block_header* header)
 {
-    ser_i32(s, header->version);
+    ser_s32(s, header->version);
     ser_u256(s, header->hashPrevBlock);
     ser_u256(s, header->hashMerkleRoot);
     ser_u32(s, header->timestamp);

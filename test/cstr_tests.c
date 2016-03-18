@@ -10,7 +10,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include <btc/cstr.h>
+#include <logdb/cstr.h>
 
 void test_cstr()
 {

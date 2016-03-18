@@ -37,8 +37,8 @@
 #include "btc/ecc_key.h"
 
 #include "ripemd160.h"
-#include "sha2.h"
-#include "utils.h"
+#include <logdb/sha2.h>
+#include <logdb/utils.h>
 
 // write 4 big endian bytes
 static void write_be(uint8_t* data, uint32_t x)

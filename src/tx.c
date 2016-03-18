@@ -32,9 +32,9 @@
 #include "btc/base58.h"
 #include "btc/tx.h"
 
-#include "serialize.h"
-#include "sha2.h"
-#include "utils.h"
+#include <logdb/serialize.h>
+#include <logdb/sha2.h>
+#include <logdb/utils.h>
 
 void btc_tx_in_free(btc_tx_in* tx_in)
 {
@@ -159,7 +159,7 @@ int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx*
     struct const_buffer buf = {tx_serialized, inlen};
 
     //tx needs to be initialized
-    deser_i32(&tx->version, &buf);
+    deser_s32(&tx->version, &buf);
     uint32_t vlen;
     if (!deser_varlen(&vlen, &buf))
         return false;
@@ -209,7 +209,7 @@ void btc_tx_out_serialize(cstring* s, const btc_tx_out* tx_out)
 
 void btc_tx_serialize(cstring* s, const btc_tx* tx)
 {
-    ser_i32(s, tx->version);
+    ser_s32(s, tx->version);
 
     ser_varlen(s, tx->vin ? tx->vin->len : 0);
 
@@ -476,6 +476,8 @@ btc_bool btc_tx_add_p2pkh_out(btc_tx* tx, int64_t amount, const btc_pubkey* pubk
 
 btc_bool btc_tx_outpoint_is_null(btc_tx_outpoint* tx)
 {
+    //TODO
+    UNUSED(tx);
     return true;
 }
 

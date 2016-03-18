@@ -35,20 +35,13 @@
     } while (0)
 
 extern void test_random();
-extern void test_sha_256();
-extern void test_sha_512();
-extern void test_sha_hmac();
 extern void test_bitcoin_hash();
 extern void test_base58check();
 extern void test_block_header();
 extern void test_bip32();
 extern void test_ecc();
 extern void test_vector();
-extern void test_cstr();
-extern void test_buffer();
-extern void test_utils();
 extern void test_aes();
-extern void test_serialize();
 extern void test_tx_serialization();
 extern void test_tx_sighash();
 extern void test_tx_negative_version();
@@ -58,6 +51,7 @@ extern void test_eckey();
 
 #ifdef WITH_WALLET
 extern void test_logdb();
+extern void test_wallet();
 #endif
 
 extern void btc_ecc_start();
@@ -71,20 +65,13 @@ int main()
     btc_ecc_start();
 
     u_run_test(test_random);
-    u_run_test(test_sha_256);
-    u_run_test(test_sha_512);
-    u_run_test(test_sha_hmac);
     u_run_test(test_bitcoin_hash);
     u_run_test(test_base58check);
-    u_run_test(test_utils);
     u_run_test(test_aes);
 
     u_run_test(test_bip32);
     u_run_test(test_ecc);
     u_run_test(test_vector);
-    u_run_test(test_cstr);
-    u_run_test(test_buffer);
-    u_run_test(test_serialize);
     u_run_test(test_tx_serialization);
     u_run_test(test_tx_sighash);
     u_run_test(test_tx_negative_version);
@@ -95,7 +82,7 @@ int main()
     u_run_test(test_eckey);
 
 #ifdef WITH_WALLET
-    u_run_test(test_logdb);
+    u_run_test(test_wallet);
 #endif
 
     btc_ecc_stop();

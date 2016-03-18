@@ -33,7 +33,7 @@
 #include <btc/ecc_key.h>
 
 #include "utest.h"
-#include "utils.h"
+#include <logdb/utils.h>
 
 void test_eckey()
 {

@@ -7,7 +7,7 @@
 #include <btc/bip32.h>
 
 #include "utest.h"
-#include "utils.h"
+#include <logdb/utils.h>
 
 void test_bip32()
 {

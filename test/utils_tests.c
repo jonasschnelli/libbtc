@@ -9,7 +9,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "utils.h"
+#include <logdb/utils.h>
 
 void test_utils()
 {

@@ -36,7 +36,7 @@
 #include "btc/random.h"
 
 #include "ripemd160.h"
-#include "utils.h"
+#include <logdb/utils.h>
 
 
 void btc_privkey_init(btc_key* privkey)
