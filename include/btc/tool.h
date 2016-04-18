@@ -2,7 +2,7 @@
 
  The MIT License (MIT)
 
- Copyright (c) 2015 Jonas Schnelli
+ Copyright (c) 2016 Jonas Schnelli
 
  Permission is hereby granted, free of charge, to any person obtaining
  a copy of this software and associated documentation files (the "Software"),
@@ -24,8 +24,8 @@
  
 */
 
-#ifndef __LIBBTC_CHAIN_H__
-#define __LIBBTC_CHAIN_H__
+#ifndef __LIBBTC_TOOL_H__
+#define __LIBBTC_TOOL_H__
 
 #include "btc.h"
 
@@ -34,24 +34,22 @@ extern "C" {
 #endif
 
 #include <stdint.h>
-#include <sys/types.h>
+#include <stddef.h>
 
-typedef struct btc_chain {
-    char chainname[32];
-    uint8_t b58prefix_pubkey_address;
-    uint8_t b58prefix_script_address;
-    uint8_t b58prefix_secret_address; //!private key
-    uint32_t b58prefix_bip32_privkey;
-    uint32_t b58prefix_bip32_pubkey;
-    const unsigned char netmagic[4];
-} btc_chain;
+/* generate the p2pkh address from a given hex pubkey */
+LIBBTC_API btc_bool address_from_pubkey(const btc_chain* chain, const char *pubkey_hex, char *address);
 
-static const btc_chain btc_chain_main = {"main", 0x00, 0x05, 0x80, 0x0488ADE4, 0x0488B21E, {0xf9, 0xbe, 0xb4, 0xd9} };
-static const btc_chain btc_chain_test = {"testnet3", 0x6f, 0xc4, 0xEF, 0x04358394, 0x043587CF, {0x0b, 0x11, 0x09, 0x07} };
-static const btc_chain btc_chain_regt = {"regtest", 0x6f, 0xc4, 0xEF, 0x04358394, 0x043587CF, {0xfa, 0xbf, 0xb5, 0xda} };
+/* generate the hex publickey from a given hex private key */
+LIBBTC_API btc_bool pubkey_from_privatekey(const btc_chain* chain, const char *privkey_hex, char *pubkey_hex, size_t *sizeout);
 
+/* generate a new private key (hex) */
+LIBBTC_API btc_bool gen_privatekey(const btc_chain* chain, char *privkey_wif, size_t strsize_wif, char *privkey_hex);
+
+LIBBTC_API btc_bool hd_gen_master(const btc_chain* chain, char *masterkeyhex);
+LIBBTC_API btc_bool hd_print_node(const btc_chain* chain, const char *nodeser);
+LIBBTC_API btc_bool hd_derive(const btc_chain* chain, const char *masterkey, const char *keypath, char *extkeyout, size_t extkeyout_size);
 #ifdef __cplusplus
 }
 #endif
 
-#endif //__LIBBTC_CHAIN_H__
+#endif //__LIBBTC_TOOL_H__

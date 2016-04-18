@@ -45,8 +45,18 @@ AC_ARG_ENABLE([wallet],
   [with_wallet=$enableval],
   [with_wallet=yes])
 
+AC_ARG_ENABLE([tools],
+  [AS_HELP_STRING([--disable-tools],
+  [disable bitcoin tool cli application])],
+  [with_tools=$enableval],
+  [with_tools=yes])
+
 if test "x$with_wallet" = xyes; then
   AC_DEFINE_UNQUOTED([WITH_WALLET],[1],[Define to 1 to enable wallet compilation])
+fi
+
+if test "x$with_tools" = xyes; then
+AC_DEFINE_UNQUOTED([WITH_TOOLS],[1],[Define to 1 to enable wallet compilation])
 fi
 
 if test "x$enable_debug" = xyes; then
@@ -87,6 +97,7 @@ AC_CONFIG_FILES([Makefile libbtc.pc])
 AC_SUBST(LIBTOOL_APP_LDFLAGS)
 AC_SUBST(BUILD_EXEEXT)
 AM_CONDITIONAL([USE_TESTS], [test x"$use_tests" != x"no"])
+AM_CONDITIONAL([WITH_TOOLS], [test "x$with_tools" = "xyes"])
 AM_CONDITIONAL([WITH_WALLET], [test "x$with_wallet" = "xyes"])
 
 AC_CONFIG_SUBDIRS([src/secp256k1 src/logdb])
