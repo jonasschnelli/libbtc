@@ -47,6 +47,7 @@ before_script:
 script: 
     - make
     - if [ ${CC} = gcc ] || [ "${TRAVIS_OS_NAME}" = "osx" ]; then valgrind --leak-check=full --error-exitcode=1 ./tests; fi;
+    - if [ ${CC} = gcc ]; then ./tooltests.py ; fi;
     - if [ "$CROSS_COMPILE" ]; then
           wine tests.exe
       else

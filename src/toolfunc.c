@@ -1,0 +1,129 @@
+/**********************************************************************
+ * Copyright (c) 2016 Jonas Schnelli                                  *
+ * Distributed under the MIT software license, see the accompanying   *
+ * file COPYING or http://www.opensource.org/licenses/mit-license.php.*
+ **********************************************************************/
+
+#include <btc/base58.h>
+#include <btc/bip32.h>
+#include <btc/ecc.h>
+#include <btc/ecc_key.h>
+#include <btc/random.h>
+#include <logdb/utils.h>
+
+#include <assert.h>
+#include <stdbool.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <getopt.h>
+
+btc_bool address_from_pubkey(const btc_chain* chain, const char *pubkey_hex, char *address)
+{
+    assert(strlen(pubkey_hex) == 66);
+    btc_pubkey pubkey;
+    btc_pubkey_init(&pubkey);
+    pubkey.compressed = 1;
+
+    size_t outlen = 0;
+    utils_hex_to_bin(pubkey_hex, pubkey.pubkey, strlen(pubkey_hex), (int *)&outlen);
+    assert(btc_pubkey_is_valid(&pubkey) == 1);
+
+    uint8_t hash160[21];
+    hash160[0] = chain->b58prefix_pubkey_address;
+    btc_pubkey_get_hash160(&pubkey, hash160+1);
+
+    btc_base58_encode_check(hash160, 21, address, 98);
+
+    return true;
+}
+
+btc_bool pubkey_from_privatekey(const btc_chain* chain, const char *privkey_hex, char *pubkey_hex, size_t *sizeout)
+{
+    uint8_t privkey_data[strlen(privkey_hex)];
+    size_t outlen = 0;
+    outlen = btc_base58_decode_check(privkey_hex, privkey_data, sizeof(privkey_data));
+    if (privkey_data[0] != chain->b58prefix_secret_address)
+        return false;
+
+    btc_key key;
+    btc_privkey_init(&key);
+    memcpy(key.privkey, privkey_data+1, 32);
+
+    btc_pubkey pubkey;
+    btc_pubkey_init(&pubkey);
+    assert(btc_pubkey_is_valid(&pubkey) == 0);
+    btc_pubkey_from_key(&key, &pubkey);
+    btc_privkey_cleanse(&key);
+
+    btc_pubkey_get_hex(&pubkey, pubkey_hex, sizeout);
+    btc_pubkey_cleanse(&pubkey);
+    
+    return true;
+}
+
+btc_bool gen_privatekey(const btc_chain* chain, char *privkey_wif, size_t strsize_wif, char *privkey_hex)
+{
+    uint8_t pkeybase58c[34];
+    pkeybase58c[0] = chain->b58prefix_secret_address;
+    pkeybase58c[33] = 1; /* always use compressed keys */
+
+    btc_key key;
+    btc_privkey_init(&key);
+    btc_privkey_gen(&key);
+    memcpy(&pkeybase58c[1], key.privkey, BTC_ECKEY_PKEY_LENGTH);
+    assert(btc_base58_encode_check(pkeybase58c, 34, privkey_wif, strsize_wif) != 0);
+    utils_bin_to_hex(key.privkey, BTC_ECKEY_PKEY_LENGTH, privkey_hex);
+    btc_privkey_cleanse(&key);
+    return true;
+}
+
+btc_bool hd_gen_master(const btc_chain* chain, char *masterkeyhex, size_t strsize)
+{
+    btc_hdnode node;
+    uint8_t seed[32];
+    random_bytes(seed, 32, true);
+    btc_hdnode_from_seed(seed, 32, &node);
+    memset(seed, 0, 32);
+    btc_hdnode_serialize_private(&node, chain, masterkeyhex, strsize);
+    memset(&node, 0, sizeof(node));
+    return true;
+}
+
+btc_bool hd_print_node(const btc_chain* chain, const char *nodeser)
+{
+    btc_hdnode node;
+    if (!btc_hdnode_deserialize(nodeser, chain, &node))
+        return false;
+
+    size_t strsize = 128;
+    char str[strsize];
+    btc_hdnode_get_p2pkh_address(&node, chain, str, strsize);
+
+    printf("ext key: %s\n", nodeser);
+
+    printf("depth: %d\n", node.depth);
+    printf("p2pkh address: %s\n", str);
+
+    if (!btc_hdnode_get_pub_hex(&node, str, &strsize))
+        return false;
+    printf("pubkey hex: %s\n", str);
+
+    strsize = 128;
+    btc_hdnode_serialize_public(&node, chain, str, strsize);
+    printf("extended pubkey: %s\n", str);
+    return true;
+}
+
+btc_bool hd_derive(const btc_chain* chain, const char *masterkey, const char *keypath, char *extkeyout, size_t extkeyout_size)
+{
+    btc_hdnode node, nodenew;
+    if (!btc_hdnode_deserialize(masterkey, chain, &node))
+        return false;
+
+    btc_hd_generate_key(&nodenew, keypath, node.private_key, node.chain_code);
+
+    btc_hdnode_serialize_private(&nodenew, chain, extkeyout, extkeyout_size);
+    return true;
+}

@@ -27,7 +27,8 @@ include_HEADERS = include/btc/btc.h \
 	include/btc/vector.h \
 	include/btc/script.h \
 	include/btc/aes.h \
-	include/btc/random.h
+	include/btc/random.h \
+	include/btc/tool.h
 
 noinst_HEADERS = \
 	src/ripemd160.h
@@ -46,7 +47,8 @@ libbtc_la_SOURCES = \
 	src/tx.c \
 	src/script.c \
 	src/ecc_key.c \
-	src/aes.c
+	src/aes.c \
+	src/toolfunc.c
 
 libbtc_la_CFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/src/logdb/include
 libbtc_la_LIBADD = $(LIBSECP256K1) $(LIBLOGDB)
@@ -81,13 +83,21 @@ include_HEADERS += \
 libbtc_la_SOURCES += \
 	src/wallet.c
 
-libbtc_la_LIBADD += $(LIBLOGDB)
-
 if USE_TESTS
 tests_SOURCES += \
 	test/wallet_tests.c
-tests_LDADD += $(LIBLOGDB) $(LIBLOGDB)
 endif
+endif
+
+if WITH_TOOLS
+instdir=$(prefix)/bin
+inst_PROGRAMS = bitcointool
+bitcointool_LDADD = libbtc.la
+bitcointool_SOURCES = \
+    src/bitcointool.c
+bitcointool_CFLAGS = $(libbtc_la_CFLAGS)
+bitcointool_CPPFLAGS = -I$(top_srcdir)/src
+bitcointool_LDFLAGS = -static
 endif
 
 clean-local:
