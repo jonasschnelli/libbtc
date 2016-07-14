@@ -39,11 +39,11 @@ btc_bool address_from_pubkey(const btc_chain* chain, const char *pubkey_hex, cha
     return true;
 }
 
-btc_bool pubkey_from_privatekey(const btc_chain* chain, const char *privkey_hex, char *pubkey_hex, size_t *sizeout)
+btc_bool pubkey_from_privatekey(const btc_chain* chain, const char *privkey_wif, char *pubkey_hex, size_t *sizeout)
 {
-    uint8_t privkey_data[strlen(privkey_hex)];
+    uint8_t privkey_data[strlen(privkey_wif)];
     size_t outlen = 0;
-    outlen = btc_base58_decode_check(privkey_hex, privkey_data, sizeof(privkey_data));
+    outlen = btc_base58_decode_check(privkey_wif, privkey_data, sizeof(privkey_data));
     if (privkey_data[0] != chain->b58prefix_secret_address)
         return false;
 
@@ -63,7 +63,7 @@ btc_bool pubkey_from_privatekey(const btc_chain* chain, const char *privkey_hex,
     return true;
 }
 
-btc_bool gen_privatekey(const btc_chain* chain, char *privkey_wif, size_t strsize_wif, char *privkey_hex)
+btc_bool gen_privatekey(const btc_chain* chain, char *privkey_wif, size_t strsize_wif, char *privkey_hex_or_null)
 {
     uint8_t pkeybase58c[34];
     pkeybase58c[0] = chain->b58prefix_secret_address;
@@ -74,7 +74,11 @@ btc_bool gen_privatekey(const btc_chain* chain, char *privkey_wif, size_t strsiz
     btc_privkey_gen(&key);
     memcpy(&pkeybase58c[1], key.privkey, BTC_ECKEY_PKEY_LENGTH);
     assert(btc_base58_encode_check(pkeybase58c, 34, privkey_wif, strsize_wif) != 0);
-    utils_bin_to_hex(key.privkey, BTC_ECKEY_PKEY_LENGTH, privkey_hex);
+
+    // also export the hex privkey if use had passed in a valid pointer
+    // will always export 32 bytes
+    if (privkey_hex_or_null != NULL)
+        utils_bin_to_hex(key.privkey, BTC_ECKEY_PKEY_LENGTH, privkey_hex_or_null);
     btc_privkey_cleanse(&key);
     return true;
 }
@@ -122,8 +126,15 @@ btc_bool hd_derive(const btc_chain* chain, const char *masterkey, const char *ke
     if (!btc_hdnode_deserialize(masterkey, chain, &node))
         return false;
 
-    btc_hd_generate_key(&nodenew, keypath, node.private_key, node.chain_code);
+    //check if we only have the publickey
+    bool pubckd = !btc_hdnode_has_privkey(&node);
 
-    btc_hdnode_serialize_private(&nodenew, chain, extkeyout, extkeyout_size);
+    //derive child key, use pubckd or privckd
+    btc_hd_generate_key(&nodenew, keypath, pubckd ? node.public_key : node.private_key, node.chain_code, pubckd);
+
+    if (pubckd)
+        btc_hdnode_serialize_public(&nodenew, chain, extkeyout, extkeyout_size);
+    else
+        btc_hdnode_serialize_private(&nodenew, chain, extkeyout, extkeyout_size);
     return true;
 }
