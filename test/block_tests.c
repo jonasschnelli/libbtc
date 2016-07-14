@@ -15,6 +15,8 @@
 #include <btc/ecc_key.h>
 #include <btc/utils.h>
 
+#include "utest.h"
+
 struct blockheadertest {
     char hexheader[160];
     char hexhash[64];
@@ -45,7 +47,8 @@ void test_block_header()
         utils_hex_to_bin(test->hexhash, hash_data, 32, &outlen);
 
         btc_block_header* header = btc_block_header_new();
-        btc_block_header_deserialize(header_data, 80, header);
+        struct const_buffer buf = {header_data, 80};
+        btc_block_header_deserialize(header, &buf);
 
         // Check the copies are the same
         btc_block_header* header_copy = btc_block_header_new();
@@ -75,4 +78,76 @@ void test_block_header()
         btc_block_header_free(header_copy);
         cstr_free(serialized, true);
     }
+
+
+    /* blockheader */
+    btc_block_header bheader, bheaderprev, bheadercheck;
+    bheader.version = 536870912;
+    bheader.timestamp = 1472802860;
+    bheader.nonce = 2945279651;
+    bheader.bits = 402979592;
+    char *prevblock_hex_o = "00000000000000000098ad436f0c305b4d577e40e2687783822a2fe6637dc8e5";
+    char *prevblock_hex = malloc(strlen(prevblock_hex_o)+1);
+    memcpy(prevblock_hex, prevblock_hex_o, strlen(prevblock_hex_o));
+    utils_reverse_hex(prevblock_hex, 64);
+    outlen = 0;
+    utils_hex_to_bin(prevblock_hex, bheader.prev_block, 64, &outlen);
+    free(prevblock_hex);
+
+    char *merkleroot_hex_o = "d4690e152bb72a3dc2a2a90f3f1e8afc3b48a26a070f2b099b46a439c69eb776";
+    char *merkleroot_hex = malloc(strlen(merkleroot_hex_o)+1);
+    memcpy(merkleroot_hex, merkleroot_hex_o, strlen(merkleroot_hex_o));
+    utils_reverse_hex(merkleroot_hex, 64);
+    outlen = 0;
+    utils_hex_to_bin(merkleroot_hex, bheader.merkle_root, 64, &outlen);
+    free(merkleroot_hex);
+
+    bheaderprev.version = 536870912;
+    bheaderprev.timestamp = 1472802636;
+    bheaderprev.nonce = 3627526227;
+    bheaderprev.bits = 402979592;
+
+    prevblock_hex_o = "000000000000000001beee80fe573d34a51b48f30248a8933dc71b67db9f542d";
+    prevblock_hex = malloc(strlen(prevblock_hex_o)+1);
+    memcpy(prevblock_hex, prevblock_hex_o, strlen(prevblock_hex_o));
+    utils_reverse_hex(prevblock_hex, 64);
+    outlen = 0;
+    utils_hex_to_bin(prevblock_hex, bheaderprev.prev_block, 64, &outlen);
+    free(prevblock_hex);
+
+    merkleroot_hex_o = "3696737d03075235b3874ed2ec6e93555e3259f818f53f3c241a2ae74f18ab07";
+    merkleroot_hex = malloc(strlen(merkleroot_hex_o)+1);
+    memcpy(merkleroot_hex, merkleroot_hex_o, strlen(merkleroot_hex_o));
+    utils_reverse_hex(merkleroot_hex, 64);
+    outlen = 0;
+    utils_hex_to_bin(merkleroot_hex, bheaderprev.merkle_root, 64, &outlen);
+    free(merkleroot_hex);
+
+    /* compare blockheaderhex */
+    cstring *blockheader_ser = cstr_new_sz(256);
+    btc_block_header_serialize(blockheader_ser, &bheader);
+    char *blockheader_h427928 = "00000020e5c87d63e62f2a82837768e2407e574d5b300c6f43ad9800000000000000000076b79ec639a4469b092b0f076aa2483bfc8a1e3f0fa9a2c23d2ab72b150e69d42c30c95708fb0418a3668daf";
+    char *blockheader_hash_h427928 = "00000000000000000127d7e285f5d9ad281d236353d73a176a56f7dab499b5b6";
+
+    char headercheck[1024];
+    utils_bin_to_hex((unsigned char *)blockheader_ser->str, blockheader_ser->len, headercheck);
+    u_assert_str_eq(headercheck, blockheader_h427928);
+
+    uint8_t checkhash[32];
+    btc_block_header_hash(&bheader, (uint8_t *)&checkhash);
+    char hashhex[65];
+    utils_bin_to_hex(checkhash, 32, hashhex);
+    utils_reverse_hex(hashhex, strlen(hashhex));
+    u_assert_str_eq(blockheader_hash_h427928, hashhex);
+
+    struct const_buffer buf;
+    buf.p = blockheader_ser->str;
+    buf.len = blockheader_ser->len;
+    btc_block_header_deserialize(&bheadercheck, &buf);
+    u_assert_mem_eq(&bheader, &bheadercheck, sizeof(bheadercheck));
+    cstr_free(blockheader_ser, true);
+
+
+    btc_block_header_hash(&bheaderprev, (uint8_t *)&checkhash);
+    u_assert_mem_eq(&checkhash, &bheader.prev_block, 32);
 }

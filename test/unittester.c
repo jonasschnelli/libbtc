@@ -70,6 +70,11 @@ extern void test_wallet();
 extern void test_tool();
 #endif
 
+#ifdef WITH_NET
+extern void test_net();
+extern void test_protocol();
+#endif
+
 extern void btc_ecc_start();
 extern void btc_ecc_stop();
 
@@ -118,6 +123,11 @@ int main()
     u_run_test(test_tool);
 #endif
 
+#ifdef WITH_NET
+    u_run_test(test_protocol);
+    u_run_test(test_net);
+#endif
+
     btc_ecc_stop();
-    return 0;
+    return U_TESTS_FAIL;
 }
