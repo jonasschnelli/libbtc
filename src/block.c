@@ -3,6 +3,7 @@
  The MIT License (MIT)
 
  Copyright (c) 2016 Thomas Kerin
+ Copyright (c) 2016 libbtc developers
 
  Permission is hereby granted, free of charge, to any person obtaining
  a copy of this software and associated documentation files (the "Software"),
@@ -49,29 +50,27 @@ void btc_block_header_free(btc_block_header* header)
         return;
 
     header->version = 1;
-    memset(&header->hashPrevBlock, 0, 32);
-    memset(&header->hashMerkleRoot, 0, 32);
+    memset(&header->prev_block, 0, 32);
+    memset(&header->merkle_root, 0, 32);
     header->bits = 0;
     header->timestamp = 0;
     header->nonce = 0;
     free(header);
 }
 
-int btc_block_header_deserialize(const unsigned char* header_serialized, size_t headerilen, btc_block_header* header)
+int btc_block_header_deserialize(btc_block_header* header, struct const_buffer *buf)
 {
-    struct const_buffer buf = {header_serialized, headerilen};
-
-    if (!deser_s32(&header->version, &buf))
+    if (!deser_s32(&header->version, buf))
         return false;
-    if (!deser_u256(header->hashPrevBlock, &buf))
+    if (!deser_u256(header->prev_block, buf))
         return false;
-    if (!deser_u256(header->hashMerkleRoot, &buf))
+    if (!deser_u256(header->merkle_root, buf))
         return false;
-    if (!deser_u32(&header->timestamp, &buf))
+    if (!deser_u32(&header->timestamp, buf))
         return false;
-    if (!deser_u32(&header->bits, &buf))
+    if (!deser_u32(&header->bits, buf))
         return false;
-    if (!deser_u32(&header->nonce, &buf))
+    if (!deser_u32(&header->nonce, buf))
         return false;
 
     return true;
@@ -80,8 +79,8 @@ int btc_block_header_deserialize(const unsigned char* header_serialized, size_t 
 void btc_block_header_serialize(cstring* s, const btc_block_header* header)
 {
     ser_s32(s, header->version);
-    ser_u256(s, header->hashPrevBlock);
-    ser_u256(s, header->hashMerkleRoot);
+    ser_u256(s, header->prev_block);
+    ser_u256(s, header->merkle_root);
     ser_u32(s, header->timestamp);
     ser_u32(s, header->bits);
     ser_u32(s, header->nonce);
@@ -90,8 +89,8 @@ void btc_block_header_serialize(cstring* s, const btc_block_header* header)
 void btc_block_header_copy(btc_block_header* dest, const btc_block_header* src)
 {
     dest->version = src->version;
-    memcpy(&dest->hashPrevBlock, &src->hashPrevBlock, sizeof(src->hashPrevBlock));
-    memcpy(&dest->hashMerkleRoot, &src->hashMerkleRoot, sizeof(src->hashMerkleRoot));
+    memcpy(&dest->prev_block, &src->prev_block, sizeof(src->prev_block));
+    memcpy(&dest->merkle_root, &src->merkle_root, sizeof(src->merkle_root));
     dest->timestamp = src->timestamp;
     dest->bits = src->bits;
     dest->nonce = src->nonce;

@@ -33,6 +33,28 @@ static int cstr_alloc_min_sz(cstring* s, size_t sz)
     return 1;
 }
 
+int cstr_alloc_minsize(cstring* s, size_t new_sz)
+{
+    /* no change */
+    if (new_sz == s->len)
+        return 1;
+
+    /* truncate string */
+    if (new_sz <= s->len) {
+        return 0;
+    }
+
+    /* increase string size */
+    if (!cstr_alloc_min_sz(s, new_sz))
+        return 0;
+
+    /* contents of string tail undefined */
+    //s->len = new_sz;
+    s->str[s->len] = 0;
+
+    return 1;
+}
+
 cstring* cstr_new_sz(size_t sz)
 {
     cstring* s = calloc(1, sizeof(cstring));
