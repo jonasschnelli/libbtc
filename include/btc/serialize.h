@@ -57,7 +57,6 @@ LIBBTC_API int deser_skip(struct const_buffer* buf, size_t len);
 LIBBTC_API int deser_bytes(void* po, struct const_buffer* buf, size_t len);
 LIBBTC_API int deser_u16(uint16_t* vo, struct const_buffer* buf);
 LIBBTC_API int deser_u32(uint32_t* vo, struct const_buffer* buf);
-LIBBTC_API int deser_i32(int32_t* vo, struct const_buffer* buf);
 LIBBTC_API int deser_s32(int32_t* vo, struct const_buffer* buf);
 LIBBTC_API int deser_u64(uint64_t* vo, struct const_buffer* buf);
 LIBBTC_API int deser_u256(uint8_t* vo, struct const_buffer* buf);
