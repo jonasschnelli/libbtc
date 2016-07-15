@@ -55,7 +55,7 @@ void test_bip32()
 
     /* [Chain m/0'] */
     char path0[] = "m/0'";
-    btc_hd_generate_key(&node, path0, private_key_master, chain_code_master);
+    btc_hd_generate_key(&node, path0, private_key_master, chain_code_master, false);
     u_assert_int_eq(node.fingerprint, 0x3442193e);
     u_assert_mem_eq(node.chain_code,
                     utils_hex_to_uint8("47fdacbd0f1097043b78c63c20c34ef4ed9a111d980047ad16282c7ae6236141"),
@@ -88,7 +88,7 @@ void test_bip32()
 
     /* [Chain m/0'/1] */
     char path1[] = "m/0'/1";
-    btc_hd_generate_key(&node, path1, private_key_master, chain_code_master);
+    btc_hd_generate_key(&node, path1, private_key_master, chain_code_master, false);
     u_assert_int_eq(node.fingerprint, 0x5c1bd648);
     u_assert_mem_eq(node.chain_code,
                     utils_hex_to_uint8("2a7857631386ba23dacac34180dd1983734e444fdbf774041578e9b6adb37c19"),
@@ -118,7 +118,7 @@ void test_bip32()
 
     /* [Chain m/0'/1/2'] */
     char path2[] = "m/0'/1/2'";
-    btc_hd_generate_key(&node, path2, private_key_master, chain_code_master);
+    btc_hd_generate_key(&node, path2, private_key_master, chain_code_master, false);
     u_assert_int_eq(node.fingerprint, 0xbef5a2f9);
     u_assert_mem_eq(node.chain_code,
                     utils_hex_to_uint8("04466b9cc8e161e966409ca52986c584f07e9dc81f735db683c3ff6ec7b1503f"),
@@ -148,7 +148,7 @@ void test_bip32()
 
     /* [Chain m/0'/1/2'/2] */
     char path3[] = "m/0'/1/2'/2";
-    btc_hd_generate_key(&node, path3, private_key_master, chain_code_master);
+    btc_hd_generate_key(&node, path3, private_key_master, chain_code_master, false);
     u_assert_int_eq(node.fingerprint, 0xee7ab90c);
     u_assert_mem_eq(node.chain_code,
                     utils_hex_to_uint8("cfb71883f01676f587d023cc53a35bc7f88f724b1f8c2892ac1275ac822a3edd"),
@@ -178,7 +178,7 @@ void test_bip32()
 
     /* [Chain m/0'/1/2'/2/1000000000] */
     char path4[] = "m/0'/1/2'/2/1000000000";
-    btc_hd_generate_key(&node, path4, private_key_master, chain_code_master);
+    btc_hd_generate_key(&node, path4, private_key_master, chain_code_master, false);
     u_assert_int_eq(node.fingerprint, 0xd880d7d8);
     u_assert_mem_eq(node.chain_code,
                     utils_hex_to_uint8("c783e67b921d2beb8f6b389cc646d7263b4145701dadd2161548a8b078e65e9e"),

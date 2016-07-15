@@ -24,6 +24,8 @@
  
 */
 
+#include "libbtc-config.h"
+
 #include <btc/chain.h>
 #include <btc/tool.h>
 #include <btc/ecc.h>
@@ -39,16 +41,22 @@
 
 static struct option long_options[] =
 {
-    {"privkey", no_argument, NULL, 'p'},
-    {"pubkey", no_argument, NULL, 'k'},
-    {"keypath", no_argument, NULL, 'm'},
+    {"privkey", required_argument, NULL, 'p'},
+    {"pubkey", required_argument, NULL, 'k'},
+    {"keypath", required_argument, NULL, 'm'},
     {"command", required_argument, NULL, 'c'},
     {"testnet", no_argument, NULL, 't'},
     {"regtest", no_argument, NULL, 'r'},
+    {"version", no_argument, NULL, 'v'},
     {NULL, 0, NULL, 0}
 };
 
+static void print_version() {
+    printf("Version: %s %s\n", PACKAGE_NAME, PACKAGE_VERSION);
+}
+
 static void print_usage() {
+    print_version();
     printf("Usage: bitcointool (-p <privatekey>) (-t[--testnet]) (-r[--regtest]) -c <command>\n");
     printf("Available commands: pubfrompriv, addrfrompub, genkey\n");
     printf("\nExamples: \n");
@@ -73,7 +81,7 @@ int main(int argc, char *argv[])
     const btc_chain* chain = &btc_chain_main;
 
     /* get arguments */
-    while ((opt = getopt_long(argc, argv,"p:c:k:rtm:", long_options, &long_index )) != -1) {
+    while ((opt = getopt_long_only(argc, argv,"p:k:m:c:trv", long_options, &long_index )) != -1) {
         switch (opt) {
             case 'p' :
                 pkey = optarg;
@@ -91,6 +99,10 @@ int main(int argc, char *argv[])
                 break;
             case 'r' :
                 chain = &btc_chain_regt;
+                break;
+            case 'v' :
+                print_version();
+                exit(EXIT_SUCCESS);
                 break;
             default: print_usage();
                 exit(EXIT_FAILURE);
@@ -162,7 +174,7 @@ int main(int argc, char *argv[])
         char masterkey[sizeout];
 
         /* generate a new hd master key */
-        hd_gen_master(chain, masterkey);
+        hd_gen_master(chain, masterkey, sizeout);
         printf("masterkey: %s\n", masterkey);
         memset(masterkey, 0, strlen(masterkey));
     }

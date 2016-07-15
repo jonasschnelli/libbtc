@@ -90,6 +90,10 @@ endif
 endif
 
 if WITH_TOOLS
+if USE_TESTS
+tests_SOURCES += \
+	test/tool_tests.c
+endif
 instdir=$(prefix)/bin
 inst_PROGRAMS = bitcointool
 bitcointool_LDADD = libbtc.la

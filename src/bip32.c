@@ -298,7 +298,7 @@ btc_bool btc_hdnode_deserialize(const char* str, const btc_chain* chain, btc_hdn
     return true;
 }
 
-btc_bool btc_hd_generate_key(btc_hdnode* node, const char* keypath, const uint8_t* privkeymaster, const uint8_t* chaincode)
+btc_bool btc_hd_generate_key(btc_hdnode* node, const char* keypath, const uint8_t* keymaster, const uint8_t* chaincode, btc_bool usepubckd)
 {
     static char delim[] = "/";
     static char prime[] = "phH\'";
@@ -326,8 +326,15 @@ btc_bool btc_hd_generate_key(btc_hdnode* node, const char* keypath, const uint8_
     node->child_num = 0;
     node->fingerprint = 0;
     memcpy(node->chain_code, chaincode, BTC_BIP32_CHAINCODE_SIZE);
-    memcpy(node->private_key, privkeymaster, BTC_ECKEY_PKEY_LENGTH);
-    btc_hdnode_fill_public_key(node);
+    if (usepubckd == true)
+    {
+        memcpy(node->public_key, keymaster, BTC_ECKEY_COMPRESSED_LENGTH);
+    }
+    else
+    {
+        memcpy(node->private_key, keymaster, BTC_ECKEY_PKEY_LENGTH);
+        btc_hdnode_fill_public_key(node);
+    }
 
     pch = strtok(kp + 2, delim);
     while (pch != NULL) {
@@ -335,7 +342,7 @@ btc_bool btc_hd_generate_key(btc_hdnode* node, const char* keypath, const uint8_
         int prm = 0;
         for (; i < strlens(pch); i++) {
             if (strchr(prime, pch[i])) {
-                if (i != strlens(pch) - 1) {
+                if ((i != strlens(pch) - 1) || usepubckd == true) {
                     goto err;
                 }
                 prm = 1;
@@ -354,7 +361,7 @@ btc_bool btc_hd_generate_key(btc_hdnode* node, const char* keypath, const uint8_
                 goto err;
             }
         } else {
-            if (btc_hdnode_private_ckd(node, idx) != true) {
+            if ( (usepubckd == true ? btc_hdnode_public_ckd(node, idx) : btc_hdnode_private_ckd(node, idx)) != true) {
                 goto err;
             }
         }
@@ -365,5 +372,15 @@ btc_bool btc_hd_generate_key(btc_hdnode* node, const char* keypath, const uint8_
 
 err:
     free(kp);
+    return false;
+}
+
+btc_bool btc_hdnode_has_privkey(btc_hdnode* node)
+{
+    int i;
+    for (i = 0; i < BTC_ECKEY_PKEY_LENGTH; ++i) {
+        if (node->private_key[i] != 0)
+            return true;
+    }
     return false;
 }

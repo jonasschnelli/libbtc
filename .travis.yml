@@ -55,4 +55,4 @@ script:
       fi
 
 after_success:
-  - coveralls --verbose -i src -x c -e src/secp256k1 -r $TRAVIS_BUILD_DIR -b $TRAVIS_BUILD_DIR --gcov-options '\-lp'
+  - if [ ${CC} = gcc ] || [ "${TRAVIS_OS_NAME}" = "linux" ]; then coveralls --verbose -i src -x c -e src/logdb -e src/secp256k1 -r $TRAVIS_BUILD_DIR -b $TRAVIS_BUILD_DIR --gcov-options '\-lp'; fi;

@@ -68,8 +68,12 @@ LIBBTC_API void btc_hdnode_get_p2pkh_address(const btc_hdnode* node, const btc_c
 LIBBTC_API btc_bool btc_hdnode_get_pub_hex(const btc_hdnode* node, char* str, size_t *strsize);
 LIBBTC_API btc_bool btc_hdnode_deserialize(const char* str, const btc_chain* chain, btc_hdnode* node);
 
-//!derive btc_hdnode including private key from master private key
-LIBBTC_API btc_bool btc_hd_generate_key(btc_hdnode* node, const char* keypath, const uint8_t* privkeymaster, const uint8_t* chaincode);
+//!derive btc_hdnode from extended private or extended public key orkey
+//if you use pub child key derivation, pass usepubckd=true
+LIBBTC_API btc_bool btc_hd_generate_key(btc_hdnode* node, const char* keypath, const uint8_t* keymaster, const uint8_t* chaincode, btc_bool usepubckd);
+
+//!checks if a node has the according private key (or if its a pubkey only node)
+LIBBTC_API btc_bool btc_hdnode_has_privkey(btc_hdnode* node);
 
 #ifdef __cplusplus
 }
