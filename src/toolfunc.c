@@ -21,7 +21,9 @@
 
 btc_bool address_from_pubkey(const btc_chain* chain, const char *pubkey_hex, char *address)
 {
-    assert(strlen(pubkey_hex) == 66);
+    if (!pubkey_hex || strlen(pubkey_hex) != 66)
+        return false;
+
     btc_pubkey pubkey;
     btc_pubkey_init(&pubkey);
     pubkey.compressed = 1;
