@@ -57,17 +57,18 @@ static void print_version() {
 
 static void print_usage() {
     print_version();
-    printf("Usage: bitcointool (-p <privatekey>) (-t[--testnet]) (-r[--regtest]) -c <command>\n");
-    printf("Available commands: pubfrompriv, addrfrompub, genkey\n");
+    printf("Usage: bitcointool (-m|-keypath <bip_keypath>) (-k|-pubkey <publickey>) (-p|-privkey <privatekey>) (-t[--testnet]) (-r[--regtest]) -c <command>\n");
+    printf("Available commands: pubfrompriv (requires -p WIF), addrfrompub (requires -k HEX), genkey, hdgenmaster, hdprintkey (requires -p), hdderive (requires -m and -p) \n");
     printf("\nExamples: \n");
     printf("Generate a testnet privatekey in WIF/HEX format:\n");
-    printf("> bitcointool -c gen --testnet\n\n");
+    printf("> bitcointool -c genkey --testnet\n\n");
+    printf("> bitcointool -c pubfrompriv -p KzLzeMteBxy8aPPDCeroWdkYPctafGapqBAmWQwdvCkgKniH9zw6\n\n");
 }
 
 static bool showError(const char *er)
 {
     printf("Error: %s\n", er);
-    return 0;
+    return 1;
 }
 
 int main(int argc, char *argv[])
@@ -150,7 +151,8 @@ int main(int argc, char *argv[])
 
         size_t sizeout = 128;
         char address[sizeout];
-        address_from_pubkey(chain, pubkey, address);
+        if (!address_from_pubkey(chain, pubkey, address))
+            return showError("Operation failed, invalid pubkey");
         printf("p2pkh address: %s\n", address);
         memset(pubkey, 0, strlen(pubkey));
         memset(address, 0, strlen(address));
@@ -183,7 +185,7 @@ int main(int argc, char *argv[])
         if (!pkey)
             return showError("Missing extended key (use -p)");
         if (!hd_print_node(chain, pkey))
-            showError("Failed. Probably invalid extended key.\n");
+            return showError("Failed. Probably invalid extended key.\n");
     }
     else if (strcmp(cmd, "hdderive") == 0)
     {
@@ -194,7 +196,7 @@ int main(int argc, char *argv[])
         size_t sizeout = 128;
         char newextkey[sizeout];
         if (!hd_derive(chain, pkey, keypath, newextkey, sizeout))
-            showError("Deriving child key failed\n");
+            return showError("Deriving child key failed\n");
         else
             hd_print_node(chain, newextkey);
     }
