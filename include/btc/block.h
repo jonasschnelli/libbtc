@@ -11,8 +11,8 @@ extern "C" {
 
 #include <stdint.h>
 #include <sys/types.h>
-#include "hash.h"
-#include <logdb/cstr.h>
+#include <btc/hash.h>
+#include <btc/cstr.h>
 
 typedef struct btc_block_header_ {
     int32_t version;

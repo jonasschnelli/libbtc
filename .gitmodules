@@ -1,3 +1,0 @@
-[submodule "logdb"]
-	path = src/logdb
-	url = git@github.com:liblogdb/liblogdb.git

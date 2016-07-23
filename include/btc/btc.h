@@ -41,7 +41,6 @@ typedef uint8_t btc_bool; //!serialize, c/c++ save bool
 #define false 0
 #endif
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif

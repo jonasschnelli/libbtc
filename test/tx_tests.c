@@ -11,11 +11,11 @@
 
 #include <btc/tx.h>
 
-#include <logdb/cstr.h>
+#include <btc/cstr.h>
 #include <btc/ecc_key.h>
 #include <btc/script.h>
 #include "utest.h"
-#include <logdb/utils.h>
+#include <btc/utils.h>
 
 
 struct txtest_input {

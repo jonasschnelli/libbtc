@@ -10,7 +10,7 @@
 #include <logdb/logdb.h>
 
 #include "utest.h"
-#include <logdb/utils.h>
+#include <btc/utils.h>
 #include <unistd.h>
 
 static const char *wallettmpfile = "/tmp/dummy";

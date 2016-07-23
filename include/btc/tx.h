@@ -37,11 +37,11 @@ extern "C" {
 #include <stdint.h>
 #include <stddef.h>
 
-#include "chain.h"
-#include <logdb/cstr.h>
-#include "hash.h"
-#include "script.h"
-#include "vector.h"
+#include <btc/chain.h>
+#include <btc/cstr.h>
+#include <btc/hash.h>
+#include <btc/script.h>
+#include <btc/vector.h>
 
 
 typedef struct btc_script_ {

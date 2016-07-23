@@ -10,7 +10,7 @@
 #include <assert.h>
 
 #include <btc/base58.h>
-#include <logdb/utils.h>
+#include <btc/utils.h>
 
 /* test vectors from bitcoin core */
 static const char* base58_vector[] = {

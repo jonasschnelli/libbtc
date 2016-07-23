@@ -8,7 +8,7 @@
 #include <btc/chain.h>
 #include <btc/tool.h>
 
-#include <logdb/utils.h>
+#include <btc/utils.h>
 
 #include "utest.h"
 

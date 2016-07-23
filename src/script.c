@@ -30,8 +30,8 @@
 #include <assert.h>
 #include <string.h>
 
-#include <logdb/buffer.h>
-#include <logdb/serialize.h>
+#include <btc/buffer.h>
+#include <btc/serialize.h>
 
 btc_bool btc_script_copy_without_op_codeseperator(const cstring* script_in, cstring* script_out)
 {

@@ -9,7 +9,7 @@
 #include <btc/ecc.h>
 #include <btc/ecc_key.h>
 #include <btc/random.h>
-#include <logdb/utils.h>
+#include <btc/utils.h>
 
 #include <assert.h>
 #include <stdbool.h>

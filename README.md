@@ -80,8 +80,17 @@ The bitcointool CLI
 
 How to Build
 ----------------
+
+#### Full library including CLI tool and wallet database
 ```
 ./autogen.sh
 ./configure
+make check
+```
+
+#### Pure library without wallet support
+```
+./autogen.sh
+./configure --disable-wallet --disable-tools
 make check
 ```

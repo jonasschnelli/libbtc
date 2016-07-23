@@ -38,8 +38,8 @@ extern "C" {
 #include <stdint.h>
 #include <string.h>
 
-#include <logdb/cstr.h>
-#include <logdb/sha2.h>
+#include <btc/cstr.h>
+#include <btc/sha2.h>
 #include "vector.h"
 
 typedef uint8_t uint256[32];

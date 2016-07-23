@@ -9,7 +9,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include <logdb/utils.h>
+#include <btc/utils.h>
 #include <btc/vector.h>
 
 struct teststruct {

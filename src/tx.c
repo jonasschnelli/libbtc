@@ -29,12 +29,11 @@
 #include <stddef.h>
 #include <string.h>
 
-#include "btc/base58.h"
-#include "btc/tx.h"
-
-#include <logdb/serialize.h>
-#include <logdb/sha2.h>
-#include <logdb/utils.h>
+#include <btc/base58.h>
+#include <btc/serialize.h>
+#include <btc/sha2.h>
+#include <btc/tx.h>
+#include <btc/utils.h>
 
 void btc_tx_in_free(btc_tx_in* tx_in)
 {
@@ -476,8 +475,7 @@ btc_bool btc_tx_add_p2pkh_out(btc_tx* tx, int64_t amount, const btc_pubkey* pubk
 
 btc_bool btc_tx_outpoint_is_null(btc_tx_outpoint* tx)
 {
-    //TODO
-    UNUSED(tx);
+    (void)(tx);
     return true;
 }
 

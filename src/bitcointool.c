@@ -29,7 +29,7 @@
 #include <btc/chain.h>
 #include <btc/tool.h>
 #include <btc/ecc.h>
-#include <logdb/utils.h>
+#include <btc/utils.h>
 
 #include <assert.h>
 #include <stdbool.h>
