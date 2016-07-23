@@ -29,7 +29,7 @@
 #include <string.h>
 
 
-#include "btc/block.h"
+#include <btc/block.h>
 
 #include <btc/serialize.h>
 #include <btc/sha2.h>
