@@ -34,6 +34,14 @@
         }                                                  \
     } while (0)
 
+extern void test_sha_256();
+extern void test_sha_512();
+extern void test_sha_hmac();
+extern void test_cstr();
+extern void test_buffer();
+extern void test_utils();
+extern void test_serialize();
+
 extern void test_random();
 extern void test_bitcoin_hash();
 extern void test_base58check();
@@ -50,6 +58,10 @@ extern void test_script_op_codeseperator();
 extern void test_eckey();
 
 #ifdef WITH_WALLET
+extern void test_red_black_tree();
+extern void test_logdb_memdb();
+extern void test_logdb_rbtree();
+
 extern void test_logdb();
 extern void test_wallet();
 #endif
@@ -68,6 +80,14 @@ int main()
 {
     btc_ecc_start();
 
+    u_run_test(test_sha_256);
+    u_run_test(test_sha_512);
+    u_run_test(test_sha_hmac);
+    u_run_test(test_utils);
+    u_run_test(test_cstr);
+    u_run_test(test_buffer);
+    u_run_test(test_serialize);
+
     u_run_test(test_random);
     u_run_test(test_bitcoin_hash);
     u_run_test(test_base58check);
@@ -80,6 +100,7 @@ int main()
     u_run_test(test_tx_sighash);
     u_run_test(test_tx_negative_version);
     u_run_test(test_block_header);
+    fprintf(stderr, "finish2\n");
     u_run_test(test_script_parse);
     u_run_test(test_script_op_codeseperator);
 
@@ -87,6 +108,10 @@ int main()
 
 #ifdef WITH_WALLET
     u_run_test(test_wallet);
+
+    u_run_test(test_red_black_tree);
+    u_run_test(test_logdb_memdb);
+    u_run_test(test_logdb_rbtree);
 #endif
 
 #ifdef WITH_TOOLS

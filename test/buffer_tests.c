@@ -7,16 +7,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "limits.h"
 
-#include "buffer.h"
+#include <btc/buffer.h>
 
 void test_buffer()
 {
     struct const_buffer buf0 = {"data", 4};
     struct const_buffer buf1 = {"data", 4};
+    struct buffer* buf2;
+    
+    assert(buffer_equal(&buf0.p, &buf1.p) == 1);
 
-    assert(buffer_equal(&buf0.p, &buf1.p) == true);
-
-    struct buffer* buf2 = buffer_copy(&buf0.p, buf0.len);
+    buf2 = buffer_copy(&buf0.p, buf0.len);
     buffer_free(buf2);
 }

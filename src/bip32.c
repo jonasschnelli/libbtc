@@ -31,14 +31,14 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#include "btc/base58.h"
-#include "btc/hash.h"
-#include "btc/ecc.h"
-#include "btc/ecc_key.h"
+#include <btc/sha2.h>
+#include <btc/utils.h>
+#include <btc/base58.h>
+#include <btc/hash.h>
+#include <btc/ecc.h>
+#include <btc/ecc_key.h>
 
 #include "ripemd160.h"
-#include <logdb/sha2.h>
-#include <logdb/utils.h>
 
 // write 4 big endian bytes
 static void write_be(uint8_t* data, uint32_t x)

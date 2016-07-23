@@ -30,10 +30,10 @@
 
 
 #include "btc/block.h"
-#include <logdb/serialize.h>
-#include <logdb/sha2.h>
-#include <logdb/utils.h>
-#include "../include/btc/block.h"
+
+#include <btc/serialize.h>
+#include <btc/sha2.h>
+#include <btc/utils.h>
 
 btc_block_header* btc_block_header_new()
 {

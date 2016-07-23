@@ -11,8 +11,8 @@
 
 #include <btc/hash.h>
 
-#include <logdb/sha2.h>
-#include <logdb/utils.h>
+#include <btc/sha2.h>
+#include <btc/utils.h>
 
 void test_bitcoin_hash()
 {

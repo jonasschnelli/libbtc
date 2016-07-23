@@ -10,10 +10,15 @@
 #include <string.h>
 #include <assert.h>
 
-#include <logdb/cstr.h>
+#include <btc/cstr.h>
 
 void test_cstr()
 {
+    cstring* s1 = cstr_new("foo");
+    cstring* s2 = cstr_new("foo");
+    cstring* s3 = cstr_new("bar");
+    cstring* s4 = cstr_new("bar1");
+    
     cstring* s = cstr_new("foo");
     assert(s != NULL);
     assert(s->len == 3);
@@ -61,10 +66,11 @@ void test_cstr()
 
     cstr_free(s, true);
 
-    cstring* s1 = cstr_new("foo");
-    cstring* s2 = cstr_new("foo");
-    cstring* s3 = cstr_new("bar");
-    cstring* s4 = cstr_new("bar1");
+    assert(cstr_compare(s1, s2) ==  0);
+    assert(cstr_compare(s1, s3) ==  1);
+    assert(cstr_compare(s3, s1) ==  -1);
+    assert(cstr_compare(s3, s4) ==  -1);
+    assert(cstr_compare(s4, s3) ==  1);
 
     assert(cstr_equal(s1, s2) == true);
     assert(cstr_equal(s1, s3) == false);
@@ -73,6 +79,9 @@ void test_cstr()
     assert(cstr_equal(s3, s3) == true);
     assert(cstr_equal(s3, s4) == false);
     cstr_erase(s4, 0, 3);
+    cstr_erase(s4, 110, 3);
+    cstr_erase(s4, s4->len, 0);
+    cstr_erase(s4, 0, 100);
     assert(strcmp(s4->str, "1") == 0);
 
     cstr_free(s1, true);

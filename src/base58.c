@@ -26,7 +26,7 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include <logdb/sha2.h>
+#include <btc/sha2.h>
 
 static const int8_t b58digits_map[] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,

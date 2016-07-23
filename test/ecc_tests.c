@@ -15,7 +15,7 @@
 #include <btc/random.h>
 
 #include "utest.h"
-#include <logdb/utils.h>
+#include <btc/utils.h>
 
 void test_ecc()
 {

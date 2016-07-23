@@ -11,9 +11,9 @@
 
 #include <btc/block.h>
 
-#include <logdb/cstr.h>
+#include <btc/cstr.h>
 #include <btc/ecc_key.h>
-#include <logdb/utils.h>
+#include <btc/utils.h>
 
 struct blockheadertest {
     char hexheader[160];
