@@ -29,6 +29,8 @@
 #include <string.h>
 #include <stdio.h>
 #include <inttypes.h>
+#include <time.h>
+#include <ctype.h>
 
 #include <btc/utils.h>
 
@@ -148,6 +150,57 @@ void utils_reverse_hex(char* h, int len)
     free(copy);
 }
 
+const signed char p_util_hexdigit[256] =
+{ -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    0,1,2,3,4,5,6,7,8,9,-1,-1,-1,-1,-1,-1,
+    -1,0xa,0xb,0xc,0xd,0xe,0xf,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,0xa,0xb,0xc,0xd,0xe,0xf,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, };
+
+signed char utils_hex_digit(char c)
+{
+    return p_util_hexdigit[(unsigned char)c];
+}
+
+void utils_uint256_sethex(char *psz, uint8_t *out)
+{
+    memset(out, 0, 32);
+
+    // skip leading spaces
+    while (isspace(*psz))
+        psz++;
+
+    // skip 0x
+    if (psz[0] == '0' && tolower(psz[1]) == 'x')
+        psz += 2;
+
+    // hex string to uint
+    const char* pbegin = psz;
+    while (utils_hex_digit(*psz) != -1)
+        psz++;
+    psz--;
+    unsigned char* p1 = (unsigned char*)out;
+    unsigned char* pend = p1 + 32;
+    while (psz >= pbegin && p1 < pend) {
+        *p1 = utils_hex_digit(*psz--);
+        if (psz >= pbegin) {
+            *p1 |= ((unsigned char)utils_hex_digit(*psz--) << 4);
+            p1++;
+        }
+    }
+}
+
 void * safe_malloc(size_t size) {
     void * result;
 
@@ -158,5 +211,13 @@ void * safe_malloc(size_t size) {
         printf("  Exiting Program.\n");
         exit(-1);
         return(0);
+    }
+}
+
+void btc_cheap_random_bytes(uint8_t* buf, uint32_t len)
+{
+    srand(time(NULL));
+    for (uint32_t i = 0; i < len; i++) {
+        buf[i] = rand();
     }
 }
