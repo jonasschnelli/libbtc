@@ -106,7 +106,7 @@ fi
 if test x$with_net = "xyes"; then
   AC_CHECK_HEADER([event2/event.h],, AC_MSG_ERROR(libevent headers missing),)
   AC_CHECK_LIB([event],[main],EVENT_LIBS=-levent,AC_MSG_ERROR(libevent missing))
-  if test x$TARGET_OS != xwindows; then
+  if test "$host" = "mingw"; then
     AC_CHECK_LIB([event_pthreads],[main],EVENT_PTHREADS_LIBS=-levent_pthreads,AC_MSG_ERROR(libevent_pthreads missing))
   fi
 fi
