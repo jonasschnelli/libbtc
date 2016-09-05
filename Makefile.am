@@ -120,6 +120,23 @@ tests_SOURCES += \
 endif
 endif
 
+if WITH_NET
+include_HEADERS += \
+    include/btc/protocol.h
+
+libbtc_la_SOURCES += \
+    src/protocol.c
+
+libbtc_la_LIBADD += $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
+libbtc_la_CFLAGS += $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
+
+if USE_TESTS
+tests_SOURCES += \
+    test/protocol_tests.c
+tests_LDFLAGS += -levent
+endif
+endif
+
 if WITH_TOOLS
 if USE_TESTS
 tests_SOURCES += \
