@@ -11,9 +11,15 @@
 #include <btc/utils.h>
 #include <btc/serialize.h>
 
+#ifdef _WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <getopt.h>
+#else
 #include <sys/socket.h>
-#include <netinet/tcp.h>
+#include <netinet/in.h>
 #include <arpa/inet.h>
+#endif
 
 #include <assert.h>
 #include <stdio.h>
