@@ -75,8 +75,8 @@ int main(int argc, char *argv[])
 {
     int long_index =0;
     int opt= 0;
-    char *pkey;
-    char *pubkey;
+    char *pkey = 0;
+    char *pubkey = 0;
     char *cmd = 0;
     char *keypath = 0;
     const btc_chain* chain = &btc_chain_main;

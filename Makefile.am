@@ -122,9 +122,11 @@ endif
 
 if WITH_NET
 include_HEADERS += \
-    include/btc/protocol.h
+    include/btc/protocol.h \
+    include/btc/net.h
 
 libbtc_la_SOURCES += \
+    src/net.c \
     src/protocol.c
 
 libbtc_la_LIBADD += $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
@@ -132,6 +134,7 @@ libbtc_la_CFLAGS += $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
 
 if USE_TESTS
 tests_SOURCES += \
+    test/net_tests.c \
     test/protocol_tests.c
 tests_LDFLAGS += -levent
 endif

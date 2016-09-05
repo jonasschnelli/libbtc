@@ -59,6 +59,7 @@ LIBBTC_API int cstr_append_cstr(cstring* s, cstring *append);
 
 LIBBTC_API int cstr_append_c(cstring* s, char ch);
 
+LIBBTC_API int cstr_alloc_minsize(cstring* s, size_t sz);
 #ifdef __cplusplus
 }
 #endif
