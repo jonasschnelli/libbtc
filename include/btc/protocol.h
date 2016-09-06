@@ -37,7 +37,15 @@ extern "C" {
 #include <btc/cstr.h>
 #include <btc/vector.h>
 
+#ifdef _WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <getopt.h>
+#else
+#include <sys/socket.h>
+#include <netinet/in.h>
 #include <arpa/inet.h>
+#endif
 
 #define BTC_P2P_HDRSZ	(4 + 12 + 4 + 4) /* magic, command, length, checksum */
 

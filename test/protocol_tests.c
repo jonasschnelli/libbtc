@@ -14,6 +14,8 @@
 #include <btc/protocol.h>
 #include "utest.h"
 
+#include <event2/util.h>
+
 void test_protocol()
 {
     /* get new string buffer */
@@ -26,12 +28,12 @@ void test_protocol()
     struct sockaddr_in6 test_sa6, test_sa6_check;
     test_sa6.sin6_family = AF_INET6;
     test_sa6.sin6_port = htons(1024);
-    inet_aton("10.0.0.1", &test_sa.sin_addr); // store IP in antelope
+    evutil_inet_pton(AF_INET, "10.0.0.1", &test_sa.sin_addr); // store IP in antelope
 
     char i6buf[1024];
     memset(&i6buf, 0, 1024);
 
-    inet_pton(AF_INET6, "::1", &test_sa6.sin6_addr);
+    evutil_inet_pton(AF_INET6, "::1", &test_sa6.sin6_addr);
     btc_p2p_address ipv6Test;
     btc_p2p_address_init(&ipv6Test);
     btc_addr_to_p2paddr((struct sockaddr *)&test_sa6, &ipv6Test);
@@ -47,7 +49,7 @@ void test_protocol()
     btc_addr_to_p2paddr((struct sockaddr *)&test_sa, &toAddr);
     btc_p2paddr_to_addr(&toAddr, (struct sockaddr *)&test_sa_check);
     u_assert_int_eq(test_sa.sin_port, test_sa_check.sin_port);
-    inet_ntop(AF_INET, &test_sa_check.sin_addr, i6buf, 1024);
+    evutil_inet_ntop(AF_INET, &test_sa_check.sin_addr, i6buf, 1024);
     u_assert_str_eq(i6buf, "10.0.0.1");
 
     /* create a version message struct */
