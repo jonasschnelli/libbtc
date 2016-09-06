@@ -82,6 +82,11 @@ cstring* cstr_new_buf(const void* buf, size_t sz)
     return s;
 }
 
+cstring* cstr_new_cstr(cstring* copy_str)
+{
+    return cstr_new_buf(copy_str->str, copy_str->len);
+}
+
 cstring* cstr_new(const char* init_str)
 {
     size_t slen;

@@ -105,7 +105,6 @@ int main()
     u_run_test(test_tx_sighash);
     u_run_test(test_tx_negative_version);
     u_run_test(test_block_header);
-    fprintf(stderr, "finish2\n");
     u_run_test(test_script_parse);
     u_run_test(test_script_op_codeseperator);
 

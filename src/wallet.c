@@ -299,16 +299,25 @@ void btc_wallet_set_master_key_copy(btc_wallet *wallet, btc_hdnode *masterkey)
     wallet->masterkey = btc_hdnode_copy(masterkey);
 
     //serialize and store node
+    cstring value;
+    cstring key;
+
     char str[128];
-    btc_hdnode_serialize_private(wallet->masterkey, wallet->chain, str, sizeof(str));
+    // form a stack cstring for the value
+    value.str = (char *)&str;
+    value.alloc = sizeof(str);
+    btc_hdnode_serialize_private(wallet->masterkey, wallet->chain, value.str, value.alloc);
+    value.len = strlen(str);
 
-    uint8_t key[strlen(hdmasterkey_key)+SHA256_DIGEST_LENGTH];
-    memcpy(key, hdmasterkey_key, strlen(hdmasterkey_key));
-    btc_hash(wallet->masterkey->public_key, BTC_ECKEY_COMPRESSED_LENGTH, key+strlen(hdmasterkey_key));
+    uint8_t key_int[strlen(hdmasterkey_key)+SHA256_DIGEST_LENGTH];
+    // form a stack cstring for the key
+    key.alloc = sizeof(key);
+    key.len = key.alloc;
+    key.str = (char *)&key_int;
+    memcpy(key.str, hdmasterkey_key, strlen(hdmasterkey_key));
+    btc_hash(wallet->masterkey->public_key, BTC_ECKEY_COMPRESSED_LENGTH, (uint8_t *)key.str+strlen(hdmasterkey_key));
 
-    struct buffer buf_key = {key, sizeof(key)};
-    struct buffer buf_val = {str, strlen(str)};
-    logdb_append(wallet->db, &buf_key, &buf_val);
+    logdb_append(wallet->db, NULL, &key, &value);
 }
 
 btc_hdnode* btc_wallet_next_key_new(btc_wallet *wallet)
@@ -321,20 +330,26 @@ btc_hdnode* btc_wallet_next_key_new(btc_wallet *wallet)
     btc_hdnode_private_ckd(node, wallet->next_childindex);
 
     //serialize and store node
+    cstring value;
+    cstring key;
     char str[128];
-    btc_hdnode_serialize_public(node, wallet->chain, str, sizeof(str));
+    value.str = (char *)&str;
+    value.alloc = sizeof(str);
+    btc_hdnode_serialize_public(node, wallet->chain, value.str, value.alloc);
+    value.len = strlen(str);
 
-    uint8_t key[strlen(hdkey_key)+20];
-    memcpy(key, hdkey_key, strlen(hdkey_key)); //set the key prefix for the kv store
-    btc_hdnode_get_hash160(node, key+strlen(hdkey_key)); //append the hash160
+    uint8_t key_int[strlen(hdkey_key)+20];
+    key.alloc = sizeof(key_int);
+    key.len = key.alloc;
+    key.str = (char *)&key_int;
+    memcpy(key.str, hdkey_key, strlen(hdkey_key)); //set the key prefix for the kv store
+    btc_hdnode_get_hash160(node, (uint8_t *)key.str+strlen(hdkey_key)); //append the hash160
 
-    struct buffer buf_key = {key, sizeof(key)};
-    struct buffer buf_val = {str, strlen(str)};
-    logdb_append(wallet->db, &buf_key, &buf_val);
+    logdb_append(wallet->db, NULL, &key, &value);
     logdb_flush(wallet->db);
 
     //add key to the rbtree
-    cstring *hdnodehash = cstr_new_buf(((char *)buf_key.p)+strlen(hdkey_key),20);
+    cstring *hdnodehash = cstr_new_buf(key.str+strlen(hdkey_key),20);
     RBTreeInsert(wallet->hdkeys_rbtree,hdnodehash,btc_hdnode_copy(node));
 
     //increase the in-memory counter (cache)
@@ -391,13 +406,15 @@ btc_bool btc_wallet_add_wtx(btc_wallet *wallet, btc_wtx *wtx)
     cstring* txser = cstr_new_sz(1024);
     btc_wallet_wtx_serialize(txser, wtx);
 
-    uint8_t key[strlen(tx_key)+SHA256_DIGEST_LENGTH];
-    memcpy(key, tx_key, strlen(tx_key));
-    btc_hash((const uint8_t*)txser->str, txser->len, key+strlen(tx_key));
+    cstring key;
+    uint8_t key_int[strlen(tx_key)+SHA256_DIGEST_LENGTH];
+    key.alloc = sizeof(key_int);
+    key.len = key.alloc;
+    key.str = (char *)&key_int;
+    memcpy(key.str, tx_key, strlen(tx_key));
+    btc_hash((const uint8_t*)txser->str, txser->len, (uint8_t *)key.str+strlen(tx_key));
 
-    struct buffer buf_key = {key, sizeof(key)};
-    struct buffer buf_val = {txser->str, txser->len};
-    logdb_append(wallet->db, &buf_key, &buf_val);
+    logdb_append(wallet->db, NULL, &key, txser);
 
     //add to spends
     btc_wallet_add_to_spent(wallet, wtx);

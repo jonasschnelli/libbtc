@@ -31,9 +31,7 @@
 #ifndef __LIBLOGDB_RBTREE_H__
 #define __LIBLOGDB_RBTREE_H__
 
-#include <btc/buffer.h>
 #include <btc/cstr.h>
-
 #include <logdb/logdb_base.h>
 #include <logdb/logdb_rec.h>
 #include <logdb/logdb_core.h>
@@ -60,7 +58,7 @@ LIBLOGDB_API void logdb_rbtree_init(logdb_log_db* db);
 LIBLOGDB_API void logdb_rbtree_append(void* ctx, logdb_bool load_phase, logdb_record *rec);
 
 /** find a record by key */
-LIBLOGDB_API cstring * logdb_rbtree_find(logdb_log_db* db, struct buffer *key);
+LIBLOGDB_API cstring * logdb_rbtree_find(logdb_log_db* db, cstring *key);
 
 /** count all red black tree nodes */
 LIBLOGDB_API size_t logdb_rbtree_size(logdb_log_db* db);

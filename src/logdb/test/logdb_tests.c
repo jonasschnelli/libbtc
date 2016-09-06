@@ -25,18 +25,18 @@ void test_logdb(logdb_log_db* (*new_func)())
 {
     logdb_log_db *db;
     enum logdb_error error = 0;
-    struct buffer key = {"key0", 4};
-    struct buffer value = {"val0", 4};
-    struct buffer key1;
-    struct buffer value1;
+    cstring *key;// key= {"key0", 4};
+    cstring *value;// = {"val0", 4};
+    cstring *key1;
+    cstring *value1;
     cstring *outtest;
     cstring *value_test;
     unsigned char testbin[4] = {0x00, 0x10, 0x20, 0x30};
-    struct buffer value0_new = {"dumb", 4};
-    struct buffer key2 = {"pkey", 4};
-    struct buffer value2;
-    struct buffer smp_value;
-    struct buffer smp_key;
+    cstring *value0;// = {"dumb", 4};
+    cstring *key2;// = {"pkey", 4};
+    cstring *value2;
+    cstring *smp_value;
+    cstring *smp_key;
     uint8_t txbin[10240];
     uint8_t txbin_rev[10240];
     char hexrev[98];
@@ -51,28 +51,30 @@ void test_logdb(logdb_log_db* (*new_func)())
     unsigned int cnt = 0;
     logdb_record* rec;
 
-    value2.p = testbin;
-    value2.len = 4;
+    key = cstr_new("key0");
+    value = cstr_new("val0");
 
-    key1.p = (char *)key1str;
-    key1.len = strlen(key1str);
-    value1.p = (char *)value1str;
-    value1.len = strlen(value1str);
+    value0 = cstr_new("dumb");
+    value1 = cstr_new_sz(10);
+    value2 = cstr_new_sz(10);
+    key1 = cstr_new_sz(10);
+    key2 = cstr_new("key2");
+
+    cstr_append_buf(value2, testbin, sizeof(testbin));
+    cstr_append_buf(value2, testbin, sizeof(testbin));
+    cstr_append_buf(key1, key1str, strlen(key1str));
+    cstr_append_buf(value1, value1str, strlen(value1str));
 
     unlink(dbtmpfile);
     db = new_func();
     u_assert_int_eq(logdb_load(db, "file_that_should_not_exists.dat", false, NULL), false);
     u_assert_int_eq(logdb_load(db, dbtmpfile, true, NULL), true);
 
-
-    logdb_append(db, &key, &value);
-
-
-
-    logdb_append(db, &key1, &value1);
+    logdb_append(db, NULL, key, value);
+    logdb_append(db, NULL, key1, value1);
 
     u_assert_int_eq(logdb_cache_size(db), 2);
-    outtest = logdb_find_cache(db, &key1);
+    outtest = logdb_find_cache(db, key1);
     u_assert_int_eq(strcmp(outtest->str, value1str),0);
     logdb_flush(db);
     logdb_free(db);
@@ -81,10 +83,10 @@ void test_logdb(logdb_log_db* (*new_func)())
     u_assert_int_eq(logdb_load(db, dbtmpfile, false, NULL), true);
     u_assert_int_eq(logdb_count_keys(db), 2);
     
-    value_test = logdb_find(db, &key1);
+    value_test = logdb_find(db, key1);
     u_assert_int_eq(strcmp(value_test->str, value1str), 0);
-    value_test = logdb_find(db, &key);
-    u_assert_int_eq(memcmp(value_test->str, value.p, value.len), 0);
+    value_test = logdb_find(db, key);
+    u_assert_int_eq(memcmp(value_test->str, value->str, value->len), 0);
     logdb_free(db);
 
     db = new_func();
@@ -92,7 +94,7 @@ void test_logdb(logdb_log_db* (*new_func)())
 
 
 
-    logdb_append(db, &key2, &value2);
+    logdb_append(db, NULL, key2, value2);
     logdb_flush(db);
     logdb_free(db);
 
@@ -100,13 +102,13 @@ void test_logdb(logdb_log_db* (*new_func)())
     db = new_func();
     u_assert_int_eq(logdb_load(db, dbtmpfile, false, NULL), true);
 
-    value_test = logdb_find(db, &key2);
-    u_assert_int_eq(memcmp(value_test->str, value2.p, value2.len), 0);
-    value_test = logdb_find(db, &key);
-    u_assert_int_eq(memcmp(value_test->str, value.p, value.len), 0);
+    value_test = logdb_find(db, key2);
+    u_assert_int_eq(memcmp(value_test->str, value2->str, value2->len), 0);
+    value_test = logdb_find(db, key);
+    u_assert_int_eq(memcmp(value_test->str, value->str, value->len), 0);
 
     /* delete a record */
-    logdb_delete(db, &key2);
+    logdb_delete(db, NULL, key2);
     logdb_flush(db);
     logdb_free(db);
 
@@ -114,25 +116,25 @@ void test_logdb(logdb_log_db* (*new_func)())
     db = new_func();
     u_assert_int_eq(logdb_load(db, dbtmpfile, false, NULL), true);
 
-    value_test = logdb_find(db, &key);
-    u_assert_int_eq(memcmp(value_test->str, value.p, value.len), 0);
+    value_test = logdb_find(db, key);
+    u_assert_int_eq(memcmp(value_test->str, value->str, value->len), 0);
 
-    value_test = logdb_find(db, &key2);
+    value_test = logdb_find(db, key2);
     u_assert_int_eq((int)value_test, 0); /* should be null */
 
     /* overwrite a key */
-    logdb_append(db, &key, &value0_new);
+    logdb_append(db, NULL, key, value0);
 
-    value_test = logdb_find(db, &key);
-    u_assert_int_eq(memcmp(value_test->str, value0_new.p, value0_new.len), 0);
+    value_test = logdb_find(db, key);
+    u_assert_int_eq(memcmp(value_test->str, value0->str, value0->len), 0);
 
     logdb_flush(db);
     logdb_free(db);
 
     db = new_func();
     u_assert_int_eq(logdb_load(db, dbtmpfile, false, NULL), true);
-    value_test = logdb_find(db, &key);
-    u_assert_int_eq(memcmp(value_test->str, value0_new.p, value0_new.len), 0);
+    value_test = logdb_find(db, key);
+    u_assert_int_eq(memcmp(value_test->str, value0->str, value0->len), 0);
 
     logdb_flush(db);
     logdb_free(db);
@@ -203,6 +205,8 @@ void test_logdb(logdb_log_db* (*new_func)())
     db = new_func();
     u_assert_int_eq(logdb_load(db, dbtmpfile, true, NULL), true);
 
+    smp_key = cstr_new_sz(100);
+    smp_value = cstr_new_sz(100);
     for (i = 0; i < (sizeof(sampledata) / sizeof(sampledata[0])); i++) {
         const struct txtest *tx = &sampledata[i];
 
@@ -210,16 +214,16 @@ void test_logdb(logdb_log_db* (*new_func)())
         int outlen = sizeof(tx->txhash) / 2;
         utils_hex_to_bin(tx->txhash, hashbin, strlen(tx->txhash), &outlen);
 
-        smp_key.p = hashbin;
-        smp_key.len = outlen;
+        cstr_erase(smp_key, 0, smp_key->len);
+        cstr_append_buf(smp_key, hashbin, outlen);
 
         outlen = sizeof(tx->hextx) / 2;
         utils_hex_to_bin(tx->hextx, txbin, strlen(tx->hextx), &outlen);
 
-        smp_value.p = txbin;
-        smp_value.len = outlen;
+        cstr_erase(smp_value, 0, smp_value->len);
+        cstr_append_buf(smp_value, txbin, outlen);
 
-        logdb_append(db, &smp_key, &smp_value);
+        logdb_append(db, NULL, smp_key, smp_value);
     }
 
     u_assert_int_eq(logdb_count_keys(db), (sizeof(sampledata) / sizeof(sampledata[0])));
@@ -232,9 +236,9 @@ void test_logdb(logdb_log_db* (*new_func)())
         int outlen = sizeof(tx->txhash) / 2;
         utils_hex_to_bin(tx->txhash, hashbin, strlen(tx->txhash), &outlen);
 
-        smp_key.p = hashbin;
-        smp_key.len = outlen;
-        outtest = logdb_find(db, &smp_key);
+        cstr_erase(smp_key, 0, smp_key->len);
+        cstr_append_buf(smp_key, hashbin, outlen);
+        outtest = logdb_find(db, smp_key);
 
         outlen = sizeof(tx->hextx) / 2;
         utils_hex_to_bin(tx->hextx, txbin, strlen(tx->hextx), &outlen);
@@ -263,9 +267,9 @@ void test_logdb(logdb_log_db* (*new_func)())
         outlenrev = sizeof(tx->txhash) / 2;
         utils_hex_to_bin(hexrev, txbin_rev, strlen(hexrev), &outlenrev);
 
-        smp_key.p = hashbin;
-        smp_key.len = outlen;
-        outtest = logdb_find(db, &smp_key);
+        cstr_erase(smp_key, 0, smp_key->len);
+        cstr_append_buf(smp_key, hashbin, outlen);
+        outtest = logdb_find(db, smp_key);
 
         outlen = strlen(tx->hextx) / 2;
         utils_hex_to_bin(tx->hextx, txbin, strlen(tx->hextx), &outlen);
@@ -290,9 +294,9 @@ void test_logdb(logdb_log_db* (*new_func)())
         int outlen = sizeof(tx->txhash) / 2;
         utils_hex_to_bin(tx->txhash, hashbin, strlen(tx->txhash), &outlen);
 
-        smp_key.p = hashbin;
-        smp_key.len = outlen;
-        logdb_delete(db, &smp_key);
+        cstr_erase(smp_key, 0, smp_key->len);
+        cstr_append_buf(smp_key, hashbin, outlen);
+        logdb_delete(db, NULL, smp_key);
     }
     u_assert_int_eq(logdb_count_keys(db), 0);
 
@@ -312,16 +316,16 @@ void test_logdb(logdb_log_db* (*new_func)())
         int outlen = sizeof(tx->txhash) / 2;
         utils_hex_to_bin(tx->txhash, hashbin, strlen(tx->txhash), &outlen);
 
-        smp_key.p = hashbin;
-        smp_key.len = outlen;
+        cstr_erase(smp_key, 0, smp_key->len);
+        cstr_append_buf(smp_key, hashbin, outlen);
 
         outlen = sizeof(tx->hextx) / 2;
         utils_hex_to_bin(tx->hextx, txbin, strlen(tx->hextx), &outlen);
 
-        smp_value.p = txbin;
-        smp_value.len = outlen;
+        cstr_erase(smp_value, 0, smp_value->len);
+        cstr_append_buf(smp_value, txbin, outlen);
 
-        logdb_append(db, &smp_key, &smp_value);
+        logdb_append(db, NULL, smp_key, smp_value);
     }
 
     logdb_flush(db);
@@ -369,16 +373,16 @@ void test_logdb(logdb_log_db* (*new_func)())
         int outlen = sizeof(tx->txhash) / 2;
         utils_hex_to_bin(tx->txhash, hashbin, strlen(tx->txhash), &outlen);
 
-        smp_key.p = hashbin;
-        smp_key.len = outlen;
+        cstr_erase(smp_key, 0, smp_key->len);
+        cstr_append_buf(smp_key, hashbin, outlen);
 
         outlen = sizeof(tx->hextx) / 2;
         utils_hex_to_bin(tx->hextx, txbin, strlen(tx->hextx), &outlen);
 
-        smp_value.p = txbin;
-        smp_value.len = outlen;
+        cstr_erase(smp_value, 0, smp_value->len);
+        cstr_append_buf(smp_value, txbin, outlen);
 
-        logdb_append(db, &smp_key, &smp_value);
+        logdb_append(db, NULL, smp_key, smp_value);
     }
 
     logdb_flush(db);
@@ -389,6 +393,55 @@ void test_logdb(logdb_log_db* (*new_func)())
     logdb_set_memmapper(db, &logdb_rbtree_mapper, NULL);
     logdb_flush(db);
     logdb_free(db);
+
+
+    unlink(dbtmpfile);
+
+    db = new_func();
+    u_assert_int_eq(logdb_load(db, dbtmpfile, true, NULL), true);
+
+    // create transaction, don't store
+    logdb_txn* txn = logdb_txn_new();
+    logdb_append(db, txn, key, value);
+    logdb_append(db, txn, key1, value1);
+    u_assert_int_eq(logdb_cache_size(db), 0);
+    logdb_txn_free(txn);
+
+    logdb_flush(db);
+    logdb_free(db);
+
+    db = new_func();
+    u_assert_int_eq(logdb_load(db, dbtmpfile, false, NULL), true);
+    // db should still be empty
+    u_assert_int_eq(logdb_count_keys(db), 0);
+
+    // create transaction, store it this time
+    txn = logdb_txn_new();
+    logdb_append(db, txn, key, value);
+    logdb_append(db, txn, key1, value1);
+    logdb_txn_commit(db, txn);
+    u_assert_int_eq(logdb_cache_size(db), 2);
+    logdb_txn_free(txn);
+
+    logdb_flush(db);
+    logdb_free(db);
+
+    db = new_func();
+    u_assert_int_eq(logdb_load(db, dbtmpfile, false, NULL), true);
+    // now we should have the two persisted items from the txn
+    u_assert_int_eq(logdb_count_keys(db), 2);
+    logdb_flush(db);
+    logdb_free(db);
+
+    cstr_free(key, true);
+    cstr_free(value, true);
+    cstr_free(value0, true);
+    cstr_free(value1, true);
+    cstr_free(value2, true);
+    cstr_free(key1, true);
+    cstr_free(key2, true);
+    cstr_free(smp_key, true);
+    cstr_free(smp_value, true);
 }
 
 void test_logdb_rbtree()
@@ -399,4 +452,33 @@ void test_logdb_rbtree()
 void test_logdb_memdb()
 {
     test_logdb(logdb_new);
+}
+
+void test_examples()
+{
+    cstring *value;
+    cstring *key;
+    logdb_log_db *db;
+    enum logdb_error error = 0;
+    int create_database = 1;
+
+    /* create a new database object */
+    db = logdb_new();
+
+    /* create a database file (will overwrite existing) */
+    logdb_load(db, "/tmp/test.logdb", create_database, &error);
+
+    /* append a record */
+    value = cstr_new("testkey");
+    key = cstr_new("somevalue");
+    /* second parameter NULL means we don't use a transaction */
+    logdb_append(db, NULL, key, value);
+
+    /* flush database (write its state to disk) */
+    logdb_flush(db);
+
+    /* cleanup */
+    logdb_free(db);
+    cstr_free(key, true);
+    cstr_free(value, true);
 }
