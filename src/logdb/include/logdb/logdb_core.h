@@ -30,7 +30,6 @@
 #include <logdb/logdb_base.h>
 #include <logdb/logdb_rec.h>
 #include <btc/sha2.h>
-#include <btc/buffer.h>
 
 #include <stdint.h>
 #include <stdio.h>
@@ -64,6 +63,10 @@ typedef struct logdb_log_db {
     uint32_t support_flags;
 } logdb_log_db;
 
+typedef struct logdb_txn {
+    logdb_record *txn_head;
+} logdb_txn;
+
 /* function pointer interface for flexible memory mapping functions*/
 struct logdb_memmapper_
 {
@@ -80,7 +83,7 @@ struct logdb_memmapper_
     void (*cleanup_cb)(void*);
 
     /* callback for finding a record with given key */
-    cstring* (*find_cb)(logdb_log_db*, struct buffer*);
+    cstring* (*find_cb)(logdb_log_db*, cstring *);
 
     /* callback which expect the get back the total amount of keys in the database */
     size_t (*size_cb)(logdb_log_db*);
@@ -111,14 +114,14 @@ LIBLOGDB_API logdb_bool logdb_load(logdb_log_db* handle, const char *file_path, 
 LIBLOGDB_API logdb_bool logdb_flush(logdb_log_db* db);
 
 /** deletes record with key */
-LIBLOGDB_API void logdb_delete(logdb_log_db* db, struct buffer *key);
+LIBLOGDB_API void logdb_delete(logdb_log_db* db, logdb_txn *txn, cstring *key);
 
 /** appends record to the logdb */
-LIBLOGDB_API void logdb_append(logdb_log_db* db, struct buffer *key, struct buffer *value);
+LIBLOGDB_API void logdb_append(logdb_log_db* db, logdb_txn *txn, cstring *key, cstring *value);
 
 /** find and get value from key */
-LIBLOGDB_API cstring * logdb_find_cache(logdb_log_db* db, struct buffer *key);
-LIBLOGDB_API cstring * logdb_find(logdb_log_db* db, struct buffer *key);
+LIBLOGDB_API cstring * logdb_find_cache(logdb_log_db* db, cstring *key);
+LIBLOGDB_API cstring * logdb_find(logdb_log_db* db, cstring *key);
 
 /** get the amount of in-memory-records */
 LIBLOGDB_API size_t logdb_cache_size(logdb_log_db* db);
@@ -132,6 +135,19 @@ logdb_bool logdb_record_deser_from_file(logdb_record* rec, logdb_log_db *db, enu
 
 /** remove records with given key (to keep memory clean) */
 logdb_bool logdb_remove_existing_records(logdb_record *usehead, cstring *key);
+
+
+/* TRANSACTION HANDLING
+////////////////////////////////// */
+
+/** create a new transaction object **/
+LIBLOGDB_API logdb_txn* logdb_txn_new();
+
+/** releases a transaction object **/
+LIBLOGDB_API void logdb_txn_free(logdb_txn* db);
+
+/** writes transaction to the internal cache **/
+LIBLOGDB_API void logdb_txn_commit(logdb_log_db* db, logdb_txn *txn);
 #ifdef __cplusplus
 }
 #endif

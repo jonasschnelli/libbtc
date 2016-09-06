@@ -37,7 +37,6 @@
 #ifndef __LIBLOGDB_MEMDB_H__
 #define __LIBLOGDB_MEMDB_H__
 
-#include <btc/buffer.h>
 #include <btc/cstr.h>
 #include <logdb/logdb_base.h>
 #include <logdb/logdb_rec.h>
@@ -62,7 +61,7 @@ LIBLOGDB_API void logdb_llistdb_init(logdb_log_db* db);
 /** appends record to the mem db */
 LIBLOGDB_API void logdb_llistdb_append(void* ctx, logdb_bool load_phase, logdb_record *rec);
 
-LIBLOGDB_API cstring * logdb_llistdb_find(logdb_log_db* db, struct buffer *key);
+LIBLOGDB_API cstring * logdb_llistdb_find(logdb_log_db* db, cstring *key);
 
 LIBLOGDB_API size_t logdb_llistdb_size(logdb_log_db* db);
 

@@ -108,13 +108,11 @@ void logdb_rbtree_append(void* ctx, logdb_bool load_phase, logdb_record *rec)
     RBTreeInsert(handle->tree,rec_new->key,rec_new);
 }
 
-cstring * logdb_rbtree_find(logdb_log_db* db, struct buffer *key)
+cstring * logdb_rbtree_find(logdb_log_db* db, cstring *key)
 {
     logdb_record *rec_new = 0;
-    cstring *cstr = cstr_new_buf(key->p, key->len);
     logdb_rbtree_db* handle = (logdb_rbtree_db *)db->cb_ctx;
-    rb_red_blk_node* node = RBExactQuery(handle->tree, cstr);
-    cstr_free(cstr, true);
+    rb_red_blk_node* node = RBExactQuery(handle->tree, key);
 
     if (node && node->info)
         rec_new = (logdb_record *)node->info;

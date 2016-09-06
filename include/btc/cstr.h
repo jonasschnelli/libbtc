@@ -47,6 +47,7 @@ typedef struct cstring {
 LIBBTC_API cstring* cstr_new(const char* init_str);
 LIBBTC_API cstring* cstr_new_sz(size_t sz);
 LIBBTC_API cstring* cstr_new_buf(const void* buf, size_t sz);
+LIBBTC_API cstring* cstr_new_cstr(cstring* copy_str);
 LIBBTC_API void cstr_free(cstring* s, int free_buf);
 
 LIBBTC_API int cstr_equal(const cstring* a, const cstring* b);
