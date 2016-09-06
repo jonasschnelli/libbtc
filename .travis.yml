@@ -50,6 +50,7 @@ script:
     - make -j2 V=1
     - if ( [ "${TRAVIS_OS_NAME}" == "linux" ] ) && ( [ "$CC" == "gcc" ] ); then
           valgrind --track-origins=yes --leak-check=full --error-exitcode=1 ./tests;
+          ./tests;
       else
           if [ "$CROSS_COMPILE" ]; then
              wine tests.exe;
@@ -63,4 +64,4 @@ script:
     - if [ ${CC} = gcc ]; then ./tooltests.py ; fi;
 
 after_success:
-  - if [ ${CC} = gcc ] || [ "${TRAVIS_OS_NAME}" = "linux" ]; then coveralls --verbose -i src -x c -e src/logdb -e src/secp256k1 -r $TRAVIS_BUILD_DIR -b $TRAVIS_BUILD_DIR --gcov-options '\-lp'; fi;
+  - if [ ${CC} = gcc ] && [ "${TRAVIS_OS_NAME}" = "linux" ]; then coveralls --verbose -i src -x c -e src/logdb -e src/secp256k1 -r $TRAVIS_BUILD_DIR -b $TRAVIS_BUILD_DIR --gcov-options '\-lp'; fi;

@@ -127,7 +127,7 @@ void node_periodical_timer(int fd, short event, void *ctx) {
         event_del(node->timer_event);
     }
 
-    if (node->lastping + BTC_PING_INTERVAL_S < now)
+    if ( ((node->state & NODE_CONNECTED) == NODE_CONNECTED) && node->lastping + BTC_PING_INTERVAL_S < now)
     {
         //time for a ping
         uint64_t nonce;
@@ -318,7 +318,8 @@ btc_bool btc_node_group_connect_next_nodes(btc_node_group *group)
             if (bufferevent_socket_connect(node->event_bev, (struct sockaddr *)&node->addr, sizeof(node->addr)) < 0)
             {
                 /* Error starting connection */
-                bufferevent_free(node->event_bev);
+                if (node->event_bev)
+                    bufferevent_free(node->event_bev);
                 return false;
             }
 
@@ -363,6 +364,9 @@ void btc_node_connection_state_changed(btc_node *node)
 
 void btc_node_send(btc_node *node, cstring *data)
 {
+    if ((node->state & NODE_CONNECTED) != NODE_CONNECTED)
+        return;
+
     bufferevent_write(node->event_bev, data->str, data->len);
     char *dummy = data->str+4;
     node->nodegroup->log_write_cb("sending message to node %d: %s\n", node->nodeid, dummy);
