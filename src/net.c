@@ -37,6 +37,9 @@ static const int BTC_CONNECT_TIMEOUT_S = 10;
 void read_cb(struct bufferevent* bev, void* ctx)
 {
     struct evbuffer* input = bufferevent_get_input(bev);
+    if (!input)
+        return;
+
     size_t length = evbuffer_get_length(input);
 
     btc_node *node = (btc_node *)ctx;
