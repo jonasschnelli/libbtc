@@ -19,7 +19,7 @@
 #include <unistd.h>
 #include <getopt.h>
 
-btc_bool address_from_pubkey(const btc_chain* chain, const char *pubkey_hex, char *address)
+btc_bool address_from_pubkey(const btc_chainparams* chain, const char *pubkey_hex, char *address)
 {
     if (!pubkey_hex || strlen(pubkey_hex) != 66)
         return false;
@@ -41,7 +41,7 @@ btc_bool address_from_pubkey(const btc_chain* chain, const char *pubkey_hex, cha
     return true;
 }
 
-btc_bool pubkey_from_privatekey(const btc_chain* chain, const char *privkey_wif, char *pubkey_hex, size_t *sizeout)
+btc_bool pubkey_from_privatekey(const btc_chainparams* chain, const char *privkey_wif, char *pubkey_hex, size_t *sizeout)
 {
     uint8_t privkey_data[strlen(privkey_wif)];
     size_t outlen = 0;
@@ -65,7 +65,7 @@ btc_bool pubkey_from_privatekey(const btc_chain* chain, const char *privkey_wif,
     return true;
 }
 
-btc_bool gen_privatekey(const btc_chain* chain, char *privkey_wif, size_t strsize_wif, char *privkey_hex_or_null)
+btc_bool gen_privatekey(const btc_chainparams* chain, char *privkey_wif, size_t strsize_wif, char *privkey_hex_or_null)
 {
     uint8_t pkeybase58c[34];
     pkeybase58c[0] = chain->b58prefix_secret_address;
@@ -85,7 +85,7 @@ btc_bool gen_privatekey(const btc_chain* chain, char *privkey_wif, size_t strsiz
     return true;
 }
 
-btc_bool hd_gen_master(const btc_chain* chain, char *masterkeyhex, size_t strsize)
+btc_bool hd_gen_master(const btc_chainparams* chain, char *masterkeyhex, size_t strsize)
 {
     btc_hdnode node;
     uint8_t seed[32];
@@ -97,7 +97,7 @@ btc_bool hd_gen_master(const btc_chain* chain, char *masterkeyhex, size_t strsiz
     return true;
 }
 
-btc_bool hd_print_node(const btc_chain* chain, const char *nodeser)
+btc_bool hd_print_node(const btc_chainparams* chain, const char *nodeser)
 {
     btc_hdnode node;
     if (!btc_hdnode_deserialize(nodeser, chain, &node))
@@ -132,7 +132,7 @@ btc_bool hd_print_node(const btc_chain* chain, const char *nodeser)
     return true;
 }
 
-btc_bool hd_derive(const btc_chain* chain, const char *masterkey, const char *keypath, char *extkeyout, size_t extkeyout_size)
+btc_bool hd_derive(const btc_chainparams* chain, const char *masterkey, const char *keypath, char *extkeyout, size_t extkeyout_size)
 {
     btc_hdnode node, nodenew;
     if (!btc_hdnode_deserialize(masterkey, chain, &node))

@@ -865,7 +865,7 @@ void test_script_parse()
     u_assert_str_eq(txhashhex, "41a86af25423391b1d9d78df1143e3a237f20db27511d8b72e25f2dec7a81d80");
 
 
-    btc_tx_add_address_out(tx, &btc_chain_test, 12345678, "n1e4M744gKSL269jozPwc8edjxxdwn6THc");
+    btc_tx_add_address_out(tx, &btc_chainparams_test, 12345678, "n1e4M744gKSL269jozPwc8edjxxdwn6THc");
 
 
     txser = cstr_new_sz(1024);
@@ -883,7 +883,7 @@ void test_script_parse()
     cstr_free(txser, true);
 
 
-    btc_tx_add_address_out(tx, &btc_chain_test, 876543210, "2NFoJeWNrABZQ3YCWdbX9wGEnRge7kDeGzQ");
+    btc_tx_add_address_out(tx, &btc_chainparams_test, 876543210, "2NFoJeWNrABZQ3YCWdbX9wGEnRge7kDeGzQ");
     txser = cstr_new_sz(1024);
     btc_tx_serialize(txser, tx);
     char hexbuf3[txser->len * 2 + 1];

@@ -26,7 +26,7 @@ void test_wallet()
 
     btc_hdnode node;
     btc_hdnode *node2, *node3;
-    btc_bool suc = btc_hdnode_deserialize(xpriv, &btc_chain_main, &node);
+    btc_bool suc = btc_hdnode_deserialize(xpriv, &btc_chainparams_main, &node);
     u_assert_int_eq(suc, 1);
     btc_wallet_set_master_key_copy(wallet, &node);
 

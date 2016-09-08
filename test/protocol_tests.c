@@ -9,7 +9,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include <btc/chain.h>
+#include <btc/chainparams.h>
 #include <btc/utils.h>
 #include <btc/protocol.h>
 #include "utest.h"
@@ -61,13 +61,13 @@ void test_protocol()
     btc_p2p_msg_version_ser(&version_msg, version_msg_cstr);
 
     /* create p2p message */
-    cstring *p2p_msg = btc_p2p_message_new((unsigned const char *)&btc_chain_main.netmagic, BTC_MSG_VERSION, version_msg_cstr->str, version_msg_cstr->len);
+    cstring *p2p_msg = btc_p2p_message_new((unsigned const char *)&btc_chainparams_main.netmagic, BTC_MSG_VERSION, version_msg_cstr->str, version_msg_cstr->len);
 
     struct const_buffer buf = {p2p_msg->str, p2p_msg->len};
     btc_p2p_msg_hdr hdr;
     btc_p2p_deser_msghdr(&hdr, &buf);
 
-    u_assert_mem_eq(hdr.netmagic, &btc_chain_main.netmagic, 4);
+    u_assert_mem_eq(hdr.netmagic, &btc_chainparams_main.netmagic, 4);
     u_assert_str_eq(hdr.command, BTC_MSG_VERSION);
     u_assert_int_eq(hdr.data_len, version_msg_cstr->len);
     u_assert_int_eq(buf.len, hdr.data_len);
@@ -90,7 +90,7 @@ void test_protocol()
     vector_add(blocklocators, genesis_hash);
     cstring *getheader_msg = cstr_new_sz(256);
     btc_p2p_msg_getheaders(blocklocators, NULL, getheader_msg);
-    p2p_msg = btc_p2p_message_new((unsigned const char *)&btc_chain_main.netmagic, BTC_MSG_GETHEADERS, getheader_msg->str, getheader_msg->len);
+    p2p_msg = btc_p2p_message_new((unsigned const char *)&btc_chainparams_main.netmagic, BTC_MSG_GETHEADERS, getheader_msg->str, getheader_msg->len);
 
 
     buf.p = p2p_msg->str;

@@ -170,7 +170,7 @@ btc_wallet* btc_wallet_new()
     wallet->db = logdb_new();
     logdb_set_memmapper(wallet->db, &btc_wallet_db_mapper, wallet);
     wallet->masterkey = NULL;
-    wallet->chain = &btc_chain_main;
+    wallet->chain = &btc_chainparams_main;
     wallet->spends = vector_new(10, free);
 
     wallet->wtxes_rbtree = RBTreeCreate(btc_rbtree_wtxes_compare,btc_rbtree_wtxes_free_key,btc_rbtree_wtxes_free_value,NULL,NULL);

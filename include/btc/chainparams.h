@@ -24,8 +24,8 @@
  
 */
 
-#ifndef __LIBBTC_CHAIN_H__
-#define __LIBBTC_CHAIN_H__
+#ifndef __LIBBTC_CHAINPARAMS_H__
+#define __LIBBTC_CHAINPARAMS_H__
 
 #include "btc.h"
 
@@ -36,7 +36,7 @@ extern "C" {
 #include <stdint.h>
 #include <sys/types.h>
 
-typedef struct btc_chain {
+typedef struct btc_chainparams_ {
     char chainname[32];
     uint8_t b58prefix_pubkey_address;
     uint8_t b58prefix_script_address;
@@ -45,9 +45,9 @@ typedef struct btc_chain {
     uint32_t b58prefix_bip32_pubkey;
     const unsigned char netmagic[4];
     uint8_t genesisblockhash[32];
-} btc_chain;
+} btc_chainparams;
 
-static const btc_chain btc_chain_main = {
+static const btc_chainparams btc_chainparams_main = {
     "main",
     0x00,
     0x05,
@@ -57,7 +57,7 @@ static const btc_chain btc_chain_main = {
     {0xf9, 0xbe, 0xb4, 0xd9},
     {0x6f,0xe2,0x8c,0x0a,0xb6,0xf1,0xb3,0x72,0xc1,0xa6,0xa2,0x46,0xae,0x63,0xf7,0x4f,0x93,0x1e,0x83,0x65,0xe1,0x5a,0x08,0x9c,0x68,0xd6,0x19,0x00,0x00,0x00,0x00,0x00}
 };
-static const btc_chain btc_chain_test = {
+static const btc_chainparams btc_chainparams_test = {
     "testnet3",
     0x6f,
     0xc4,
@@ -67,7 +67,7 @@ static const btc_chain btc_chain_test = {
     {0x0b, 0x11, 0x09, 0x07},
     {0x43,0x49,0x7f,0xd7,0xf8,0x26,0x95,0x71,0x08,0xf4,0xa3,0x0f,0xd9,0xce,0xc3,0xae,0xba,0x79,0x97,0x20,0x84,0xe9,0x0e,0xad,0x01,0xea,0x33,0x09,0x00,0x00,0x00,0x00}
 };
-static const btc_chain btc_chain_regt = {
+static const btc_chainparams btc_chainparams_regtest = {
     "regtest",
     0x6f,
     0xc4,
@@ -82,4 +82,4 @@ static const btc_chain btc_chain_regt = {
 }
 #endif
 
-#endif //__LIBBTC_CHAIN_H__
+#endif //__LIBBTC_CHAINPARAMS_H__
