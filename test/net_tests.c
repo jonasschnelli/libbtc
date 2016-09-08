@@ -1,12 +1,16 @@
 #include "utest.h"
+#include <btc/block.h>
 #include <btc/net.h>
 #include <btc/netspv.h>
+#include <btc/utils.h>
+#include <btc/serialize.h>
+#include <btc/tx.h>
 
 extern void btc_net_test();
 
 static btc_bool timer_cb(btc_node *node, uint64_t *now)
 {
-    if (node->time_started_con + 12 < *now)
+    if (node->time_started_con + 300 < *now)
         btc_node_disconnect(node);
 
     /* return true = run internal timer logic (ping, disconnect-timeout, etc.) */
@@ -24,17 +28,89 @@ static int default_write_log(const char *format, ...)
 
 btc_bool parse_cmd(struct btc_node_ *node, btc_p2p_msg_hdr *hdr, struct const_buffer *buf)
 {
+    (void)(node);
+    (void)(hdr);
+    (void)(buf);
     return true;
 }
 
 void postcmd(struct btc_node_ *node, btc_p2p_msg_hdr *hdr, struct const_buffer *buf)
 {
+    if (strcmp(hdr->command, "block") == 0)
+    {
+        btc_block_header header;
+        if (!btc_block_header_deserialize(&header, buf)) return;
 
+        uint32_t vsize;
+        if (!deser_varlen(&vsize, buf)) return;
+
+        for (unsigned int i = 0; i < vsize; i++)
+        {
+            btc_tx *tx = btc_tx_new(); //needs to be on the heep
+            btc_tx_deserialize(buf->p, buf->len, tx);
+
+            btc_tx_free(tx);
+        }
+
+        btc_node_disconnect(node);
+    }
+
+    if (strcmp(hdr->command, "inv") == 0)
+    {
+        // directly create a getdata message
+        cstring *p2p_msg = btc_p2p_message_new(node->nodegroup->chainparams->netmagic, "getdata", buf->p, buf->len);
+
+        uint32_t vsize;
+        uint8_t hash[36];
+        uint32_t type;
+        if (!deser_varlen(&vsize, buf)) return;
+
+        for (unsigned int i = 0; i < vsize; i++)
+        {
+            if (!deser_u32(&type, buf)) return;
+            if (!deser_u256(hash, buf)) return;
+
+        }
+
+        /* send message */
+        btc_node_send(node, p2p_msg);
+
+        /* cleanup */
+        cstr_free(p2p_msg, true);
+    }
+
+    if (strcmp(hdr->command, "headers") == 0)
+    {
+        /* send getblock command */
+
+        // request some headers (from the genesis block)
+        vector *blocklocators = vector_new(1, NULL);
+        uint8_t from_hash[32];
+        utils_uint256_sethex("000000000000000001e67f0781f5e31a62863e6d7a1a1f786c7f666a9954a648", from_hash); // height 428694
+        uint8_t stop_hash[32];
+        utils_uint256_sethex("00000000000000000378be785f464ef19243baba187cb3791ac92a69ca46bb46", stop_hash); // height 428695
+
+        vector_add(blocklocators, from_hash);
+
+        cstring *getheader_msg = cstr_new_sz(256);
+        btc_p2p_msg_getheaders(blocklocators, stop_hash, getheader_msg);
+
+        /* create p2p message */
+        cstring *p2p_msg = btc_p2p_message_new(node->nodegroup->chainparams->netmagic, "getblocks", getheader_msg->str, getheader_msg->len);
+        cstr_free(getheader_msg, true);
+
+        /* send message */
+        btc_node_send(node, p2p_msg);
+
+        /* cleanup */
+        vector_free(blocklocators, true);
+        cstr_free(p2p_msg, true);
+    }
 }
 
 void node_connection_state_changed(struct btc_node_ *node)
 {
-
+    (void)(node);
 }
 
 void handshake_done(struct btc_node_ *node)
@@ -67,7 +143,7 @@ void handshake_done(struct btc_node_ *node)
     cstr_free(p2p_msg, true);
 }
 
-void test_net()
+void test_net_basics_plus_download_block()
 {
 
     /* create a invalid node */

@@ -71,7 +71,7 @@ extern void test_tool();
 #endif
 
 #ifdef WITH_NET
-extern void test_net();
+extern void test_net_basics_plus_download_block();
 extern void test_protocol();
 #endif
 
@@ -124,7 +124,7 @@ int main()
 
 #ifdef WITH_NET
     u_run_test(test_protocol);
-    u_run_test(test_net);
+    u_run_test(test_net_basics_plus_download_block);
 #endif
 
     btc_ecc_stop();
