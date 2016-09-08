@@ -4,7 +4,7 @@
 
 extern void btc_net_test();
 
-btc_bool timer_cb(btc_node *node, uint64_t *now)
+static btc_bool timer_cb(btc_node *node, uint64_t *now)
 {
     if (node->time_started_con + 12 < *now)
         btc_node_disconnect(node);
@@ -20,6 +20,51 @@ static int default_write_log(const char *format, ...)
     vprintf(format, args);
     va_end(args);
     return 1;
+}
+
+btc_bool parse_cmd(struct btc_node_ *node, btc_p2p_msg_hdr *hdr, struct const_buffer *buf)
+{
+    return true;
+}
+
+void postcmd(struct btc_node_ *node, btc_p2p_msg_hdr *hdr, struct const_buffer *buf)
+{
+
+}
+
+void node_connection_state_changed(struct btc_node_ *node)
+{
+
+}
+
+void handshake_done(struct btc_node_ *node)
+{
+    /* make sure only one node is used for header sync */
+    for(size_t i =0;i< node->nodegroup->nodes->len; i++)
+    {
+        btc_node *check_node = vector_idx(node->nodegroup->nodes, i);
+        if ((check_node->state & NODE_HEADERSYNC) == NODE_HEADERSYNC)
+            return;
+    }
+
+    // request some headers (from the genesis block)
+    vector *blocklocators = vector_new(1, NULL);
+    vector_add(blocklocators, (void *)node->nodegroup->chainparams->genesisblockhash);
+
+    cstring *getheader_msg = cstr_new_sz(256);
+    btc_p2p_msg_getheaders(blocklocators, NULL, getheader_msg);
+
+    /* create p2p message */
+    cstring *p2p_msg = btc_p2p_message_new(node->nodegroup->chainparams->netmagic, "getheaders", getheader_msg->str, getheader_msg->len);
+    cstr_free(getheader_msg, true);
+
+    /* send message */
+    node->state |= NODE_HEADERSYNC;
+    btc_node_send(node, p2p_msg);
+
+    /* cleanup */
+    vector_free(blocklocators, true);
+    cstr_free(p2p_msg, true);
 }
 
 void test_net()
@@ -56,7 +101,11 @@ void test_net()
 
     /* set a individual log print function */
     group->log_write_cb = default_write_log;
-
+    group->parse_cmd_cb = parse_cmd;
+    group->postcmd_cb = postcmd;
+    group->node_connection_state_changed_cb = node_connection_state_changed;
+    group->handshake_done_cb = handshake_done;
+    
     /* connect to the next node */
     btc_node_group_connect_next_nodes(group);
 

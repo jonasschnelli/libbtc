@@ -9,22 +9,27 @@ libbtc – A fast, clean and small bitcoin C library
 What is libbtc?
 ----------------
 
-Libbtc is a very portable C library for creating and manipulating bitcoin data structures including:
+Libbtc is a very portable C library for creating and manipulating bitcoin data structures and interacting with the p2p network.
+
+Current features
+----------------
 * Generating and storing private and public keys
 * ECDSA secpk1 signing and verification (through [libsecp256k1](https://github.com/bitcoin-core/secp256k1) included as git subtree)
 * BIP32 hierarchical deterministic key derivation
-* Transaction generation, manipulation, signing and ser-/deserialization
+* Transaction generation, manipulation, signing and ser-/deserialization including P2PKH, P2SH, multisig
 * Address generation
-* Base58 check encoding
+* Base58check encoding
 * Native implementation of SHA256, SHA512, SHA512_HMAC, RIMPEMD160 including NIST testvectors
 * Native AES_CBC implementation including NIST testvectors
-* Keystore (wallet) databases
+* Keystore (wallet) databases (through logdb https://github.com/liblogdb/liblogdb)
+* Event based bitcoin P2P client capable of connecting to multiple nodes in a single thread (requires [libevent](https://github.com/libevent/libevent))
 
 
 Advantages of libbtc?
 ----------------
 
-* No dependencies (only dependency is [libsecp256k1](https://github.com/bitcoin-core/secp256k1) added as git subtree)
+* No dependencies in case no p2p network client is required (only dependency is [libsecp256k1](https://github.com/bitcoin-core/secp256k1) added as git subtree)
+* The only dependency for the p2p network client is [libevent](https://github.com/libevent/libevent) (very portable)
 * optimized for MCU and low mem environments
 * ~full test coverage
 * mem leak free (valgrind check during CI)

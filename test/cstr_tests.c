@@ -55,6 +55,9 @@ void test_cstr()
 
     cstr_resize(s, 2);
     cstr_resize(s, 2);
+    cstr_alloc_minsize(s, 2);
+    cstr_alloc_minsize(s, 1);
+
     assert(s->len == 2);
     assert(strcmp(s->str, "fo") == 0);
 
