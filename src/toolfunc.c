@@ -109,6 +109,16 @@ btc_bool hd_print_node(const btc_chain* chain, const char *nodeser)
 
     printf("ext key: %s\n", nodeser);
 
+    size_t privkey_wif_size_bin = 34;
+    uint8_t pkeybase58c[privkey_wif_size_bin];
+    pkeybase58c[0] = chain->b58prefix_secret_address;
+    pkeybase58c[33] = 1; /* always use compressed keys */
+    size_t privkey_wif_size = 128;
+    char privkey_wif[privkey_wif_size];
+    memcpy(&pkeybase58c[1], node.private_key, BTC_ECKEY_PKEY_LENGTH);
+    assert(btc_base58_encode_check(pkeybase58c, privkey_wif_size_bin, privkey_wif, privkey_wif_size) != 0);
+    printf("privatekey WIF: %s\n", privkey_wif);
+
     printf("depth: %d\n", node.depth);
     printf("p2pkh address: %s\n", str);
 
