@@ -127,7 +127,6 @@ void node_periodical_timer(int fd, short event, void *ctx) {
         node->state |= NODE_ERRORED;
         node->state |= NODE_TIMEOUT;
         btc_node_connection_state_changed(node);
-        event_del(node->timer_event);
     }
 
     if ( ((node->state & NODE_CONNECTED) == NODE_CONNECTED) && node->lastping + BTC_PING_INTERVAL_S < now)
@@ -146,12 +145,13 @@ void event_cb(struct bufferevent* ev, short type, void* ctx)
 {
     UNUSED(ev);
     btc_node *node = (btc_node *)ctx;
-    node->nodegroup->log_write_cb("Event Callback on node %d\n", node->nodeid);
+    node->nodegroup->log_write_cb("Event callback on node %d\n", node->nodeid);
     node->nodegroup->log_write_cb("Connected nodes: %d\n", btc_node_group_amount_of_connected_nodes(node->nodegroup));
 
     if ( ((type & BEV_EVENT_TIMEOUT) != 0)
         && ((node->state & NODE_CONNECTING) == NODE_CONNECTING))
     {
+        node->nodegroup->log_write_cb("Timout connecting to node %d.\n", node->nodeid);
         node->state = 0;
         node->state |= NODE_ERRORED;
         node->state |= NODE_TIMEOUT;
@@ -160,6 +160,7 @@ void event_cb(struct bufferevent* ev, short type, void* ctx)
     else if (((type & BEV_EVENT_EOF) != 0) ||
         ((type & BEV_EVENT_ERROR) != 0))
     {
+        node->nodegroup->log_write_cb("Error connecting to node %d.\n", node->nodeid);
         node->state = 0;
         node->state |= NODE_ERRORED;
         btc_node_connection_state_changed(node);
@@ -198,7 +199,7 @@ btc_bool btc_node_set_ipport(btc_node *node, const char *ipport)
     return (evutil_parse_sockaddr_port(ipport, &node->addr, &outlen) == 0);
 }
 
-void btc_node_disconnect(btc_node *node)
+void btc_node_release_events(btc_node *node)
 {
     if (node->event_bev)
     {
@@ -212,6 +213,12 @@ void btc_node_disconnect(btc_node *node)
         event_free(node->timer_event);
         node->timer_event = NULL;
     }
+}
+
+void btc_node_disconnect(btc_node *node)
+{
+    /* release buffer and timer event */
+    btc_node_release_events(node);
 
     node->time_started_con = 0;
     node->state = 0;
@@ -352,11 +359,8 @@ void btc_node_connection_state_changed(btc_node *node)
 
     if ((node->state & NODE_ERRORED) == NODE_ERRORED)
     {
-        if (node->event_bev)
-        {
-            bufferevent_free(node->event_bev);
-            node->event_bev = NULL;
-        }
+        btc_node_release_events(node);
+
         /* connect to more nodes are required */
         if(btc_node_group_amount_of_connected_nodes(node->nodegroup) < node->nodegroup->desired_amount_connected_nodes)
             btc_node_group_connect_next_nodes(node->nodegroup);
