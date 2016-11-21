@@ -37,7 +37,7 @@ extern "C" {
 #include <stdint.h>
 #include <stddef.h>
 
-#include <btc/chain.h>
+#include <btc/chainparams.h>
 #include <btc/cstr.h>
 #include <btc/hash.h>
 #include <btc/script.h>
@@ -99,7 +99,7 @@ LIBBTC_API void btc_tx_hash(const btc_tx* tx, uint8_t* hashout);
 
 LIBBTC_API btc_bool btc_tx_sighash(const btc_tx* tx_to, const cstring* fromPubKey, unsigned int in_num, int hashtype, uint8_t* hash);
 
-LIBBTC_API btc_bool btc_tx_add_address_out(btc_tx* tx, const btc_chain* chain, int64_t amount, const char* address);
+LIBBTC_API btc_bool btc_tx_add_address_out(btc_tx* tx, const btc_chainparams* chain, int64_t amount, const char* address);
 LIBBTC_API btc_bool btc_tx_add_p2sh_hash160_out(btc_tx* tx, int64_t amount, uint8_t* hash160);
 LIBBTC_API btc_bool btc_tx_add_p2pkh_hash160_out(btc_tx* tx, int64_t amount, uint8_t* hash160);
 LIBBTC_API btc_bool btc_tx_add_p2pkh_out(btc_tx* tx, int64_t amount, const btc_pubkey* pubkey);

@@ -26,7 +26,7 @@
 
 #include "libbtc-config.h"
 
-#include <btc/chain.h>
+#include <btc/chainparams.h>
 #include <btc/tool.h>
 #include <btc/ecc.h>
 #include <btc/utils.h>
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     char *pubkey = 0;
     char *cmd = 0;
     char *keypath = 0;
-    const btc_chain* chain = &btc_chain_main;
+    const btc_chainparams* chain = &btc_chainparams_main;
 
     /* get arguments */
     while ((opt = getopt_long_only(argc, argv,"p:k:m:c:trv", long_options, &long_index )) != -1) {
@@ -96,10 +96,10 @@ int main(int argc, char *argv[])
             case 'k' : pubkey = optarg;
                 break;
             case 't' :
-                chain = &btc_chain_test;
+                chain = &btc_chainparams_test;
                 break;
             case 'r' :
-                chain = &btc_chain_regt;
+                chain = &btc_chainparams_regtest;
                 break;
             case 'v' :
                 print_version();

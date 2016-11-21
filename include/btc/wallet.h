@@ -46,7 +46,7 @@ typedef struct btc_wallet {
     logdb_log_db *db;
     btc_hdnode *masterkey;
     uint32_t next_childindex; //cached next child index
-    const btc_chain* chain;
+    const btc_chainparams* chain;
     uint32_t bestblockheight;
     vector *spends;
 

@@ -421,7 +421,7 @@ out:
 }
 
 
-btc_bool btc_tx_add_address_out(btc_tx* tx, const btc_chain* chain, int64_t amount, const char* address)
+btc_bool btc_tx_add_address_out(btc_tx* tx, const btc_chainparams* chain, int64_t amount, const char* address)
 {
     uint8_t buf[strlen(address) * 2];
     int r = btc_base58_decode_check(address, buf, sizeof(buf));

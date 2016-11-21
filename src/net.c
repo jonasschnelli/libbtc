@@ -4,7 +4,7 @@
 #include <event2/bufferevent.h>
 #include <event2/buffer.h>
 
-#include <btc/chain.h>
+#include <btc/chainparams.h>
 #include <btc/protocol.h>
 #include <btc/buffer.h>
 #include <btc/cstr.h>
@@ -237,7 +237,7 @@ void btc_node_free_cb(void *obj)
     btc_node_free(node);
 }
 
-btc_node_group* btc_node_group_new(btc_chain *chainparams)
+btc_node_group* btc_node_group_new(btc_chainparams *chainparams)
 {
     btc_node_group* node_group;
     node_group = calloc(1, sizeof(*node_group));
@@ -247,7 +247,7 @@ btc_node_group* btc_node_group_new(btc_chain *chainparams)
     };
 
     node_group->nodes = vector_new(1, btc_node_free_cb);
-    node_group->chainparams = (chainparams ? chainparams : &btc_chain_main);
+    node_group->chainparams = (chainparams ? chainparams : &btc_chainparams_main);
     node_group->parse_cmd_cb = NULL;
     strcpy(node_group->clientstr, "libbtc 0.1");
 

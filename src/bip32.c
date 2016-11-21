@@ -230,13 +230,13 @@ static void btc_hdnode_serialize(const btc_hdnode* node, uint32_t version, char 
 }
 
 
-void btc_hdnode_serialize_public(const btc_hdnode* node, const btc_chain* chain, char* str, int strsize)
+void btc_hdnode_serialize_public(const btc_hdnode* node, const btc_chainparams* chain, char* str, int strsize)
 {
     btc_hdnode_serialize(node, chain->b58prefix_bip32_pubkey, 1, str, strsize);
 }
 
 
-void btc_hdnode_serialize_private(const btc_hdnode* node, const btc_chain* chain, char* str, int strsize)
+void btc_hdnode_serialize_private(const btc_hdnode* node, const btc_chainparams* chain, char* str, int strsize)
 {
     btc_hdnode_serialize(node, chain->b58prefix_bip32_privkey, 0, str, strsize);
 }
@@ -249,7 +249,7 @@ void btc_hdnode_get_hash160(const btc_hdnode* node, uint8_t *hash160_out)
     ripemd160(hashout, 32, hash160_out);
 }
 
-void btc_hdnode_get_p2pkh_address(const btc_hdnode* node, const btc_chain* chain, char* str, int strsize)
+void btc_hdnode_get_p2pkh_address(const btc_hdnode* node, const btc_chainparams* chain, char* str, int strsize)
 {
     uint8_t hash160[21];
     hash160[0] = chain->b58prefix_pubkey_address;
@@ -269,7 +269,7 @@ btc_bool btc_hdnode_get_pub_hex(const btc_hdnode* node, char* str, size_t *strsi
 
 
 // check for validity of curve point in case of public data not performed
-btc_bool btc_hdnode_deserialize(const char* str, const btc_chain* chain, btc_hdnode* node)
+btc_bool btc_hdnode_deserialize(const char* str, const btc_chainparams* chain, btc_hdnode* node)
 {
     uint8_t node_data[strlen(str)];
     memset(node, 0, sizeof(btc_hdnode));

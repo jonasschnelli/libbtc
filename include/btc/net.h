@@ -35,7 +35,7 @@ extern "C" {
 #endif
 
 #include <event2/event.h>
-#include <btc/chain.h>
+#include <btc/chainparams.h>
 #include <btc/buffer.h>
 #include <btc/cstr.h>
 #include "vector.h"
@@ -56,12 +56,14 @@ enum NODE_STATE {
 struct btc_node_;
 typedef struct btc_node_group_
 {
-    void *ctx; /* flexible context usefull for the callbacks */
+    void *ctx; /* flexible context usefull in conjunction with the callbacks */
     struct event_base *event_base;
     vector *nodes; /* the groups nodes */
     char clientstr[1024];
     int desired_amount_connected_nodes;
-    const btc_chain *chainparams;
+    const btc_chainparams *chainparams;
+
+    /* callbacks */
     int (*log_write_cb)(const char *format, ...); /* log callback, default=printf */
     btc_bool (*parse_cmd_cb)(struct btc_node_ *node, btc_p2p_msg_hdr *hdr, struct const_buffer *buf);
     void (*postcmd_cb)(struct btc_node_ *node, btc_p2p_msg_hdr *hdr, struct const_buffer *buf);
@@ -117,7 +119,7 @@ LIBBTC_API void btc_node_disconnect(btc_node *node);
 /* =================================== */
 
 /* create a new node group */
-LIBBTC_API btc_node_group* btc_node_group_new(btc_chain *chainparams);
+LIBBTC_API btc_node_group* btc_node_group_new(btc_chainparams *chainparams);
 LIBBTC_API void btc_node_group_free(btc_node_group *group);
 
 /* add a node to a node group */

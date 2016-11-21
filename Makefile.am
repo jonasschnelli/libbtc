@@ -17,7 +17,7 @@ include_HEADERS = \
     include/btc/block.h \
     include/btc/btc.h \
     include/btc/buffer.h \
-    include/btc/chain.h \
+    include/btc/chainparams.h \
     include/btc/cstr.h \
     include/btc/ecc_key.h \
     include/btc/ecc.h \
