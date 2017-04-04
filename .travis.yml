@@ -24,7 +24,7 @@ addons:
 
 before_install:
   - pip install --user cpp-coveralls
-  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew install valgrind gnu-sed libevent --default-names; fi
+  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew install valgrind gnu-sed --default-names; fi
 
 matrix:
     fast_finish:
