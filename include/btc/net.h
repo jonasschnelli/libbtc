@@ -41,8 +41,7 @@ extern "C" {
 #include "vector.h"
 #include "protocol.h"
 
-static const unsigned int MAX_PROTOCOL_MESSAGE_LENGTH = 2 * 1024 * 1024;
-static const unsigned int P2P_MESSAGE_CHUNK_SIZE = 4096;
+static const unsigned int BTC_P2P_MESSAGE_CHUNK_SIZE = 4096;
 
 enum NODE_STATE {
     NODE_CONNECTING	= (1 << 0),
@@ -50,6 +49,7 @@ enum NODE_STATE {
     NODE_ERRORED	= (1 << 2),
     NODE_TIMEOUT	= (1 << 3),
     NODE_HEADERSYNC	= (1 << 4),
+    NODE_MISSBEHAVED= (1 << 5),
 };
 
 /* basic group-of-nodes structure */
@@ -113,6 +113,8 @@ LIBBTC_API btc_bool btc_node_set_ipport(btc_node *node, const char *ipport);
 /* disconnect a node */
 LIBBTC_API void btc_node_disconnect(btc_node *node);
 
+/* mark a node missbehave and disconnect */
+LIBBTC_API btc_bool btc_node_missbehave(btc_node *node);
 
 /* =================================== */
 /* NODE GROUPS */
