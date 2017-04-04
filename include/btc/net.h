@@ -119,7 +119,7 @@ LIBBTC_API void btc_node_disconnect(btc_node *node);
 /* =================================== */
 
 /* create a new node group */
-LIBBTC_API btc_node_group* btc_node_group_new(btc_chainparams *chainparams);
+LIBBTC_API btc_node_group* btc_node_group_new(const btc_chainparams *chainparams);
 LIBBTC_API void btc_node_group_free(btc_node_group *group);
 
 /* add a node to a node group */

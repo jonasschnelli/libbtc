@@ -237,7 +237,7 @@ void btc_node_free_cb(void *obj)
     btc_node_free(node);
 }
 
-btc_node_group* btc_node_group_new(btc_chainparams *chainparams)
+btc_node_group* btc_node_group_new(const btc_chainparams *chainparams)
 {
     btc_node_group* node_group;
     node_group = calloc(1, sizeof(*node_group));
