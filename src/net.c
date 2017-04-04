@@ -79,7 +79,7 @@ void read_cb(struct bufferevent* bev, void* ctx)
             btc_node_parse_message(node, &hdr, &cmd_data_buf);
 
             //skip the size of the whole message
-            buf.p += hdr.data_len;
+            buf.p = (const unsigned char *)buf.p + hdr.data_len;
             buf.len -= hdr.data_len;
 
             read_upto = (void *)buf.p;

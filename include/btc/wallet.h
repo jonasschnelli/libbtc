@@ -36,6 +36,7 @@ extern "C" {
 #include <logdb/logdb.h>
 #include <logdb/logdb_core.h>
 #include "bip32.h"
+#include "buffer.h"
 #include "tx.h"
 
 #include <stdint.h>
