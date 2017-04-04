@@ -145,6 +145,17 @@ void handshake_done(struct btc_node_ *node)
 void test_net_basics_plus_download_block()
 {
 
+    vector *ips = vector_new(10, free);
+    const btc_dns_seed seed = btc_chainparams_main.dnsseeds[0];
+
+    btc_get_peers_from_dns(seed.domain, ips, AF_INET);
+    for (unsigned int i = 0; i<ips->len; i++)
+    {
+        char *ip = (char *)vector_idx(ips, i);
+        printf("dns seed ip %d: %s\n", i, ip);
+    }
+    vector_free(ips, true);
+
     /* create a invalid node */
     btc_node *node_wrong = btc_node_new();
     u_assert_int_eq(btc_node_set_ipport(node_wrong, "0.0.0.1:1"), true);
@@ -159,7 +170,7 @@ void test_net_basics_plus_download_block()
 
     /* create a node */
     btc_node *node = btc_node_new();
-    u_assert_int_eq(btc_node_set_ipport(node, "176.9.45.239:8333"), true);
+    u_assert_int_eq(btc_node_set_ipport(node, "138.201.55.219:8333"), true);
 
     /* create a node group */
     btc_node_group* group = btc_node_group_new(NULL);

@@ -79,7 +79,7 @@ void read_cb(struct bufferevent* bev, void* ctx)
             btc_node_parse_message(node, &hdr, &cmd_data_buf);
 
             //skip the size of the whole message
-            buf.p += hdr.data_len;
+            buf.p = (const unsigned char *)buf.p + hdr.data_len;
             buf.len -= hdr.data_len;
 
             read_upto = (void *)buf.p;
@@ -237,7 +237,7 @@ void btc_node_free_cb(void *obj)
     btc_node_free(node);
 }
 
-btc_node_group* btc_node_group_new(btc_chainparams *chainparams)
+btc_node_group* btc_node_group_new(const btc_chainparams *chainparams)
 {
     btc_node_group* node_group;
     node_group = calloc(1, sizeof(*node_group));
@@ -455,4 +455,48 @@ int btc_node_parse_message(btc_node *node, btc_p2p_msg_hdr *hdr, struct const_bu
         node->nodegroup->postcmd_cb(node, hdr, buf);
 
     return true;
+}
+
+/* utility function to get peers (ips/port as char*) from a seed */
+int btc_get_peers_from_dns(const char *seed, vector *ips_out, int family)
+{
+    if (!seed || !ips_out || (family != AF_INET && family != AF_INET6)) {
+        return 0;
+    }
+    char *def_port = "8333";
+    struct evutil_addrinfo hints, *aiTrav = NULL, *aiRes = NULL;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+
+    int err = evutil_getaddrinfo(seed, def_port, &hints, &aiRes);
+    if (err)
+        return 0;
+
+    aiTrav = aiRes;
+    while (aiTrav != NULL)
+    {
+        int maxlen = 256;
+        char *ipaddr = calloc(1, maxlen);
+        if (aiTrav->ai_family == AF_INET)
+        {
+            assert(aiTrav->ai_addrlen >= sizeof(struct sockaddr_in));
+            evutil_inet_ntop(aiTrav->ai_family, &((struct sockaddr_in*)(aiTrav->ai_addr))->sin_addr, ipaddr, maxlen);
+        }
+
+        if (aiTrav->ai_family == AF_INET6)
+        {
+            assert(aiTrav->ai_addrlen >= sizeof(struct sockaddr_in6));
+            evutil_inet_ntop(aiTrav->ai_family, &((struct sockaddr_in6*)(aiTrav->ai_addr))->sin6_addr, ipaddr, maxlen);
+        }
+
+        memcpy(ipaddr+strlen(ipaddr), ":", 1);
+        memcpy(ipaddr+strlen(ipaddr), def_port, strlen(def_port));;
+        vector_add(ips_out, ipaddr);
+
+        aiTrav = aiTrav->ai_next;
+    }
+    evutil_freeaddrinfo(aiRes);
+    return ips_out->len;
 }

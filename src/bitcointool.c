@@ -68,6 +68,7 @@ static void print_usage() {
 static bool showError(const char *er)
 {
     printf("Error: %s\n", er);
+    btc_ecc_stop();
     return 1;
 }
 
