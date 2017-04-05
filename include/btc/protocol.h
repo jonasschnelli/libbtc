@@ -61,8 +61,19 @@ static const char *BTC_MSG_VERSION      = "version";
 static const char *BTC_MSG_VERACK       = "verack";
 static const char *BTC_MSG_PING         = "ping";
 static const char *BTC_MSG_PONG         = "pong";
+static const char *BTC_MSG_GETDATA      = "getdata";
 static const char *BTC_MSG_GETHEADERS   = "getheaders";
 static const char *BTC_MSG_HEADERS      = "headers";
+static const char *BTC_MSG_INV          = "inv";
+static const char *BTC_MSG_TX           = "tx";
+
+enum BTC_INV_TYPE {
+    BTC_INV_TYPE_ERROR          = 0,
+    BTC_INV_TYPE_TX             = 1,
+    BTC_INV_TYPE_BLOCK          = 2,
+    BTC_INV_TYPE_FILTERED_BLOCK = 3,
+    BTC_INV_TYPE_CMPCT_BLOCK    = 4,
+};
 
 static const unsigned int MAX_HEADERS_RESULTS = 2000;
 static const int BTC_PROTOCOL_VERSION = 70014;
@@ -73,6 +84,11 @@ typedef struct btc_p2p_msg_hdr_ {
     uint32_t        data_len;
     unsigned char	hash[4];
 } btc_p2p_msg_hdr;
+
+typedef struct btc_p2p_inv_msg_ {
+    uint32_t        type;
+    uint8_t         hash[32];
+} btc_p2p_inv_msg;
 
 typedef struct btc_p2p_address_ {
     uint32_t        time;
@@ -105,6 +121,19 @@ LIBBTC_API void btc_p2p_msg_version_ser(btc_p2p_version_msg *msg, cstring* buf);
 
 /* deserialize a p2p "version" message */
 LIBBTC_API btc_bool btc_p2p_msg_version_deser(btc_p2p_version_msg *msg, struct const_buffer* buf);
+
+/* =================================== */
+/* INV MESSAGE */
+/* =================================== */
+
+/* sets an inv message-element*/
+LIBBTC_API void btc_p2p_msg_inv_init(btc_p2p_inv_msg *msg, uint32_t type, uint8_t *hash);
+
+/* serialize a p2p "inv" message to an existing cstring */
+LIBBTC_API void btc_p2p_msg_inv_ser(btc_p2p_inv_msg *msg, cstring* buf);
+
+/* deserialize a p2p "inv" message-element */
+LIBBTC_API btc_bool btc_p2p_msg_inv_deser(btc_p2p_inv_msg *msg, struct const_buffer* buf);
 
 
 

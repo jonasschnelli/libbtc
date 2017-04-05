@@ -210,6 +210,26 @@ btc_bool btc_p2p_msg_version_deser(btc_p2p_version_msg *msg, struct const_buffer
     return true;
 }
 
+void btc_p2p_msg_inv_init(btc_p2p_inv_msg *msg, uint32_t type, uint8_t *hash)
+{
+    msg->type = type;
+    memcpy(&msg->hash, hash, 32);
+}
+
+void btc_p2p_msg_inv_ser(btc_p2p_inv_msg *msg, cstring* buf)
+{
+    ser_u32(buf, msg->type);
+    ser_bytes(buf, msg->hash, 32);
+}
+
+btc_bool btc_p2p_msg_inv_deser(btc_p2p_inv_msg *msg, struct const_buffer* buf)
+{
+    memset(msg, 0, sizeof(*msg));
+    if (!deser_u32(&msg->type, buf)) return false;
+    if (!deser_u256(msg->hash, buf)) return false;
+    return true;
+}
+
 void btc_p2p_msg_getheaders(vector *blocklocators, uint8_t *hashstop, cstring *s)
 {
     unsigned int i;
