@@ -425,7 +425,7 @@ void btc_node_send_version(btc_node *node)
     memset(&version_msg, 0, sizeof(version_msg));
 
     /* create a serialized version message */
-    btc_p2p_msg_version_init(&version_msg, &fromAddr, &toAddr, node->nodegroup->clientstr);
+    btc_p2p_msg_version_init(&version_msg, &fromAddr, &toAddr, node->nodegroup->clientstr, true);
     btc_p2p_msg_version_ser(&version_msg, version_msg_cstr);
 
     /* create p2p message */

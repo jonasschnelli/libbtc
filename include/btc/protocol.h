@@ -97,10 +97,10 @@ typedef struct btc_p2p_version_msg_ {
 /* VERSION MESSAGE */
 /* =================================== */
 
-/* creates version message and writes it to str_out*/
-LIBBTC_API void btc_p2p_msg_version_init(btc_p2p_version_msg *msg, const btc_p2p_address *addrFrom, const btc_p2p_address *addrTo, const char *strSubVer);
+/* sets a version message*/
+LIBBTC_API void btc_p2p_msg_version_init(btc_p2p_version_msg *msg, const btc_p2p_address *addrFrom, const btc_p2p_address *addrTo, const char *strSubVer, btc_bool relay);
 
-/* serialize a p2p "version" message */
+/* serialize a p2p "version" message to an existing cstring */
 LIBBTC_API void btc_p2p_msg_version_ser(btc_p2p_version_msg *msg, cstring* buf);
 
 /* deserialize a p2p "version" message */
