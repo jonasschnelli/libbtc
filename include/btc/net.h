@@ -149,7 +149,7 @@ void btc_node_connection_state_changed(btc_node *node);
 /* DNS */
 /* =================================== */
 
-int btc_get_peers_from_dns(const char *seed, vector *ips_out, int family);
+int btc_get_peers_from_dns(const char *seed, vector *ips_out, int port, int family);
 
 #ifdef __cplusplus
 }

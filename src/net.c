@@ -494,19 +494,20 @@ int btc_node_parse_message(btc_node *node, btc_p2p_msg_hdr *hdr, struct const_bu
 }
 
 /* utility function to get peers (ips/port as char*) from a seed */
-int btc_get_peers_from_dns(const char *seed, vector *ips_out, int family)
+int btc_get_peers_from_dns(const char *seed, vector *ips_out, int port, int family)
 {
-    if (!seed || !ips_out || (family != AF_INET && family != AF_INET6)) {
+    if (!seed || !ips_out || (family != AF_INET && family != AF_INET6) || port > 99999) {
         return 0;
     }
-    char *def_port = "8333";
+    char def_port[6] = {0};
+    sprintf(def_port, "%d", port);
     struct evutil_addrinfo hints, *aiTrav = NULL, *aiRes = NULL;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = IPPROTO_TCP;
 
-    int err = evutil_getaddrinfo(seed, def_port, &hints, &aiRes);
+    int err = evutil_getaddrinfo(seed, "", &hints, &aiRes);
     if (err)
         return 0;
 
