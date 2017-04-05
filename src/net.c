@@ -195,7 +195,7 @@ btc_node* btc_node_new()
     node->time_started_con = 0;
 
     node->recvBuffer = cstr_new_sz(BTC_P2P_MESSAGE_CHUNK_SIZE);
-
+    node->hints = 0;
     return node;
 }
 
@@ -464,10 +464,6 @@ int btc_node_parse_message(btc_node *node, btc_p2p_msg_hdr *hdr, struct const_bu
         }
         else if (strcmp(hdr->command, BTC_MSG_VERACK) == 0)
         {
-            if (buf->len != 0) {
-                // no messaged must be attached
-                return btc_node_missbehave(node);
-            }
             /* complete handshake if verack has been received */
             node->version_handshake = true;
 

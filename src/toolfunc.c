@@ -8,7 +8,10 @@
 #include <btc/bip32.h>
 #include <btc/ecc.h>
 #include <btc/ecc_key.h>
+#include <btc/net.h>
 #include <btc/random.h>
+#include <btc/serialize.h>
+#include <btc/tx.h>
 #include <btc/utils.h>
 
 #include <assert.h>
@@ -149,4 +152,218 @@ btc_bool hd_derive(const btc_chainparams* chain, const char *masterkey, const ch
     else
         btc_hdnode_serialize_private(&nodenew, chain, extkeyout, extkeyout_size);
     return true;
+}
+
+struct broadcast_ctx {
+    const btc_tx *tx;
+    int connected_to_peers;
+    int max_peers_to_connect;
+    int max_peers_to_inv;
+    int inved_to_peers;
+    int getdata_from_peers;
+    int found_on_non_inved_peers;
+};
+
+static int broadcast_default_write_log(const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    printf("DEBUG :");
+    vprintf(format, args);
+    va_end(args);
+    return 1;
+}
+
+static btc_bool broadcast_timer_cb(btc_node *node, uint64_t *now)
+{
+    broadcast_default_write_log("timer node %d, delta: %d\n", node->nodeid, (now - node->time_started_con ));
+    if (node->time_started_con + 15 < *now)
+        btc_node_disconnect(node);
+
+    if ((node->hints & (1 << 1)) == (1 << 1))
+    {
+        btc_node_disconnect(node);
+    }
+
+    if ((node->hints & (1 << 2)) == (1 << 2))
+    {
+        btc_node_disconnect(node);
+    }
+
+    /* return true = run internal timer logic (ping, disconnect-timeout, etc.) */
+    return true;
+}
+
+void broadcast_handshake_done(struct btc_node_ *node)
+{
+    struct broadcast_ctx *ctx = (struct broadcast_ctx  *)node->nodegroup->ctx;
+    ctx->connected_to_peers++;
+
+    if (ctx->inved_to_peers >= ctx->max_peers_to_inv) {
+        return;
+    }
+
+    /* create a INV */
+    cstring *inv_msg_cstr = cstr_new_sz(256);
+    btc_p2p_inv_msg inv_msg;
+    memset(&inv_msg, 0, sizeof(inv_msg));
+
+    uint8_t hash[32];
+    btc_tx_hash(ctx->tx, hash);
+    btc_p2p_msg_inv_init(&inv_msg, BTC_INV_TYPE_TX, hash);
+
+    /* serialize the inv count (1) */
+    ser_varlen(inv_msg_cstr, 1);
+    btc_p2p_msg_inv_ser(&inv_msg, inv_msg_cstr);
+
+    cstring *p2p_msg = btc_p2p_message_new(node->nodegroup->chainparams->netmagic, BTC_MSG_INV, inv_msg_cstr->str, inv_msg_cstr->len);
+    cstr_free(inv_msg_cstr, true);
+    btc_node_send(node, p2p_msg);
+    cstr_free(p2p_msg, true);
+
+    /* set hint bit 0 == inv sent */
+    node->hints |= (1 << 0);
+    ctx->inved_to_peers++;
+}
+
+void broadcast_post_cmd(struct btc_node_ *node, btc_p2p_msg_hdr *hdr, struct const_buffer *buf) {
+    struct broadcast_ctx *ctx = (struct broadcast_ctx  *)node->nodegroup->ctx;
+    if (strcmp(hdr->command, BTC_MSG_INV) == 0)
+    {
+        /* hash the tx */
+        /* TODO: cache the hash */
+        uint8_t hash[32];
+        btc_tx_hash(ctx->tx, hash);
+
+        //  decompose
+        uint32_t vsize;
+        if (!deser_varlen(&vsize, buf)) { btc_node_missbehave(node); return; };
+        for (unsigned int i=0;i<vsize;i++)
+        {
+            btc_p2p_inv_msg inv_msg;
+            if (!btc_p2p_msg_inv_deser(&inv_msg, buf)) { btc_node_missbehave(node); return; }
+            if (memcmp(hash, inv_msg.hash, 32) == 0) {
+                // txfound
+                /* set hint bit 2 == tx found on peer*/
+                node->hints |= (1 << 2);
+                printf("node %d has the tx\n", node->nodeid);
+                ctx->found_on_non_inved_peers++;
+                printf("tx successfully seen on node %d\n", node->nodeid);
+            }
+        }
+    }
+    else if (strcmp(hdr->command, BTC_MSG_GETDATA) == 0)
+    {
+        ctx->getdata_from_peers++;
+        //only allow a single object in getdata for the broadcaster
+        uint32_t vsize;
+        if (!deser_varlen(&vsize, buf) || vsize!=1) { btc_node_missbehave(node); return; }
+
+        btc_p2p_inv_msg inv_msg;
+        memset(&inv_msg, 0, sizeof(inv_msg));
+        if (!btc_p2p_msg_inv_deser(&inv_msg, buf) || inv_msg.type != BTC_INV_TYPE_TX) { btc_node_missbehave(node); return; };
+
+        /* send the tx */
+        cstring* tx_ser = cstr_new_sz(1024);
+        btc_tx_serialize(tx_ser, ctx->tx);
+        cstring *p2p_msg = btc_p2p_message_new(node->nodegroup->chainparams->netmagic, BTC_MSG_TX, tx_ser->str, tx_ser->len);
+        cstr_free(tx_ser, true);
+        btc_node_send(node, p2p_msg);
+        cstr_free(p2p_msg, true);
+
+        /* set hint bit 1 == tx sent */
+        node->hints |= (1 << 1);
+
+        printf("tx successfully sent to node %d\n", node->nodeid);
+    }
+}
+
+btc_bool broadcast_tx(const btc_chainparams* chain, const btc_tx *tx, const char *ips)
+{
+    struct broadcast_ctx ctx;
+    ctx.tx = tx;
+    ctx.max_peers_to_inv = 2;
+    ctx.found_on_non_inved_peers = 0;
+    ctx.getdata_from_peers = 0;
+    ctx.inved_to_peers = 0;
+    ctx.connected_to_peers = 0;
+    ctx.max_peers_to_connect = 6;
+
+    /* create a node group */
+    btc_node_group* group = btc_node_group_new(chain);
+    group->desired_amount_connected_nodes = ctx.max_peers_to_connect;
+    group->ctx = &ctx;
+
+    /* set the timeout callback */
+    group->periodic_timer_cb = broadcast_timer_cb;
+
+    /* set a individual log print function */
+    group->log_write_cb = broadcast_default_write_log;
+    group->postcmd_cb = broadcast_post_cmd;
+    group->handshake_done_cb = broadcast_handshake_done;
+
+    if (ips == NULL) {
+        /* === DNS QUERY === */
+        /* get a couple of peers from a seed */
+        vector *ips_dns = vector_new(10, free);
+        const btc_dns_seed seed = chain->dnsseeds[0];
+        if (strlen(seed.domain) == 0)
+        {
+            return -1;
+        }
+        /* todo: make sure we have enought peers, eventually */
+        /* call another seeder */
+        btc_get_peers_from_dns(seed.domain, ips_dns, chain->default_port, AF_INET);
+        for (unsigned int i = 0; i<ips_dns->len; i++)
+        {
+            char *ip = (char *)vector_idx(ips_dns, i);
+
+            /* create a node */
+            btc_node *node = btc_node_new();
+            if (btc_node_set_ipport(node, ip) > 0) {
+                /* add the node to the group */
+                btc_node_group_add_node(group, node);
+            }
+        }
+        vector_free(ips_dns, true);
+    }
+    else {
+        // add comma seperated ips (nodes)
+        char working_str[64];
+        memset(working_str, 0, sizeof(working_str));
+        size_t offset = 0;
+        for(unsigned int i=0;i<=strlen(ips);i++)
+        {
+            if (i == strlen(ips) || ips[i] == ',') {
+                btc_node *node = btc_node_new();
+                if (btc_node_set_ipport(node, working_str) > 0) {
+                    btc_node_group_add_node(group, node);
+                }
+                offset = 0;
+                memset(working_str, 0, sizeof(working_str));
+            }
+            else if (ips[i] != ' ' && offset < sizeof(working_str)) {
+                working_str[offset]=ips[i];
+                offset++;
+            }
+        }
+    }
+
+
+    /* connect to the next node */
+    btc_node_group_connect_next_nodes(group);
+
+    /* start the event loop */
+    btc_node_group_event_loop(group);
+
+    /* cleanup */
+    btc_node_group_free(group); //will also free the nodes structures from the heap
+
+    printf("Result:\n=============\n");
+    printf("Max peers to connect to: %d\n", ctx.max_peers_to_connect);
+    printf("Connected to peers: %d\n", ctx.connected_to_peers);
+    printf("Informed peers: %d\n", ctx.inved_to_peers);
+    printf("Requested from peers: %d\n", ctx.getdata_from_peers);
+    printf("Seen on other peers: %d\n", ctx.found_on_non_inved_peers);
+    return 1;
 }

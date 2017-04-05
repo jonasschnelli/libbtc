@@ -97,6 +97,7 @@ typedef struct btc_node_
     uint32_t state;
     int      missbehavescore;
     btc_bool version_handshake;
+    uint32_t hints; /* can be use for user defined state */
 } btc_node;
 
 /* =================================== */
