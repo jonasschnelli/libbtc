@@ -32,7 +32,7 @@ void btc_free_internal(void *ptr);
 
 static btc_mem_mapper current_mem_mapper = {btc_malloc_internal, btc_calloc_internal, btc_free_internal};
 
-void *btc_mem_set_mapper(const btc_mem_mapper mapper){
+void btc_mem_set_mapper(const btc_mem_mapper mapper){
     current_mem_mapper = mapper;
 }
 
