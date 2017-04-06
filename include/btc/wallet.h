@@ -27,11 +27,11 @@
 #ifndef __LIBBTC_WALLET_H__
 #define __LIBBTC_WALLET_H__
 
-#include "btc.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "btc.h"
 
 #include <logdb/logdb.h>
 #include <logdb/logdb_core.h>

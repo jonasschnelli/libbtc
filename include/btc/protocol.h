@@ -27,15 +27,15 @@
 #ifndef __LIBBTC_PROTOCOL_H__
 #define __LIBBTC_PROTOCOL_H__
 
-#include "btc.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <btc/buffer.h>
-#include <btc/cstr.h>
-#include <btc/vector.h>
+#include "btc.h"
+
+#include "buffer.h"
+#include "cstr.h"
+#include "vector.h"
 
 #ifdef _WIN32
 #include <winsock2.h>

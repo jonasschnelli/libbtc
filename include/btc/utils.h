@@ -25,18 +25,17 @@
 
 */
 
-
 #ifndef __LIBBTC_UTILS_H__
 #define __LIBBTC_UTILS_H__
-
-#include <stdint.h>
-#include <stddef.h>
-
-#include "btc.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "btc.h"
+
+#include <stdint.h>
+#include <stddef.h>
 
 #define TO_UINT8_HEX_BUF_LEN 2048
 #define VARINT_LEN 20

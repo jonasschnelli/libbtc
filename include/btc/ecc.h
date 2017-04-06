@@ -27,13 +27,13 @@
 #ifndef __LIBBTC_ECC_H__
 #define __LIBBTC_ECC_H__
 
-#include "btc.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <stdint.h>
+#include "btc.h"
+
+#include <stddef.h>
 
 //!init static ecc context
 LIBBTC_API void btc_ecc_start(void);

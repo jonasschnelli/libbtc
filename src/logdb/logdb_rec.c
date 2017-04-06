@@ -31,6 +31,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
+#include <stdlib.h>
 
 logdb_record* logdb_record_new()
 {

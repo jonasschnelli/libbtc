@@ -28,17 +28,19 @@
 #ifndef __LIBBTC_SERIALIZE_H__
 #define __LIBBTC_SERIALIZE_H__
 
-#include <btc/cstr.h>
-#include <btc/buffer.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "btc.h"
+
+#include "cstr.h"
+#include "buffer.h"
 
 #include "portable_endian.h"
 
 #include <stdint.h>
 #include <stdio.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 LIBBTC_API void ser_bytes(cstring* s, const void* p, size_t len);
 LIBBTC_API void ser_u16(cstring* s, uint16_t v_);

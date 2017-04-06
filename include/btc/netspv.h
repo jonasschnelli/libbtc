@@ -27,13 +27,13 @@
 #ifndef __LIBBTC_NETSPV_H__
 #define __LIBBTC_NETSPV_H__
 
-#include "btc.h"
-#include <logdb/logdb.h>
-#include <logdb/logdb_rec.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "btc.h"
+#include <logdb/logdb.h>
+#include <logdb/logdb_rec.h>
 
 typedef struct btc_spv_client_
 {

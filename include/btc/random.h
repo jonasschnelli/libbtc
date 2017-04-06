@@ -24,15 +24,14 @@
 
 */
 
-
 #ifndef __LIBBTC_RANDOM_H__
 #define __LIBBTC_RANDOM_H__
-
-#include "btc.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "btc.h"
 
 #include <stdint.h>
 #include <stdlib.h>

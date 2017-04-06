@@ -26,6 +26,9 @@
 
 #include <btc/memory.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+
 void *btc_malloc_internal(size_t size);
 void *btc_calloc_internal(size_t count, size_t size);
 void btc_free_internal(void *ptr);

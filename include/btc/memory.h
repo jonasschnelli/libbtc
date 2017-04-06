@@ -31,10 +31,7 @@
 extern "C" {
 #endif
 
-#include <inttypes.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stddef.h>
 
 typedef struct btc_mem_mapper_ {
     void* (*btc_malloc)(size_t size);

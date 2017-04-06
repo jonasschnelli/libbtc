@@ -27,12 +27,12 @@
 #ifndef __LIBBTC_BLOCKCHAIN_H__
 #define __LIBBTC_BLOCKCHAIN_H__
 
-#include "btc.h"
-#include <btc/block.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "btc.h"
+#include "block.h"
 
 #include <stdint.h>
 #include <sys/types.h>

@@ -32,14 +32,14 @@
 #ifndef __LIBBTC_SHA2_H__
 #define __LIBBTC_SHA2_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "btc.h"
 
 #include <stdint.h>
 #include <stddef.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #define SHA256_BLOCK_LENGTH 64
 #define SHA256_DIGEST_LENGTH 32

@@ -27,11 +27,11 @@
 #ifndef __LIBBTC_VECTOR_H__
 #define __LIBBTC_VECTOR_H__
 
-#include "btc.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "btc.h"
 
 #include <stdlib.h>
 #include <sys/types.h>

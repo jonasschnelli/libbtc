@@ -28,18 +28,17 @@
 #ifndef LIBBTC_BLOCK_H
 #define LIBBTC_BLOCK_H
 
-
-#include "btc.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <stdint.h>
-#include <sys/types.h>
-#include <btc/buffer.h>
-#include <btc/hash.h>
-#include <btc/cstr.h>
+#include "btc.h"
+
+#include "buffer.h"
+#include "cstr.h"
+#include "hash.h"
+
+#include <stddef.h>
 
 typedef struct btc_block_header_ {
     int32_t version;

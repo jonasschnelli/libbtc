@@ -25,18 +25,16 @@
 
  */
 
-
 #ifndef __LIBBTC_BUFFER_H__
 #define __LIBBTC_BUFFER_H__
-
-#include "btc.h"
-
-#include <stdint.h>
-#include <sys/types.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "btc.h"
+
+#include <stddef.h>
 
 struct buffer {
     void* p;

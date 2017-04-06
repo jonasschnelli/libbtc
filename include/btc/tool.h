@@ -27,12 +27,12 @@
 #ifndef __LIBBTC_TOOL_H__
 #define __LIBBTC_TOOL_H__
 
-#include "btc.h"
-#include "tx.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "btc.h"
+#include "tx.h"
 
 #include <stdint.h>
 #include <stddef.h>

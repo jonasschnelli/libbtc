@@ -27,13 +27,13 @@
 #ifndef __LIBBTC_SCRIPT_H__
 #define __LIBBTC_SCRIPT_H__
 
-#include "btc.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <btc/cstr.h>
+#include "btc.h"
+
+#include "cstr.h"
 
 #include "ecc_key.h"
 #include "vector.h"

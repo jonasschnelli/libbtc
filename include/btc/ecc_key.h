@@ -27,14 +27,13 @@
 #ifndef __LIBBTC_ECC_KEY_H__
 #define __LIBBTC_ECC_KEY_H__
 
-#include "btc.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <stdio.h>
-#include <stdint.h>
+#include "btc.h"
+
+#include <stddef.h>
 
 typedef struct btc_key_ {
     uint8_t privkey[BTC_ECKEY_PKEY_LENGTH];

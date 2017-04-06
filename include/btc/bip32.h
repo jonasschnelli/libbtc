@@ -23,16 +23,15 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
 #ifndef __LIBBTC_BIP32_H__
 #define __LIBBTC_BIP32_H__
-
-#include "btc.h"
-#include <btc/chainparams.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "btc.h"
+#include "chainparams.h"
 
 #include <stdint.h>
 

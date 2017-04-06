@@ -24,20 +24,19 @@
 
  */
 
-
 #ifndef __LIBBTC_NET_H__
 #define __LIBBTC_NET_H__
-
-#include "btc.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include <event2/event.h>
-#include <btc/chainparams.h>
-#include <btc/buffer.h>
-#include <btc/cstr.h>
+
+#include "btc.h"
+#include "chainparams.h"
+#include "buffer.h"
+#include "cstr.h"
 #include "vector.h"
 #include "protocol.h"
 

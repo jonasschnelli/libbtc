@@ -25,18 +25,16 @@
  
 */
 
-
 #ifndef __LIBBTC_CSTR_H__
 #define __LIBBTC_CSTR_H__
-
-#include "btc.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "btc.h"
+
+#include <stddef.h>
 
 typedef struct cstring {
     char* str;    /* string data, incl. NUL */

@@ -28,8 +28,6 @@
 #ifndef __LIBBTC_TX_H__
 #define __LIBBTC_TX_H__
 
-#include "btc.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -37,11 +35,13 @@ extern "C" {
 #include <stdint.h>
 #include <stddef.h>
 
-#include <btc/chainparams.h>
-#include <btc/cstr.h>
-#include <btc/hash.h>
-#include <btc/script.h>
-#include <btc/vector.h>
+#include "btc.h"
+
+#include "chainparams.h"
+#include "cstr.h"
+#include "hash.h"
+#include "script.h"
+#include "vector.h"
 
 
 typedef struct btc_script_ {
