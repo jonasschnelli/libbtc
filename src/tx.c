@@ -172,8 +172,9 @@ int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx*
         if (!btc_tx_in_deserialize(tx_in, &buf)) {
             free(tx_in);
         }
-
-        vector_add(tx->vin, tx_in);
+        else {
+            vector_add(tx->vin, tx_in);
+        }
     }
 
     if (!deser_varlen(&vlen, &buf))
@@ -183,9 +184,9 @@ int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx*
 
         if (!btc_tx_out_deserialize(tx_out, &buf)) {
             free(tx_out);
+        } else {
+            vector_add(tx->vout, tx_out);
         }
-
-        vector_add(tx->vout, tx_out);
     }
 
     if (!deser_u32(&tx->locktime, &buf))
