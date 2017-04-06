@@ -60,7 +60,7 @@ static void print_version() {
 
 static void print_usage() {
     print_version();
-    printf("Usage: bitcoin-send-tx (-i|-ips <ip,ip,...]>) (-t[--testnet]) (-r[--regtest]) (-v[--verbose]) (-s[--timeout] <secs>) <txhex>\n");
+    printf("Usage: bitcoin-send-tx (-i|-ips <ip,ip,...]>) (-t[--testnet]) (-r[--regtest]) (-d[--debug]) (-s[--timeout] <secs>) <txhex>\n");
     printf("\nExamples: \n");
     printf("Send a TX to random peers on testnet:\n");
     printf("> bitcoin-send-tx --testnet <txhex>\n\n");

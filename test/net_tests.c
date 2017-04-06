@@ -186,7 +186,7 @@ void test_net_basics_plus_download_block()
     group->periodic_timer_cb = timer_cb;
 
     /* set a individual log print function */
-    group->log_write_cb = default_write_log;
+    group->log_write_cb = net_write_log_printf;
     group->parse_cmd_cb = parse_cmd;
     group->postcmd_cb = postcmd;
     group->node_connection_state_changed_cb = node_connection_state_changed;
