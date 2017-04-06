@@ -149,7 +149,7 @@ instdir=$(prefix)/bin
 inst_PROGRAMS = bitcointool
 bitcointool_LDADD = libbtc.la
 bitcointool_SOURCES = \
-    src/bitcointool.c
+    src/tools/bitcointool.c
 bitcointool_CFLAGS = $(libbtc_la_CFLAGS)
 bitcointool_CPPFLAGS = -I$(top_srcdir)/src
 bitcointool_LDFLAGS = -static
