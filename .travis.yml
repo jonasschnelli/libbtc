@@ -23,7 +23,7 @@ addons:
         - libevent-dev
 
 before_install:
-  - pip install --user cpp-coveralls
+  - if [ ${CC} = gcc ] && [ "${TRAVIS_OS_NAME}" = "linux" ]; then pip install --user git+git://github.com/eddyxu/cpp-coveralls.git; fi
   - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew install valgrind gnu-sed --default-names; fi
 
 matrix:
