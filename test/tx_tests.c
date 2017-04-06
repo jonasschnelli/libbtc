@@ -915,3 +915,18 @@ void test_script_op_codeseperator()
     cstr_free(new_script, true);
     cstr_free(script, true);
 }
+
+void test_invalid_tx_deser()
+{
+    char txstr[] =   "asadasdadad";
+    uint8_t tx_data[sizeof(txstr) / 2+1];
+    int outlen;
+    utils_hex_to_bin(txstr, tx_data, strlen(txstr), &outlen);
+
+    btc_tx* tx = btc_tx_new();
+    btc_tx_deserialize(tx_data, outlen, tx, NULL);
+
+    btc_tx_free(tx);
+}
+
+
