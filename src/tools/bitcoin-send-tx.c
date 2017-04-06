@@ -78,6 +78,7 @@ btc_bool broadcast_tx(const btc_chainparams* chain, const btc_tx *tx, const char
 
 int main(int argc, char *argv[])
 {
+    int ret = 0;
     int long_index =0;
     char opt = 0;
     char *data = 0;
@@ -133,11 +134,12 @@ int main(int argc, char *argv[])
     }
     else {
         showError("Transaction is invalid\n");
+        ret = 1;
     }
     free(data_bin);
     btc_tx_free(tx);
 
-    return 0;
+    return ret;
 }
 
 struct broadcast_ctx {
