@@ -19,8 +19,8 @@ Current features
 * Transaction generation, manipulation, signing and ser-/deserialization including P2PKH, P2SH, multisig
 * Address generation
 * Base58check encoding
-* Native implementation of SHA256, SHA512, SHA512_HMAC, RIMPEMD160 including NIST testvectors
-* Native AES_CBC implementation including NIST testvectors
+* Native implementation of SHA256, SHA512, SHA512_HMAC, RIPEMD-160 including NIST testvectors
+* Native constant time AES (+256CBC) cipher implementation including NIST testvectors
 * Keystore (wallet) databases (through logdb https://github.com/liblogdb/liblogdb)
 * Event based bitcoin P2P client capable of connecting to multiple nodes in a single thread (requires [libevent](https://github.com/libevent/libevent))
 
