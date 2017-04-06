@@ -32,8 +32,8 @@
 extern "C" {
 #endif
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include "btc.h"
 
@@ -90,7 +90,7 @@ LIBBTC_API void btc_tx_free(btc_tx* tx);
 LIBBTC_API void btc_tx_copy(btc_tx* dest, const btc_tx* src);
 
 //!deserialize/parse a p2p serialized bitcoin transaction
-LIBBTC_API int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx* tx, size_t *consumed_length);
+LIBBTC_API int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx* tx, size_t* consumed_length);
 
 //!serialize a lbc bitcoin data structure into a p2p serialized buffer
 LIBBTC_API void btc_tx_serialize(cstring* s, const btc_tx* tx);

@@ -34,8 +34,8 @@ extern "C" {
 
 #include "btc.h"
 
-#include "cstr.h"
 #include "buffer.h"
+#include "cstr.h"
 
 #include "portable_endian.h"
 
@@ -64,7 +64,7 @@ LIBBTC_API int deser_u64(uint64_t* vo, struct const_buffer* buf);
 LIBBTC_API int deser_u256(uint8_t* vo, struct const_buffer* buf);
 
 LIBBTC_API int deser_varlen(uint32_t* lo, struct const_buffer* buf);
-LIBBTC_API int deser_varlen_file(uint32_t* lo, FILE *file, uint8_t *rawdata, size_t *buflen_inout);
+LIBBTC_API int deser_varlen_file(uint32_t* lo, FILE* file, uint8_t* rawdata, size_t* buflen_inout);
 LIBBTC_API int deser_str(char* so, struct const_buffer* buf, size_t maxlen);
 LIBBTC_API int deser_varstr(cstring** so, struct const_buffer* buf);
 

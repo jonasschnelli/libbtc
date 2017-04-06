@@ -48,13 +48,15 @@ LIBBTC_API static inline btc_bool btc_hash_is_empty(uint256 hash)
 }
 
 //bitcoin double sha256 hash
-LIBBTC_API static inline void btc_hash(const unsigned char* datain, size_t length, uint256 hashout) {
+LIBBTC_API static inline void btc_hash(const unsigned char* datain, size_t length, uint256 hashout)
+{
     sha256_Raw(datain, length, hashout);
     sha256_Raw(hashout, SHA256_DIGEST_LENGTH, hashout);
 }
 
 //single sha256 hash
-LIBBTC_API static inline void btc_hash_sngl_sha256(const unsigned char* datain, size_t length, uint256 hashout) {
+LIBBTC_API static inline void btc_hash_sngl_sha256(const unsigned char* datain, size_t length, uint256 hashout)
+{
     sha256_Raw(datain, length, hashout);
 }
 

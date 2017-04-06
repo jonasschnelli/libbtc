@@ -38,8 +38,8 @@ extern "C" {
 
 #include "btc.h"
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #define SHA256_BLOCK_LENGTH 64
 #define SHA256_DIGEST_LENGTH 32

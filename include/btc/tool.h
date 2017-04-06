@@ -34,21 +34,21 @@ extern "C" {
 #include "btc.h"
 #include "tx.h"
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 /* generate the p2pkh address from a given hex pubkey */
-LIBBTC_API btc_bool address_from_pubkey(const btc_chainparams* chain, const char *pubkey_hex, char *address);
+LIBBTC_API btc_bool address_from_pubkey(const btc_chainparams* chain, const char* pubkey_hex, char* address);
 
 /* generate the hex publickey from a given hex private key */
-LIBBTC_API btc_bool pubkey_from_privatekey(const btc_chainparams* chain, const char *privkey_hex, char *pubkey_hex, size_t *sizeout);
+LIBBTC_API btc_bool pubkey_from_privatekey(const btc_chainparams* chain, const char* privkey_hex, char* pubkey_hex, size_t* sizeout);
 
 /* generate a new private key (hex) */
-LIBBTC_API btc_bool gen_privatekey(const btc_chainparams* chain, char *privkey_wif, size_t strsize_wif, char *privkey_hex);
+LIBBTC_API btc_bool gen_privatekey(const btc_chainparams* chain, char* privkey_wif, size_t strsize_wif, char* privkey_hex);
 
-LIBBTC_API btc_bool hd_gen_master(const btc_chainparams* chain, char *masterkeyhex, size_t strsize);
-LIBBTC_API btc_bool hd_print_node(const btc_chainparams* chain, const char *nodeser);
-LIBBTC_API btc_bool hd_derive(const btc_chainparams* chain, const char *masterkey, const char *keypath, char *extkeyout, size_t extkeyout_size);
+LIBBTC_API btc_bool hd_gen_master(const btc_chainparams* chain, char* masterkeyhex, size_t strsize);
+LIBBTC_API btc_bool hd_print_node(const btc_chainparams* chain, const char* nodeser);
+LIBBTC_API btc_bool hd_derive(const btc_chainparams* chain, const char* masterkey, const char* keypath, char* extkeyout, size_t extkeyout_size);
 
 #ifdef __cplusplus
 }

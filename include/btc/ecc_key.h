@@ -59,7 +59,7 @@ LIBBTC_API void btc_pubkey_from_key(btc_key* privkey, btc_pubkey* pubkey_inout);
 LIBBTC_API void btc_pubkey_get_hash160(const btc_pubkey* pubkey, uint8_t* hash160);
 
 //get the hex representation of a pubkey, strsize must be at leat 66 bytes
-LIBBTC_API btc_bool btc_pubkey_get_hex(const btc_pubkey* pubkey, char* str, size_t *strsize);
+LIBBTC_API btc_bool btc_pubkey_get_hex(const btc_pubkey* pubkey, char* str, size_t* strsize);
 
 //sign a 32byte message/hash and returns a DER encoded signature (through *sigout)
 LIBBTC_API btc_bool btc_key_sign_hash(const btc_key* privkey, const uint8_t* hash, unsigned char* sigout, size_t* outlen);

@@ -36,16 +36,16 @@ extern "C" {
 typedef struct btc_mem_mapper_ {
     void* (*btc_malloc)(size_t size);
     void* (*btc_calloc)(size_t count, size_t size);
-    void (*btc_free)(void *ptr);
+    void (*btc_free)(void* ptr);
 } btc_mem_mapper;
 
 // set's a custom memory mapper
 // this function is _not_ thread safe and must be called before anything else
 void btc_mem_set_mapper(const btc_mem_mapper mapper);
 
-void *btc_malloc(size_t size);
-void *btc_calloc(size_t count, size_t size);
-void btc_free(void *ptr);
+void* btc_malloc(size_t size);
+void* btc_calloc(size_t count, size_t size);
+void btc_free(void* ptr);
 
 #ifdef __cplusplus
 }

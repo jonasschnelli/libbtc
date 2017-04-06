@@ -31,8 +31,8 @@
 extern "C" {
 #endif
 
-#include "btc.h"
 #include "block.h"
+#include "btc.h"
 
 #include <stdint.h>
 #include <sys/types.h>
@@ -41,8 +41,8 @@ typedef struct btc_blockindex {
     uint32_t height;
     uint8_t hash[32];
     btc_block_header header;
-    struct btc_blockindex *next;
-    struct btc_blockindex *prev;
+    struct btc_blockindex* next;
+    struct btc_blockindex* prev;
 } btc_blockindex;
 
 #ifdef __cplusplus
