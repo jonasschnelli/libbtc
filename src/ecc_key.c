@@ -26,10 +26,10 @@
 
 #include "btc/ecc_key.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 #include "btc/ecc.h"
 #include "btc/hash.h"
@@ -118,12 +118,12 @@ void btc_pubkey_get_hash160(const btc_pubkey* pubkey, uint8_t* hash160)
 }
 
 
-btc_bool btc_pubkey_get_hex(const btc_pubkey* pubkey, char* str, size_t *strsize)
+btc_bool btc_pubkey_get_hex(const btc_pubkey* pubkey, char* str, size_t* strsize)
 {
-    if (*strsize < BTC_ECKEY_COMPRESSED_LENGTH*2)
+    if (*strsize < BTC_ECKEY_COMPRESSED_LENGTH * 2)
         return false;
-    utils_bin_to_hex((unsigned char *)pubkey->pubkey, BTC_ECKEY_COMPRESSED_LENGTH, str);
-    *strsize = BTC_ECKEY_COMPRESSED_LENGTH*2;
+    utils_bin_to_hex((unsigned char*)pubkey->pubkey, BTC_ECKEY_COMPRESSED_LENGTH, str);
+    *strsize = BTC_ECKEY_COMPRESSED_LENGTH * 2;
     return true;
 }
 

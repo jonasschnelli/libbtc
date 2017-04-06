@@ -2,7 +2,7 @@
 #include <btc/aes256_cbc.h>
 #include <btc/ctaes.h>
 
-#include <strings.h>
+#include <string.h>
 
 int aes256_cbc_encrypt(const unsigned char aes_key[32], const unsigned char iv[AES_BLOCK_SIZE], const unsigned char* data, int size, int pad, unsigned char* out)
 {
@@ -19,14 +19,14 @@ int aes256_cbc_encrypt(const unsigned char aes_key[32], const unsigned char iv[A
     AES256_ctx aes_ctx;
     // Set cipher key
     AES256_init(&aes_ctx, aes_key);
-	
+
     memcpy(mixed, iv, AES_BLOCK_SIZE);
 
     // Write all but the last block
     while (written + AES_BLOCK_SIZE <= size) {
         for (int i = 0; i != AES_BLOCK_SIZE; i++)
             mixed[i] ^= *data++;
-		AES256_encrypt(&aes_ctx, 1, out + written, mixed);
+        AES256_encrypt(&aes_ctx, 1, out + written, mixed);
         memcpy(mixed, out + written, AES_BLOCK_SIZE);
         written += AES_BLOCK_SIZE;
     }
@@ -37,7 +37,7 @@ int aes256_cbc_encrypt(const unsigned char aes_key[32], const unsigned char iv[A
             mixed[i] ^= *data++;
         for (int i = padsize; i != AES_BLOCK_SIZE; i++)
             mixed[i] ^= AES_BLOCK_SIZE - padsize;
-		AES256_encrypt(&aes_ctx, 1, out + written, mixed);
+        AES256_encrypt(&aes_ctx, 1, out + written, mixed);
         written += AES_BLOCK_SIZE;
     }
     return written;
@@ -55,14 +55,14 @@ int aes256_cbc_decrypt(const unsigned char aes_key[32], const unsigned char iv[A
 
     if (size % AES_BLOCK_SIZE != 0)
         return 0;
-	
+
     AES256_ctx aes_ctx;
     // Set cipher key
     AES256_init(&aes_ctx, aes_key);
-	
+
     // Decrypt all data. Padding will be checked in the output.
     while (written != size) {
-		AES256_decrypt(&aes_ctx, 1, out, data + written);
+        AES256_decrypt(&aes_ctx, 1, out, data + written);
         for (int i = 0; i != AES_BLOCK_SIZE; i++)
             *out++ ^= prev[i];
         prev = data + written;

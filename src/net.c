@@ -1,30 +1,30 @@
 #include <btc/net.h>
 
-#include <event2/event.h>
-#include <event2/bufferevent.h>
 #include <event2/buffer.h>
+#include <event2/bufferevent.h>
+#include <event2/event.h>
 
-#include <btc/chainparams.h>
-#include <btc/protocol.h>
 #include <btc/buffer.h>
+#include <btc/chainparams.h>
 #include <btc/cstr.h>
-#include <btc/utils.h>
+#include <btc/protocol.h>
 #include <btc/serialize.h>
+#include <btc/utils.h>
 
 #ifdef _WIN32
+#include <getopt.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#include <getopt.h>
 #else
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 #endif
 
 #include <assert.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
-#include <fcntl.h>
 
 #include <time.h>
 
@@ -34,7 +34,7 @@ static const int BTC_PERIODICAL_NODE_TIMER_S = 3;
 static const int BTC_PING_INTERVAL_S = 180;
 static const int BTC_CONNECT_TIMEOUT_S = 10;
 
-int net_write_log_printf(const char *format, ...)
+int net_write_log_printf(const char* format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -44,7 +44,7 @@ int net_write_log_printf(const char *format, ...)
     return 1;
 }
 
-int net_write_log_null(const char *format, ...)
+int net_write_log_null(const char* format, ...)
 {
     UNUSED(format);
     return 1;
@@ -58,17 +58,17 @@ void read_cb(struct bufferevent* bev, void* ctx)
 
     size_t length = evbuffer_get_length(input);
 
-    btc_node *node = (btc_node *)ctx;
+    btc_node* node = (btc_node*)ctx;
 
     if ((node->state & NODE_CONNECTED) != NODE_CONNECTED) {
         // ignore messages from disconnected peers
         return;
     }
     // expand the cstring buffer if required
-    cstr_alloc_minsize(node->recvBuffer, node->recvBuffer->len+length);
+    cstr_alloc_minsize(node->recvBuffer, node->recvBuffer->len + length);
 
     // copy direct to cstring, avoid another heap buffer
-    evbuffer_copyout(input, node->recvBuffer->str+node->recvBuffer->len, length);
+    evbuffer_copyout(input, node->recvBuffer->str + node->recvBuffer->len, length);
     node->recvBuffer->len += length;
 
     // drain the event buffer
@@ -76,7 +76,7 @@ void read_cb(struct bufferevent* bev, void* ctx)
 
     struct const_buffer buf = {node->recvBuffer->str, node->recvBuffer->len};
     btc_p2p_msg_hdr hdr;
-    char *read_upto = NULL;
+    char* read_upto = NULL;
 
     do {
         //check if message is complete
@@ -105,23 +105,23 @@ void read_cb(struct bufferevent* bev, void* ctx)
             btc_node_parse_message(node, &hdr, &cmd_data_buf);
 
             //skip the size of the whole message
-            buf.p = (const unsigned char *)buf.p + hdr.data_len;
+            buf.p = (const unsigned char*)buf.p + hdr.data_len;
             buf.len -= hdr.data_len;
 
-            read_upto = (void *)buf.p;
+            read_upto = (void*)buf.p;
         }
         if (buf.len == 0) {
             //if we have "consumed" the whole buffer
             node->recvBuffer->len = 0;
             break;
         }
-    } while(1);
+    } while (1);
 
     if (read_upto != NULL && node->recvBuffer->len != 0 && read_upto != (node->recvBuffer->str + node->recvBuffer->len)) {
-        char *end = node->recvBuffer->str + node->recvBuffer->len;
+        char* end = node->recvBuffer->str + node->recvBuffer->len;
         size_t available_chunk_data = end - read_upto;
         //partial message
-        cstring *tmp = cstr_new_buf(read_upto, available_chunk_data);
+        cstring* tmp = cstr_new_buf(read_upto, available_chunk_data);
         cstr_free(node->recvBuffer, true);
         node->recvBuffer = tmp;
     }
@@ -133,10 +133,11 @@ void write_cb(struct bufferevent* ev, void* ctx)
     UNUSED(ctx);
 }
 
-void node_periodical_timer(int fd, short event, void *ctx) {
+void node_periodical_timer(int fd, short event, void* ctx)
+{
     UNUSED(fd);
     UNUSED(event);
-    btc_node *node = (btc_node *)ctx;
+    btc_node* node = (btc_node*)ctx;
     uint64_t now = time(NULL);
 
     /* pass data to the callback and give it a chance to cancle the call */
@@ -144,8 +145,7 @@ void node_periodical_timer(int fd, short event, void *ctx) {
         if (!node->nodegroup->periodic_timer_cb(node, &now))
             return;
 
-    if (node->time_started_con+BTC_CONNECT_TIMEOUT_S < now && ((node->state & NODE_CONNECTING) == NODE_CONNECTING))
-    {
+    if (node->time_started_con + BTC_CONNECT_TIMEOUT_S < now && ((node->state & NODE_CONNECTING) == NODE_CONNECTING)) {
         node->state = 0;
         node->time_started_con = 0;
         node->state |= NODE_ERRORED;
@@ -153,12 +153,11 @@ void node_periodical_timer(int fd, short event, void *ctx) {
         btc_node_connection_state_changed(node);
     }
 
-    if ( ((node->state & NODE_CONNECTED) == NODE_CONNECTED) && node->lastping + BTC_PING_INTERVAL_S < now)
-    {
+    if (((node->state & NODE_CONNECTED) == NODE_CONNECTED) && node->lastping + BTC_PING_INTERVAL_S < now) {
         //time for a ping
         uint64_t nonce;
-        btc_cheap_random_bytes((uint8_t *)&nonce, sizeof(nonce));
-        cstring *pingmsg = btc_p2p_message_new(node->nodegroup->chainparams->netmagic, BTC_MSG_PING, &nonce, sizeof(nonce));
+        btc_cheap_random_bytes((uint8_t*)&nonce, sizeof(nonce));
+        cstring* pingmsg = btc_p2p_message_new(node->nodegroup->chainparams->netmagic, BTC_MSG_PING, &nonce, sizeof(nonce));
         btc_node_send(node, pingmsg);
         cstr_free(pingmsg, true);
         node->lastping = now;
@@ -168,28 +167,23 @@ void node_periodical_timer(int fd, short event, void *ctx) {
 void event_cb(struct bufferevent* ev, short type, void* ctx)
 {
     UNUSED(ev);
-    btc_node *node = (btc_node *)ctx;
+    btc_node* node = (btc_node*)ctx;
     node->nodegroup->log_write_cb("Event callback on node %d\n", node->nodeid);
     node->nodegroup->log_write_cb("Connected nodes: %d\n", btc_node_group_amount_of_connected_nodes(node->nodegroup));
 
-    if ( ((type & BEV_EVENT_TIMEOUT) != 0)
-        && ((node->state & NODE_CONNECTING) == NODE_CONNECTING))
-    {
+    if (((type & BEV_EVENT_TIMEOUT) != 0) && ((node->state & NODE_CONNECTING) == NODE_CONNECTING)) {
         node->nodegroup->log_write_cb("Timout connecting to node %d.\n", node->nodeid);
         node->state = 0;
         node->state |= NODE_ERRORED;
         node->state |= NODE_TIMEOUT;
         btc_node_connection_state_changed(node);
-    }
-    else if (((type & BEV_EVENT_EOF) != 0) ||
-        ((type & BEV_EVENT_ERROR) != 0))
-    {
+    } else if (((type & BEV_EVENT_EOF) != 0) ||
+               ((type & BEV_EVENT_ERROR) != 0)) {
         node->nodegroup->log_write_cb("Error connecting to node %d.\n", node->nodeid);
         node->state = 0;
         node->state |= NODE_ERRORED;
         btc_node_connection_state_changed(node);
-    }
-    else if (type & BEV_EVENT_CONNECTED) {
+    } else if (type & BEV_EVENT_CONNECTED) {
         node->nodegroup->log_write_cb("Successfull connected to node %d.\n", node->nodeid);
         node->state |= NODE_CONNECTED;
         node->state &= ~NODE_CONNECTING;
@@ -215,7 +209,7 @@ btc_node* btc_node_new()
     return node;
 }
 
-btc_bool btc_node_set_ipport(btc_node *node, const char *ipport)
+btc_bool btc_node_set_ipport(btc_node* node, const char* ipport)
 {
     int outlen = (int)sizeof(node->addr);
 
@@ -223,34 +217,32 @@ btc_bool btc_node_set_ipport(btc_node *node, const char *ipport)
     return (evutil_parse_sockaddr_port(ipport, &node->addr, &outlen) == 0);
 }
 
-void btc_node_release_events(btc_node *node)
+void btc_node_release_events(btc_node* node)
 {
-    if (node->event_bev)
-    {
+    if (node->event_bev) {
         bufferevent_free(node->event_bev);
         node->event_bev = NULL;
     }
 
-    if (node->timer_event)
-    {
+    if (node->timer_event) {
         event_del(node->timer_event);
         event_free(node->timer_event);
         node->timer_event = NULL;
     }
 }
 
-btc_bool btc_node_missbehave(btc_node *node)
+btc_bool btc_node_missbehave(btc_node* node)
 {
-    node->nodegroup->log_write_cb("Mark node %d as missbehaved\n",  node->nodeid);
+    node->nodegroup->log_write_cb("Mark node %d as missbehaved\n", node->nodeid);
     node->state |= NODE_MISSBEHAVED;
     btc_node_connection_state_changed(node);
     return 0;
 }
 
-void btc_node_disconnect(btc_node *node)
+void btc_node_disconnect(btc_node* node)
 {
-    if ( (node->state & NODE_CONNECTED) == NODE_CONNECTED || (node->state & NODE_CONNECTING) == NODE_CONNECTING) {
-        node->nodegroup->log_write_cb("Disconnect node %d\n",  node->nodeid);
+    if ((node->state & NODE_CONNECTED) == NODE_CONNECTED || (node->state & NODE_CONNECTING) == NODE_CONNECTING) {
+        node->nodegroup->log_write_cb("Disconnect node %d\n", node->nodeid);
     }
     /* release buffer and timer event */
     btc_node_release_events(node);
@@ -261,20 +253,20 @@ void btc_node_disconnect(btc_node *node)
     node->time_started_con = 0;
 }
 
-void btc_node_free(btc_node *node)
+void btc_node_free(btc_node* node)
 {
     btc_node_disconnect(node);
     cstr_free(node->recvBuffer, true);
     btc_free(node);
 }
 
-void btc_node_free_cb(void *obj)
+void btc_node_free_cb(void* obj)
 {
-    btc_node *node = (btc_node *)obj;
+    btc_node* node = (btc_node*)obj;
     btc_node_free(node);
 }
 
-btc_node_group* btc_node_group_new(const btc_chainparams *chainparams)
+btc_node_group* btc_node_group_new(const btc_chainparams* chainparams)
 {
     btc_node_group* node_group;
     node_group = btc_calloc(1, sizeof(*node_group));
@@ -298,48 +290,45 @@ btc_node_group* btc_node_group_new(const btc_chainparams *chainparams)
     return node_group;
 }
 
-void btc_node_group_free(btc_node_group *group)
+void btc_node_group_free(btc_node_group* group)
 {
     if (!group)
         return;
 
-    if (group->event_base)
-    {
+    if (group->event_base) {
         event_base_free(group->event_base);
     }
 
-    if (group->nodes)
-    {
+    if (group->nodes) {
         vector_free(group->nodes, true);
     }
     btc_free(group);
 }
 
-void btc_node_group_event_loop(btc_node_group *group)
+void btc_node_group_event_loop(btc_node_group* group)
 {
     event_base_dispatch(group->event_base);
 }
 
-void btc_node_group_add_node(btc_node_group *group, btc_node *node)
+void btc_node_group_add_node(btc_node_group* group, btc_node* node)
 {
     vector_add(group->nodes, node);
     node->nodegroup = group;
     node->nodeid = group->nodes->len;
 }
 
-int btc_node_group_amount_of_connected_nodes(btc_node_group *group)
+int btc_node_group_amount_of_connected_nodes(btc_node_group* group)
 {
-    int cnt=0;
-    for (size_t i = 0; i < group->nodes->len;i++)
-    {
-        btc_node *node = vector_idx(group->nodes, i);
+    int cnt = 0;
+    for (size_t i = 0; i < group->nodes->len; i++) {
+        btc_node* node = vector_idx(group->nodes, i);
         if ((node->state & NODE_CONNECTED) == NODE_CONNECTED)
             cnt++;
     }
     return cnt;
 }
 
-btc_bool btc_node_group_connect_next_nodes(btc_node_group *group)
+btc_bool btc_node_group_connect_next_nodes(btc_node_group* group)
 {
     btc_bool connected_at_least_to_one_node = false;
     int connect_amount = group->desired_amount_connected_nodes - btc_node_group_amount_of_connected_nodes(group);
@@ -347,23 +336,17 @@ btc_bool btc_node_group_connect_next_nodes(btc_node_group *group)
         return true;
 
     /* search for a potential node that has not errored and is not connected or in connecting state */
-    for (size_t i = 0; i < group->nodes->len;i++)
-    {
-        btc_node *node = vector_idx(group->nodes, i);
+    for (size_t i = 0; i < group->nodes->len; i++) {
+        btc_node* node = vector_idx(group->nodes, i);
         if (
-            !((node->state & NODE_CONNECTED) == NODE_CONNECTED)
-            &&
-            !((node->state & NODE_CONNECTING) == NODE_CONNECTING)
-            &&
-            !((node->state & NODE_ERRORED) == NODE_ERRORED)
-            )
-        {
+            !((node->state & NODE_CONNECTED) == NODE_CONNECTED) &&
+            !((node->state & NODE_CONNECTING) == NODE_CONNECTING) &&
+            !((node->state & NODE_ERRORED) == NODE_ERRORED)) {
             /* setup buffer event */
             node->event_bev = bufferevent_socket_new(group->event_base, -1, BEV_OPT_CLOSE_ON_FREE);
             bufferevent_setcb(node->event_bev, read_cb, write_cb, event_cb, node);
-            bufferevent_enable(node->event_bev, EV_READ|EV_WRITE);
-            if (bufferevent_socket_connect(node->event_bev, (struct sockaddr *)&node->addr, sizeof(node->addr)) < 0)
-            {
+            bufferevent_enable(node->event_bev, EV_READ | EV_WRITE);
+            if (bufferevent_socket_connect(node->event_bev, (struct sockaddr*)&node->addr, sizeof(node->addr)) < 0) {
                 /* Error starting connection */
                 if (node->event_bev)
                     bufferevent_free(node->event_bev);
@@ -375,7 +358,7 @@ btc_bool btc_node_group_connect_next_nodes(btc_node_group *group)
             struct timeval tv;
             tv.tv_sec = BTC_PERIODICAL_NODE_TIMER_S;
             tv.tv_usec = 0;
-            node->timer_event = event_new(group->event_base, 0, EV_TIMEOUT|EV_PERSIST, node_periodical_timer,
+            node->timer_event = event_new(group->event_base, 0, EV_TIMEOUT | EV_PERSIST, node_periodical_timer,
                                           (void*)node);
             event_add(node->timer_event, &tv);
             node->state |= NODE_CONNECTING;
@@ -389,47 +372,43 @@ btc_bool btc_node_group_connect_next_nodes(btc_node_group *group)
     return connected_at_least_to_one_node;
 }
 
-void btc_node_connection_state_changed(btc_node *node)
+void btc_node_connection_state_changed(btc_node* node)
 {
     if (node->nodegroup->node_connection_state_changed_cb)
         node->nodegroup->node_connection_state_changed_cb(node);
 
-    if ((node->state & NODE_ERRORED) == NODE_ERRORED)
-    {
+    if ((node->state & NODE_ERRORED) == NODE_ERRORED) {
         btc_node_release_events(node);
 
         /* connect to more nodes are required */
-        if(btc_node_group_amount_of_connected_nodes(node->nodegroup) < node->nodegroup->desired_amount_connected_nodes)
+        if (btc_node_group_amount_of_connected_nodes(node->nodegroup) < node->nodegroup->desired_amount_connected_nodes)
             btc_node_group_connect_next_nodes(node->nodegroup);
     }
-    if ((node->state & NODE_MISSBEHAVED) == NODE_MISSBEHAVED)
-    {
-        if ((node->state & NODE_CONNECTED) == NODE_CONNECTED || (node->state & NODE_CONNECTING) == NODE_CONNECTING)
-        {
+    if ((node->state & NODE_MISSBEHAVED) == NODE_MISSBEHAVED) {
+        if ((node->state & NODE_CONNECTED) == NODE_CONNECTED || (node->state & NODE_CONNECTING) == NODE_CONNECTING) {
             btc_node_disconnect(node);
         }
-    }
-    else
+    } else
         btc_node_send_version(node);
 }
 
-void btc_node_send(btc_node *node, cstring *data)
+void btc_node_send(btc_node* node, cstring* data)
 {
     if ((node->state & NODE_CONNECTED) != NODE_CONNECTED)
         return;
 
     bufferevent_write(node->event_bev, data->str, data->len);
-    char *dummy = data->str+4;
+    char* dummy = data->str + 4;
     node->nodegroup->log_write_cb("sending message to node %d: %s\n", node->nodeid, dummy);
 }
 
-void btc_node_send_version(btc_node *node)
+void btc_node_send_version(btc_node* node)
 {
     if (!node)
         return;
 
     /* get new string buffer */
-    cstring *version_msg_cstr = cstr_new_sz(256);
+    cstring* version_msg_cstr = cstr_new_sz(256);
 
     /* copy socket_addr to p2p addr */
     btc_p2p_address fromAddr;
@@ -447,7 +426,7 @@ void btc_node_send_version(btc_node *node)
     btc_p2p_msg_version_ser(&version_msg, version_msg_cstr);
 
     /* create p2p message */
-    cstring *p2p_msg = btc_p2p_message_new(node->nodegroup->chainparams->netmagic, BTC_MSG_VERSION, version_msg_cstr->str, version_msg_cstr->len);
+    cstring* p2p_msg = btc_p2p_message_new(node->nodegroup->chainparams->netmagic, BTC_MSG_VERSION, version_msg_cstr->str, version_msg_cstr->len);
 
     /* send message */
     btc_node_send(node, p2p_msg);
@@ -457,44 +436,40 @@ void btc_node_send_version(btc_node *node)
     cstr_free(p2p_msg, true);
 }
 
-int btc_node_parse_message(btc_node *node, btc_p2p_msg_hdr *hdr, struct const_buffer *buf)
+int btc_node_parse_message(btc_node* node, btc_p2p_msg_hdr* hdr, struct const_buffer* buf)
 {
-    node->nodegroup->log_write_cb("received command from node %d: %s\n",  node->nodeid, hdr->command);
+    node->nodegroup->log_write_cb("received command from node %d: %s\n", node->nodeid, hdr->command);
     if (memcmp(hdr->netmagic, node->nodegroup->chainparams->netmagic, sizeof(node->nodegroup->chainparams->netmagic)) != 0) {
         return btc_node_missbehave(node);
     }
 
     /* send the header and buffer to the possible callback */
     /* callback can decide to run the internal base message logic */
-    if (!node->nodegroup->parse_cmd_cb || node->nodegroup->parse_cmd_cb(node, hdr, buf))
-    {
-        if (strcmp(hdr->command, BTC_MSG_VERSION) == 0)
-        {
+    if (!node->nodegroup->parse_cmd_cb || node->nodegroup->parse_cmd_cb(node, hdr, buf)) {
+        if (strcmp(hdr->command, BTC_MSG_VERSION) == 0) {
             btc_p2p_version_msg v_msg_check;
             if (!btc_p2p_msg_version_deser(&v_msg_check, buf)) {
                 return btc_node_missbehave(node);
             }
-            node->nodegroup->log_write_cb("Connected to node %d: %s (%d)\n",  node->nodeid, v_msg_check.useragent, v_msg_check.start_height);
+            node->nodegroup->log_write_cb("Connected to node %d: %s (%d)\n", node->nodeid, v_msg_check.useragent, v_msg_check.start_height);
             /* confirm version via verack */
-            cstring *verack = btc_p2p_message_new(node->nodegroup->chainparams->netmagic, BTC_MSG_VERACK, NULL, 0);
+            cstring* verack = btc_p2p_message_new(node->nodegroup->chainparams->netmagic, BTC_MSG_VERACK, NULL, 0);
             btc_node_send(node, verack);
             cstr_free(verack, true);
-        }
-        else if (strcmp(hdr->command, BTC_MSG_VERACK) == 0)
-        {
+        } else if (strcmp(hdr->command, BTC_MSG_VERACK) == 0) {
             /* complete handshake if verack has been received */
             node->version_handshake = true;
 
             /* execute callback and inform that the node is ready for custom message logic */
             if (node->nodegroup->handshake_done_cb)
                 node->nodegroup->handshake_done_cb(node);
-        }
-        else if (strcmp(hdr->command, BTC_MSG_PING) == 0)
-        {
+        } else if (strcmp(hdr->command, BTC_MSG_PING) == 0) {
             /* response pings */
             uint64_t nonce = 0;
-            if (!deser_u64(&nonce, buf)) { return btc_node_missbehave(node); }
-            cstring *pongmsg = btc_p2p_message_new(node->nodegroup->chainparams->netmagic, BTC_MSG_PONG, &nonce, 8);
+            if (!deser_u64(&nonce, buf)) {
+                return btc_node_missbehave(node);
+            }
+            cstring* pongmsg = btc_p2p_message_new(node->nodegroup->chainparams->netmagic, BTC_MSG_PONG, &nonce, 8);
             btc_node_send(node, pongmsg);
             cstr_free(pongmsg, true);
         }
@@ -508,7 +483,7 @@ int btc_node_parse_message(btc_node *node, btc_p2p_msg_hdr *hdr, struct const_bu
 }
 
 /* utility function to get peers (ips/port as char*) from a seed */
-int btc_get_peers_from_dns(const char *seed, vector *ips_out, int port, int family)
+int btc_get_peers_from_dns(const char* seed, vector* ips_out, int port, int family)
 {
     if (!seed || !ips_out || (family != AF_INET && family != AF_INET6) || port > 99999) {
         return 0;
@@ -521,29 +496,27 @@ int btc_get_peers_from_dns(const char *seed, vector *ips_out, int port, int fami
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = IPPROTO_TCP;
 
-    int err = evutil_getaddrinfo(seed, "", &hints, &aiRes);
+    int err = evutil_getaddrinfo(seed, NULL, &hints, &aiRes);
     if (err)
         return 0;
 
     aiTrav = aiRes;
-    while (aiTrav != NULL)
-    {
+    while (aiTrav != NULL) {
         int maxlen = 256;
-        char *ipaddr = btc_calloc(1, maxlen);
-        if (aiTrav->ai_family == AF_INET)
-        {
+        char* ipaddr = btc_calloc(1, maxlen);
+        if (aiTrav->ai_family == AF_INET) {
             assert(aiTrav->ai_addrlen >= sizeof(struct sockaddr_in));
             evutil_inet_ntop(aiTrav->ai_family, &((struct sockaddr_in*)(aiTrav->ai_addr))->sin_addr, ipaddr, maxlen);
         }
 
-        if (aiTrav->ai_family == AF_INET6)
-        {
+        if (aiTrav->ai_family == AF_INET6) {
             assert(aiTrav->ai_addrlen >= sizeof(struct sockaddr_in6));
             evutil_inet_ntop(aiTrav->ai_family, &((struct sockaddr_in6*)(aiTrav->ai_addr))->sin6_addr, ipaddr, maxlen);
         }
 
-        memcpy(ipaddr+strlen(ipaddr), ":", 1);
-        memcpy(ipaddr+strlen(ipaddr), def_port, strlen(def_port));;
+        memcpy(ipaddr + strlen(ipaddr), ":", 1);
+        memcpy(ipaddr + strlen(ipaddr), def_port, strlen(def_port));
+        ;
         vector_add(ips_out, ipaddr);
 
         aiTrav = aiTrav->ai_next;

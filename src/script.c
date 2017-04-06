@@ -49,8 +49,7 @@ btc_bool btc_script_copy_without_op_codeseperator(const cstring* script_in, cstr
         if (opcode < OP_PUSHDATA1 && opcode > OP_0) {
             data_len = opcode;
             cstr_append_buf(script_out, &opcode, 1);
-        }
-        else if (opcode == OP_PUSHDATA1) {
+        } else if (opcode == OP_PUSHDATA1) {
             uint8_t v8;
             if (!deser_bytes(&v8, &buf, 1))
                 goto err_out;
@@ -71,18 +70,15 @@ btc_bool btc_script_copy_without_op_codeseperator(const cstring* script_in, cstr
             cstr_append_buf(script_out, &opcode, 1);
             cstr_append_buf(script_out, &v32, 5);
             data_len = v32;
-        }
-        else if (opcode == OP_CODESEPARATOR)
+        } else if (opcode == OP_CODESEPARATOR)
             continue;
 
-        if (data_len > 0)
-        {
+        if (data_len > 0) {
             assert(data_len < 16777215); //limit max push to 0xFFFFFF
             unsigned char bufpush[data_len];
             deser_bytes(&bufpush, &buf, data_len);
             cstr_append_buf(script_out, &bufpush, data_len);
-        }
-        else
+        } else
             cstr_append_buf(script_out, &opcode, 1);
     }
 
@@ -213,20 +209,18 @@ btc_bool btc_script_is_pubkey(vector* ops)
 }
 
 // OP_DUP, OP_HASH160, OP_PUBKEYHASH, OP_EQUALVERIFY, OP_CHECKSIG,
-btc_bool btc_script_is_pubkeyhash(vector* ops, vector *data_out)
+btc_bool btc_script_is_pubkeyhash(vector* ops, vector* data_out)
 {
     if ((ops->len == 5) &&
-            btc_script_is_op(vector_idx(ops, 0), OP_DUP) &&
-            btc_script_is_op(vector_idx(ops, 1), OP_HASH160) &&
-            btc_script_is_op_pubkeyhash(vector_idx(ops, 2)) &&
-            btc_script_is_op(vector_idx(ops, 3), OP_EQUALVERIFY) &&
-            btc_script_is_op(vector_idx(ops, 4), OP_CHECKSIG))
-    {
-        if (data_out)
-        {
+        btc_script_is_op(vector_idx(ops, 0), OP_DUP) &&
+        btc_script_is_op(vector_idx(ops, 1), OP_HASH160) &&
+        btc_script_is_op_pubkeyhash(vector_idx(ops, 2)) &&
+        btc_script_is_op(vector_idx(ops, 3), OP_EQUALVERIFY) &&
+        btc_script_is_op(vector_idx(ops, 4), OP_CHECKSIG)) {
+        if (data_out) {
             //copy the data (hash160) in case of a non empty vector
-            const btc_script_op *op = vector_idx(ops, 2);
-            uint8_t *buffer = btc_calloc(1, 20);
+            const btc_script_op* op = vector_idx(ops, 2);
+            uint8_t* buffer = btc_calloc(1, 20);
             memcpy(buffer, op->data, 20);
             vector_add(data_out, buffer);
         }
@@ -280,7 +274,7 @@ enum btc_tx_out_type btc_script_classify_ops(vector* ops)
     return BTC_TX_NONSTANDARD;
 }
 
-enum btc_tx_out_type btc_script_classify(cstring* script, vector *data_out)
+enum btc_tx_out_type btc_script_classify(cstring* script, vector* data_out)
 {
     //INFO: could be speed up by not forming a vector
     //      and directly parse the script cstring
@@ -302,7 +296,7 @@ enum btc_tx_out_type btc_script_classify(cstring* script, vector *data_out)
     return tx_out_type;
 }
 
-btc_bool btc_script_extract_pkh(cstring* script, uint8_t *data)
+btc_bool btc_script_extract_pkh(cstring* script, uint8_t* data)
 {
     // expected that data is a 20byte buffer
 
@@ -311,8 +305,7 @@ btc_bool btc_script_extract_pkh(cstring* script, uint8_t *data)
     vector* ops = vector_new(10, btc_script_op_free_cb);
     btc_script_get_ops(script, ops);
     btc_script_op* op = vector_idx(ops, 2);
-    if (op && btc_script_is_op_pubkeyhash(op))
-    {
+    if (op && btc_script_is_op_pubkeyhash(op)) {
         memcpy(data, op->data, 20);
         suc = true;
     }
@@ -386,7 +379,7 @@ btc_bool btc_script_build_p2pkh(cstring* script_in, const uint8_t* hash160)
     btc_script_append_op(script_in, OP_HASH160);
 
 
-    btc_script_append_pushdata(script_in, (unsigned char *)hash160, 20);
+    btc_script_append_pushdata(script_in, (unsigned char*)hash160, 20);
     btc_script_append_op(script_in, OP_EQUALVERIFY);
     btc_script_append_op(script_in, OP_CHECKSIG);
 
@@ -397,7 +390,7 @@ btc_bool btc_script_build_p2sh(cstring* script_in, const uint8_t* hash160)
 {
     cstr_resize(script_in, 0); //clear script
     btc_script_append_op(script_in, OP_HASH160);
-    btc_script_append_pushdata(script_in, (unsigned char *)hash160, 20);
+    btc_script_append_pushdata(script_in, (unsigned char*)hash160, 20);
     btc_script_append_op(script_in, OP_EQUAL);
 
     return true;

@@ -148,7 +148,7 @@ int cstr_append_buf(cstring* s, const void* buf, size_t sz)
     return 1;
 }
 
-int cstr_append_cstr(cstring* s, cstring *append)
+int cstr_append_cstr(cstring* s, cstring* append)
 {
     return cstr_append_buf(s, append->str, append->len);
 }
@@ -174,19 +174,22 @@ int cstr_equal(const cstring* a, const cstring* b)
 int cstr_compare(const cstring* a, const cstring* b)
 {
     unsigned int i;
-    if (a->len  > b->len) return(1);
-    if (a->len  < b->len) return(-1);
+    if (a->len > b->len)
+        return (1);
+    if (a->len < b->len)
+        return (-1);
 
     /* length equal, byte per byte compare */
-    for (i=0;i<a->len;i++)
-    {
+    for (i = 0; i < a->len; i++) {
         char a1 = a->str[i];
         char b1 = b->str[i];
 
-        if (a1 > b1) return(1);
-        if (a1 < b1) return(-1);
+        if (a1 > b1)
+            return (1);
+        if (a1 < b1)
+            return (-1);
     }
-    return(0);
+    return (0);
 }
 
 int cstr_erase(cstring* s, size_t pos, ssize_t len)
