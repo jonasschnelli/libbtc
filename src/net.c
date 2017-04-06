@@ -34,6 +34,22 @@ static const int BTC_PERIODICAL_NODE_TIMER_S = 3;
 static const int BTC_PING_INTERVAL_S = 180;
 static const int BTC_CONNECT_TIMEOUT_S = 10;
 
+int net_write_log_printf(const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    printf("DEBUG :");
+    vprintf(format, args);
+    va_end(args);
+    return 1;
+}
+
+int net_write_log_null(const char *format, ...)
+{
+    UNUSED(format);
+    return 1;
+}
+
 void read_cb(struct bufferevent* bev, void* ctx)
 {
     struct evbuffer* input = bufferevent_get_input(bev);
@@ -233,7 +249,9 @@ btc_bool btc_node_missbehave(btc_node *node)
 
 void btc_node_disconnect(btc_node *node)
 {
-    node->nodegroup->log_write_cb("Disconnect node %d\n",  node->nodeid);
+    if ( (node->state & NODE_CONNECTED) == NODE_CONNECTED || (node->state & NODE_CONNECTING) == NODE_CONNECTING) {
+        node->nodegroup->log_write_cb("Disconnect node %d\n",  node->nodeid);
+    }
     /* release buffer and timer event */
     btc_node_release_events(node);
 
@@ -274,7 +292,7 @@ btc_node_group* btc_node_group_new(const btc_chainparams *chainparams)
     node_group->postcmd_cb = NULL;
     node_group->node_connection_state_changed_cb = NULL;
     node_group->handshake_done_cb = NULL;
-    node_group->log_write_cb = printf;
+    node_group->log_write_cb = net_write_log_null;
     node_group->desired_amount_connected_nodes = 3;
 
     return node_group;
