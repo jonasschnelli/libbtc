@@ -148,7 +148,7 @@ void test_net_basics_plus_download_block()
     vector *ips = vector_new(10, free);
     const btc_dns_seed seed = btc_chainparams_main.dnsseeds[0];
 
-    btc_get_peers_from_dns(seed.domain, ips, AF_INET);
+    btc_get_peers_from_dns(seed.domain, ips, btc_chainparams_main.default_port, AF_INET);
     for (unsigned int i = 0; i<ips->len; i++)
     {
         char *ip = (char *)vector_idx(ips, i);
@@ -186,7 +186,7 @@ void test_net_basics_plus_download_block()
     group->periodic_timer_cb = timer_cb;
 
     /* set a individual log print function */
-    group->log_write_cb = default_write_log;
+    group->log_write_cb = net_write_log_printf;
     group->parse_cmd_cb = parse_cmd;
     group->postcmd_cb = postcmd;
     group->node_connection_state_changed_cb = node_connection_state_changed;

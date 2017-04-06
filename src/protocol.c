@@ -141,7 +141,7 @@ void btc_p2paddr_to_addr(btc_p2p_address *p2p_addr, struct sockaddr *addr_out)
     }
 }
 
-void btc_p2p_msg_version_init(btc_p2p_version_msg *msg, const btc_p2p_address *addrFrom, const btc_p2p_address *addrTo, const char *strSubVer)
+void btc_p2p_msg_version_init(btc_p2p_version_msg *msg, const btc_p2p_address *addrFrom, const btc_p2p_address *addrTo, const char *strSubVer, btc_bool relay)
 {
     msg->version = BTC_PROTOCOL_VERSION;
     msg->services = 0;
@@ -160,7 +160,7 @@ void btc_p2p_msg_version_init(btc_p2p_version_msg *msg, const btc_p2p_address *a
         memcpy(msg->useragent, strSubVer, strlen(strSubVer));
 
     msg->start_height = 0;
-    msg->relay = false;
+    msg->relay = relay;
 }
 
 void btc_p2p_msg_version_ser(btc_p2p_version_msg *msg, cstring* buf)
@@ -207,6 +207,26 @@ btc_bool btc_p2p_msg_version_deser(btc_p2p_version_msg *msg, struct const_buffer
     if (msg->version > 70001)
         if (!deser_bytes(&msg->relay, buf, 1)) return false;
 
+    return true;
+}
+
+void btc_p2p_msg_inv_init(btc_p2p_inv_msg *msg, uint32_t type, uint8_t *hash)
+{
+    msg->type = type;
+    memcpy(&msg->hash, hash, 32);
+}
+
+void btc_p2p_msg_inv_ser(btc_p2p_inv_msg *msg, cstring* buf)
+{
+    ser_u32(buf, msg->type);
+    ser_bytes(buf, msg->hash, 32);
+}
+
+btc_bool btc_p2p_msg_inv_deser(btc_p2p_inv_msg *msg, struct const_buffer* buf)
+{
+    memset(msg, 0, sizeof(*msg));
+    if (!deser_u32(&msg->type, buf)) return false;
+    if (!deser_u256(msg->hash, buf)) return false;
     return true;
 }
 

@@ -44,6 +44,7 @@ libbtc_la_SOURCES = \
     src/bip32.c \
     src/block.c \
     src/buffer.c \
+    src/commontools.c \
     src/cstr.c \
     src/ecc_key.c \
     src/ecc_libsecp256k1.c \
@@ -52,7 +53,6 @@ libbtc_la_SOURCES = \
     src/script.c \
     src/serialize.c \
     src/sha2.c \
-    src/toolfunc.c \
     src/tx.c \
     src/utils.c \
     src/vector.c
@@ -149,10 +149,19 @@ instdir=$(prefix)/bin
 inst_PROGRAMS = bitcointool
 bitcointool_LDADD = libbtc.la
 bitcointool_SOURCES = \
-    src/bitcointool.c
+    src/tools/bitcointool.c
 bitcointool_CFLAGS = $(libbtc_la_CFLAGS)
 bitcointool_CPPFLAGS = -I$(top_srcdir)/src
 bitcointool_LDFLAGS = -static
+
+inst_PROGRAMS += bitcoin-send-tx
+bitcoin_send_tx_LDADD = libbtc.la
+bitcoin_send_tx_SOURCES = \
+    src/tools/bitcoin-send-tx.c
+bitcoin_send_tx_CFLAGS = $(libbtc_la_CFLAGS)
+bitcoin_send_tx_CPPFLAGS = -I$(top_srcdir)/src
+bitcoin_send_tx_LDFLAGS = -static
+
 endif
 
 clean-local:

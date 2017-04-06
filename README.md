@@ -80,8 +80,22 @@ The bitcointool CLI
     > pubkey hex: 0203a85ec401e66a218bf1583112599ee2a1268ebc90d91b7f457c87a50f2b011b
     > extended pubkey: xpub695C7w8tgyFnCeZejvCr59q9W7jCpkkbBbomjX13CwfrLXFVUcPXfsmHGiSfpYds2JuHrXAFEoikMX6725W8VgrVL5x4ojBw9QFAPgtdw1G
 
+The bitcoin-send-tx CLI
+----------------
+This tools can be used to broadcast a raw transaction to peers retrived from a dns seed or specified by ip/port.
+The application will try to connect to max 6 peers, send the transaction two two of them and listens on the remaining ones if the transaction has been relayed back.
 
+##### Send a raw transaction to random peers on mainnet
 
+    ./bitcoin-send-tx <txhex>
+
+##### Send a raw transaction to random peers on testnet and show debug infos
+
+    ./bitcoin-send-tx -d -t <txhex>
+
+##### Send a raw transaction to specific peers on mainnet and show debug infos use a timeout of 5s
+
+    ./bitcoin-send-tx -d -s 5 -i 192.168.1.110:8333,127.0.0.1:8333 <txhex>
 
 How to Build
 ----------------

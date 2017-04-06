@@ -34,6 +34,22 @@ static const int BTC_PERIODICAL_NODE_TIMER_S = 3;
 static const int BTC_PING_INTERVAL_S = 180;
 static const int BTC_CONNECT_TIMEOUT_S = 10;
 
+int net_write_log_printf(const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    printf("DEBUG :");
+    vprintf(format, args);
+    va_end(args);
+    return 1;
+}
+
+int net_write_log_null(const char *format, ...)
+{
+    UNUSED(format);
+    return 1;
+}
+
 void read_cb(struct bufferevent* bev, void* ctx)
 {
     struct evbuffer* input = bufferevent_get_input(bev);
@@ -44,6 +60,10 @@ void read_cb(struct bufferevent* bev, void* ctx)
 
     btc_node *node = (btc_node *)ctx;
 
+    if ((node->state & NODE_CONNECTED) != NODE_CONNECTED) {
+        // ignore messages from disconnected peers
+        return;
+    }
     // expand the cstring buffer if required
     cstr_alloc_minsize(node->recvBuffer, node->recvBuffer->len+length);
 
@@ -60,22 +80,28 @@ void read_cb(struct bufferevent* bev, void* ctx)
 
     do {
         //check if message is complete
-        if (buf.len < BTC_P2P_HDRSZ)
-        {
+        if (buf.len < BTC_P2P_HDRSZ) {
             break;
         }
 
         btc_p2p_deser_msghdr(&hdr, &buf);
-        if (buf.len < hdr.data_len)
-        {
+        if (hdr.data_len > BTC_MAX_P2P_MSG_SIZE) {
+            // check for invalid message lengths
+            btc_node_missbehave(node);
+            return;
+        }
+        if (buf.len < hdr.data_len) {
             //if we haven't read the whole message, continue and wait for the next chunk
             break;
         }
-        if (buf.len >= hdr.data_len)
-        {
+        if (buf.len >= hdr.data_len) {
             //at least one message is complete
 
             struct const_buffer cmd_data_buf = {buf.p, buf.len};
+            if ((node->state & NODE_CONNECTED) != NODE_CONNECTED) {
+                // ignore messages from disconnected peers
+                return;
+            }
             btc_node_parse_message(node, &hdr, &cmd_data_buf);
 
             //skip the size of the whole message
@@ -84,16 +110,14 @@ void read_cb(struct bufferevent* bev, void* ctx)
 
             read_upto = (void *)buf.p;
         }
-        if (buf.len == 0)
-        {
+        if (buf.len == 0) {
             //if we have "consumed" the whole buffer
             node->recvBuffer->len = 0;
             break;
         }
     } while(1);
 
-    if (read_upto != NULL && node->recvBuffer->len != 0 && read_upto != (node->recvBuffer->str + node->recvBuffer->len))
-    {
+    if (read_upto != NULL && node->recvBuffer->len != 0 && read_upto != (node->recvBuffer->str + node->recvBuffer->len)) {
         char *end = node->recvBuffer->str + node->recvBuffer->len;
         size_t available_chunk_data = end - read_upto;
         //partial message
@@ -186,8 +210,8 @@ btc_node* btc_node_new()
     node->lastping = 0;
     node->time_started_con = 0;
 
-    node->recvBuffer = cstr_new_sz(P2P_MESSAGE_CHUNK_SIZE);
-
+    node->recvBuffer = cstr_new_sz(BTC_P2P_MESSAGE_CHUNK_SIZE);
+    node->hints = 0;
     return node;
 }
 
@@ -215,13 +239,26 @@ void btc_node_release_events(btc_node *node)
     }
 }
 
+btc_bool btc_node_missbehave(btc_node *node)
+{
+    node->nodegroup->log_write_cb("Mark node %d as missbehaved\n",  node->nodeid);
+    node->state |= NODE_MISSBEHAVED;
+    btc_node_connection_state_changed(node);
+    return 0;
+}
+
 void btc_node_disconnect(btc_node *node)
 {
+    if ( (node->state & NODE_CONNECTED) == NODE_CONNECTED || (node->state & NODE_CONNECTING) == NODE_CONNECTING) {
+        node->nodegroup->log_write_cb("Disconnect node %d\n",  node->nodeid);
+    }
     /* release buffer and timer event */
     btc_node_release_events(node);
 
+    node->state &= ~NODE_CONNECTING;
+    node->state &= ~NODE_CONNECTED;
+
     node->time_started_con = 0;
-    node->state = 0;
 }
 
 void btc_node_free(btc_node *node)
@@ -255,7 +292,7 @@ btc_node_group* btc_node_group_new(const btc_chainparams *chainparams)
     node_group->postcmd_cb = NULL;
     node_group->node_connection_state_changed_cb = NULL;
     node_group->handshake_done_cb = NULL;
-    node_group->log_write_cb = printf;
+    node_group->log_write_cb = net_write_log_null;
     node_group->desired_amount_connected_nodes = 3;
 
     return node_group;
@@ -365,6 +402,13 @@ void btc_node_connection_state_changed(btc_node *node)
         if(btc_node_group_amount_of_connected_nodes(node->nodegroup) < node->nodegroup->desired_amount_connected_nodes)
             btc_node_group_connect_next_nodes(node->nodegroup);
     }
+    if ((node->state & NODE_MISSBEHAVED) == NODE_MISSBEHAVED)
+    {
+        if ((node->state & NODE_CONNECTED) == NODE_CONNECTED || (node->state & NODE_CONNECTING) == NODE_CONNECTING)
+        {
+            btc_node_disconnect(node);
+        }
+    }
     else
         btc_node_send_version(node);
 }
@@ -399,7 +443,7 @@ void btc_node_send_version(btc_node *node)
     memset(&version_msg, 0, sizeof(version_msg));
 
     /* create a serialized version message */
-    btc_p2p_msg_version_init(&version_msg, &fromAddr, &toAddr, node->nodegroup->clientstr);
+    btc_p2p_msg_version_init(&version_msg, &fromAddr, &toAddr, node->nodegroup->clientstr, true);
     btc_p2p_msg_version_ser(&version_msg, version_msg_cstr);
 
     /* create p2p message */
@@ -416,8 +460,9 @@ void btc_node_send_version(btc_node *node)
 int btc_node_parse_message(btc_node *node, btc_p2p_msg_hdr *hdr, struct const_buffer *buf)
 {
     node->nodegroup->log_write_cb("received command from node %d: %s\n",  node->nodeid, hdr->command);
-    if (memcmp(hdr->netmagic, node->nodegroup->chainparams->netmagic, sizeof(node->nodegroup->chainparams->netmagic)) != 0)
-        return 0;
+    if (memcmp(hdr->netmagic, node->nodegroup->chainparams->netmagic, sizeof(node->nodegroup->chainparams->netmagic)) != 0) {
+        return btc_node_missbehave(node);
+    }
 
     /* send the header and buffer to the possible callback */
     /* callback can decide to run the internal base message logic */
@@ -425,7 +470,12 @@ int btc_node_parse_message(btc_node *node, btc_p2p_msg_hdr *hdr, struct const_bu
     {
         if (strcmp(hdr->command, BTC_MSG_VERSION) == 0)
         {
-            /* confirm version for verack */
+            btc_p2p_version_msg v_msg_check;
+            if (!btc_p2p_msg_version_deser(&v_msg_check, buf)) {
+                return btc_node_missbehave(node);
+            }
+            node->nodegroup->log_write_cb("Connected to node %d: %s (%d)\n",  node->nodeid, v_msg_check.useragent, v_msg_check.start_height);
+            /* confirm version via verack */
             cstring *verack = btc_p2p_message_new(node->nodegroup->chainparams->netmagic, BTC_MSG_VERACK, NULL, 0);
             btc_node_send(node, verack);
             cstr_free(verack, true);
@@ -443,7 +493,7 @@ int btc_node_parse_message(btc_node *node, btc_p2p_msg_hdr *hdr, struct const_bu
         {
             /* response pings */
             uint64_t nonce = 0;
-            deser_u64(&nonce, buf);
+            if (!deser_u64(&nonce, buf)) { return btc_node_missbehave(node); }
             cstring *pongmsg = btc_p2p_message_new(node->nodegroup->chainparams->netmagic, BTC_MSG_PONG, &nonce, 8);
             btc_node_send(node, pongmsg);
             cstr_free(pongmsg, true);
@@ -458,19 +508,20 @@ int btc_node_parse_message(btc_node *node, btc_p2p_msg_hdr *hdr, struct const_bu
 }
 
 /* utility function to get peers (ips/port as char*) from a seed */
-int btc_get_peers_from_dns(const char *seed, vector *ips_out, int family)
+int btc_get_peers_from_dns(const char *seed, vector *ips_out, int port, int family)
 {
-    if (!seed || !ips_out || (family != AF_INET && family != AF_INET6)) {
+    if (!seed || !ips_out || (family != AF_INET && family != AF_INET6) || port > 99999) {
         return 0;
     }
-    char *def_port = "8333";
+    char def_port[6] = {0};
+    sprintf(def_port, "%d", port);
     struct evutil_addrinfo hints, *aiTrav = NULL, *aiRes = NULL;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = IPPROTO_TCP;
 
-    int err = evutil_getaddrinfo(seed, def_port, &hints, &aiRes);
+    int err = evutil_getaddrinfo(seed, "", &hints, &aiRes);
     if (err)
         return 0;
 

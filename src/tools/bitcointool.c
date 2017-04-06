@@ -29,6 +29,8 @@
 #include <btc/chainparams.h>
 #include <btc/tool.h>
 #include <btc/ecc.h>
+#include <btc/protocol.h>
+#include <btc/tx.h>
 #include <btc/utils.h>
 
 #include <assert.h>
@@ -201,7 +203,6 @@ int main(int argc, char *argv[])
         else
             hd_print_node(chain, newextkey);
     }
-
 
     btc_ecc_stop();
 

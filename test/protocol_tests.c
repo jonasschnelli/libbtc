@@ -20,6 +20,7 @@ void test_protocol()
 {
     /* get new string buffer */
     cstring *version_msg_cstr = cstr_new_sz(256);
+    cstring *inv_msg_cstr = cstr_new_sz(256);
 
     struct sockaddr_in test_sa, test_sa_check;
     memset(&test_sa, 0, sizeof(test_sa));
@@ -52,12 +53,27 @@ void test_protocol()
     evutil_inet_ntop(AF_INET, &test_sa_check.sin_addr, i6buf, 1024);
     u_assert_str_eq(i6buf, "10.0.0.1");
 
+    /* create a inv message struct */
+    btc_p2p_inv_msg inv_msg, inv_msg_check;
+    memset(&inv_msg, 0, sizeof(inv_msg));
+
+    uint8_t hash[32] = {0};
+
+    btc_p2p_msg_inv_init(&inv_msg, 1, hash);
+    btc_p2p_msg_inv_ser(&inv_msg, inv_msg_cstr);
+
+    struct const_buffer buf_inv = {inv_msg_cstr->str, inv_msg_cstr->len};
+    u_assert_int_eq(btc_p2p_msg_inv_deser(&inv_msg_check, &buf_inv), true);
+    u_assert_int_eq(inv_msg_check.type, 1);
+    u_assert_mem_eq(inv_msg_check.hash, inv_msg.hash, 32);
+    cstr_free(inv_msg_cstr, true);
+
     /* create a version message struct */
     btc_p2p_version_msg version_msg;
     memset(&version_msg, 0, sizeof(version_msg));
 
     /* create a serialized version message */
-    btc_p2p_msg_version_init(&version_msg, &fromAddr, &toAddr, "client");
+    btc_p2p_msg_version_init(&version_msg, &fromAddr, &toAddr, "client", false);
     btc_p2p_msg_version_ser(&version_msg, version_msg_cstr);
 
     /* create p2p message */

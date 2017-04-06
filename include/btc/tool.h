@@ -28,6 +28,7 @@
 #define __LIBBTC_TOOL_H__
 
 #include "btc.h"
+#include "tx.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,6 +49,7 @@ LIBBTC_API btc_bool gen_privatekey(const btc_chainparams* chain, char *privkey_w
 LIBBTC_API btc_bool hd_gen_master(const btc_chainparams* chain, char *masterkeyhex, size_t strsize);
 LIBBTC_API btc_bool hd_print_node(const btc_chainparams* chain, const char *nodeser);
 LIBBTC_API btc_bool hd_derive(const btc_chainparams* chain, const char *masterkey, const char *keypath, char *extkeyout, size_t extkeyout_size);
+
 #ifdef __cplusplus
 }
 #endif
