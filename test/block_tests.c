@@ -87,20 +87,20 @@ void test_block_header()
     bheader.nonce = 2945279651;
     bheader.bits = 402979592;
     char *prevblock_hex_o = "00000000000000000098ad436f0c305b4d577e40e2687783822a2fe6637dc8e5";
-    char *prevblock_hex = malloc(strlen(prevblock_hex_o)+1);
+    char *prevblock_hex = btc_malloc(strlen(prevblock_hex_o)+1);
     memcpy(prevblock_hex, prevblock_hex_o, strlen(prevblock_hex_o));
     utils_reverse_hex(prevblock_hex, 64);
     outlen = 0;
     utils_hex_to_bin(prevblock_hex, bheader.prev_block, 64, &outlen);
-    free(prevblock_hex);
+    btc_free(prevblock_hex);
 
     char *merkleroot_hex_o = "d4690e152bb72a3dc2a2a90f3f1e8afc3b48a26a070f2b099b46a439c69eb776";
-    char *merkleroot_hex = malloc(strlen(merkleroot_hex_o)+1);
+    char *merkleroot_hex = btc_malloc(strlen(merkleroot_hex_o)+1);
     memcpy(merkleroot_hex, merkleroot_hex_o, strlen(merkleroot_hex_o));
     utils_reverse_hex(merkleroot_hex, 64);
     outlen = 0;
     utils_hex_to_bin(merkleroot_hex, bheader.merkle_root, 64, &outlen);
-    free(merkleroot_hex);
+    btc_free(merkleroot_hex);
 
     bheaderprev.version = 536870912;
     bheaderprev.timestamp = 1472802636;
@@ -108,20 +108,20 @@ void test_block_header()
     bheaderprev.bits = 402979592;
 
     prevblock_hex_o = "000000000000000001beee80fe573d34a51b48f30248a8933dc71b67db9f542d";
-    prevblock_hex = malloc(strlen(prevblock_hex_o)+1);
+    prevblock_hex = btc_malloc(strlen(prevblock_hex_o)+1);
     memcpy(prevblock_hex, prevblock_hex_o, strlen(prevblock_hex_o));
     utils_reverse_hex(prevblock_hex, 64);
     outlen = 0;
     utils_hex_to_bin(prevblock_hex, bheaderprev.prev_block, 64, &outlen);
-    free(prevblock_hex);
+    btc_free(prevblock_hex);
 
     merkleroot_hex_o = "3696737d03075235b3874ed2ec6e93555e3259f818f53f3c241a2ae74f18ab07";
-    merkleroot_hex = malloc(strlen(merkleroot_hex_o)+1);
+    merkleroot_hex = btc_malloc(strlen(merkleroot_hex_o)+1);
     memcpy(merkleroot_hex, merkleroot_hex_o, strlen(merkleroot_hex_o));
     utils_reverse_hex(merkleroot_hex, 64);
     outlen = 0;
     utils_hex_to_bin(merkleroot_hex, bheaderprev.merkle_root, 64, &outlen);
-    free(merkleroot_hex);
+    btc_free(merkleroot_hex);
 
     /* compare blockheaderhex */
     cstring *blockheader_ser = cstr_new_sz(256);

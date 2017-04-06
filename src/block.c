@@ -39,7 +39,7 @@
 btc_block_header* btc_block_header_new()
 {
     btc_block_header* header;
-    header = calloc(1, sizeof(*header));
+    header = btc_calloc(1, sizeof(*header));
 
     return header;
 }
@@ -55,7 +55,7 @@ void btc_block_header_free(btc_block_header* header)
     header->bits = 0;
     header->timestamp = 0;
     header->nonce = 0;
-    free(header);
+    btc_free(header);
 }
 
 int btc_block_header_deserialize(btc_block_header* header, struct const_buffer *buf)

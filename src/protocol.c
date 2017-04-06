@@ -256,9 +256,9 @@ btc_bool btc_p2p_deser_msg_getheaders(vector *blocklocators, uint8_t *hashstop, 
     vector_resize(blocklocators, vsize);
     for(unsigned int i = 0; i < vsize;i++)
     {
-        uint8_t *hash = malloc(32);
+        uint8_t *hash = btc_malloc(32);
         if (!deser_u256(hash, buf)){
-            free(hash);
+            btc_free(hash);
             return false;
         }
         vector_add(blocklocators, hash);

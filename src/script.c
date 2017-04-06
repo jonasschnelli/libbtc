@@ -95,7 +95,7 @@ err_out:
 btc_script_op* btc_script_op_new()
 {
     btc_script_op* script_op;
-    script_op = calloc(1, sizeof(*script_op));
+    script_op = btc_calloc(1, sizeof(*script_op));
 
     return script_op;
 }
@@ -104,7 +104,7 @@ btc_script_op* btc_script_op_new()
 void btc_script_op_free(btc_script_op* script_op)
 {
     if (script_op->data) {
-        free(script_op->data);
+        btc_free(script_op->data);
         script_op->data = NULL;
     }
     script_op->datalen = 0;
@@ -116,7 +116,7 @@ void btc_script_op_free_cb(void* data)
     btc_script_op* script_op = data;
     btc_script_op_free(script_op);
 
-    free(script_op);
+    btc_free(script_op);
 }
 
 btc_bool btc_script_get_ops(const cstring* script_in, vector* ops_out)
@@ -160,7 +160,7 @@ btc_bool btc_script_get_ops(const cstring* script_in, vector* ops_out)
             continue;
         }
 
-        op->data = calloc(1, data_len);
+        op->data = btc_calloc(1, data_len);
         memcpy(op->data, buf.p, data_len);
         op->datalen = data_len;
 
@@ -226,7 +226,7 @@ btc_bool btc_script_is_pubkeyhash(vector* ops, vector *data_out)
         {
             //copy the data (hash160) in case of a non empty vector
             const btc_script_op *op = vector_idx(ops, 2);
-            uint8_t *buffer = calloc(1, 20);
+            uint8_t *buffer = btc_calloc(1, 20);
             memcpy(buffer, op->data, 20);
             vector_add(data_out, buffer);
         }

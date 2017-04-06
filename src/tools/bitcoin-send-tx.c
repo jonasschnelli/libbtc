@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
     if (data == NULL || strlen(data) == 0 || strlen(data) > BTC_MAX_P2P_MSG_SIZE) {
         return showError("Transaction in invalid or to large.\n");
     }
-    uint8_t *data_bin = malloc(strlen(data)/2+1);
+    uint8_t *data_bin = btc_malloc(strlen(data)/2+1);
     int outlen = 0;
     utils_hex_to_bin(data, data_bin, strlen(data), &outlen);
 
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
         showError("Transaction is invalid\n");
         ret = 1;
     }
-    free(data_bin);
+    btc_free(data_bin);
     btc_tx_free(tx);
 
     return ret;

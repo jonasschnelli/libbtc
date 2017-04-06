@@ -102,7 +102,7 @@ int btc_rbtree_hdkey_compare(const void* a,const void* b) {
 btc_wtx* btc_wallet_wtx_new()
 {
     btc_wtx* wtx;
-    wtx = calloc(1, sizeof(*wtx));
+    wtx = btc_calloc(1, sizeof(*wtx));
     wtx->height = 0;
     wtx->tx = btc_tx_new();
 
@@ -121,7 +121,7 @@ btc_wtx* btc_wallet_wtx_copy(btc_wtx* wtx)
 void btc_wallet_wtx_free(btc_wtx* wtx)
 {
     btc_tx_free(wtx->tx);
-    free(wtx);
+    btc_free(wtx);
 }
 
 void btc_wallet_wtx_serialize(cstring* s, const btc_wtx* wtx)
@@ -145,7 +145,7 @@ btc_bool btc_wallet_wtx_deserialize(btc_wtx* wtx, struct const_buffer* buf)
 btc_output* btc_wallet_output_new()
 {
     btc_output* output;
-    output = calloc(1, sizeof(*output));
+    output = btc_calloc(1, sizeof(*output));
     output->i = 0;
     output->wtx = btc_wallet_wtx_new();
 
@@ -155,7 +155,7 @@ btc_output* btc_wallet_output_new()
 void btc_wallet_output_free(btc_output* output)
 {
     btc_wallet_wtx_free(output->wtx);
-    free(output);
+    btc_free(output);
 }
 
 /*
@@ -166,7 +166,7 @@ void btc_wallet_output_free(btc_output* output)
 btc_wallet* btc_wallet_new()
 {
     btc_wallet* wallet;
-    wallet = calloc(1, sizeof(*wallet));
+    wallet = btc_calloc(1, sizeof(*wallet));
     wallet->db = logdb_new();
     logdb_set_memmapper(wallet->db, &btc_wallet_db_mapper, wallet);
     wallet->masterkey = NULL;
@@ -196,12 +196,12 @@ void btc_wallet_free(btc_wallet *wallet)
     }
 
     if (wallet->masterkey)
-        free(wallet->masterkey);
+        btc_free(wallet->masterkey);
 
     RBTreeDestroy(wallet->wtxes_rbtree);
     RBTreeDestroy(wallet->hdkeys_rbtree);
 
-    free(wallet);
+    btc_free(wallet);
 }
 
 void btc_wallet_logdb_append_cb(void* ctx, logdb_bool load_phase, logdb_record *rec)
@@ -373,7 +373,7 @@ void btc_wallet_get_addresses(btc_wallet *wallet, vector *addr_out)
         memcpy(hash160+1, key->str, 20);
 
         size_t addrsize = 98;
-        char *addr = calloc(1, addrsize);
+        char *addr = btc_calloc(1, addrsize);
         btc_base58_encode_check(hash160, 21, addr, addrsize);
         vector_add(addr_out, addr);
     }
@@ -519,7 +519,7 @@ void btc_wallet_add_to_spent(btc_wallet *wallet, btc_wtx *wtx)
             btc_tx_in* tx_in = vector_idx(wtx->tx->vin, i);
 
             //add to spends
-            btc_tx_outpoint *outpoint = calloc(1, sizeof(btc_tx_outpoint));
+            btc_tx_outpoint *outpoint = btc_calloc(1, sizeof(btc_tx_outpoint));
             memcpy(outpoint, &tx_in->prevout, sizeof(btc_tx_outpoint));
             vector_add(wallet->spends, outpoint);
         }

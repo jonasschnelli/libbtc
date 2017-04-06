@@ -59,14 +59,14 @@ void btc_tx_in_free_cb(void* data)
     btc_tx_in_free(tx_in);
 
     memset(tx_in, 0, sizeof(*tx_in));
-    free(tx_in);
+    btc_free(tx_in);
 }
 
 
 btc_tx_in* btc_tx_in_new()
 {
     btc_tx_in* tx_in;
-    tx_in = calloc(1, sizeof(*tx_in));
+    tx_in = btc_calloc(1, sizeof(*tx_in));
     memset(&tx_in->prevout, 0, sizeof(tx_in->prevout));
     tx_in->sequence = UINT32_MAX;
     return tx_in;
@@ -95,14 +95,14 @@ void btc_tx_out_free_cb(void* data)
     btc_tx_out_free(tx_out);
 
     memset(tx_out, 0, sizeof(*tx_out));
-    free(tx_out);
+    btc_free(tx_out);
 }
 
 
 btc_tx_out* btc_tx_out_new()
 {
     btc_tx_out* tx_out;
-    tx_out = calloc(1, sizeof(*tx_out));
+    tx_out = btc_calloc(1, sizeof(*tx_out));
 
     return tx_out;
 }
@@ -116,14 +116,14 @@ void btc_tx_free(btc_tx* tx)
     if (tx->vout)
         vector_free(tx->vout, true);
 
-    free(tx);
+    btc_free(tx);
 }
 
 
 btc_tx* btc_tx_new()
 {
     btc_tx* tx;
-    tx = calloc(1, sizeof(*tx));
+    tx = btc_calloc(1, sizeof(*tx));
     tx->vin = vector_new(8, btc_tx_in_free_cb);
     tx->vout = vector_new(8, btc_tx_out_free_cb);
     tx->version = 1;
@@ -170,7 +170,7 @@ int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx*
         btc_tx_in* tx_in = btc_tx_in_new();
 
         if (!btc_tx_in_deserialize(tx_in, &buf)) {
-            free(tx_in);
+            btc_free(tx_in);
             return false;
         }
         else {
@@ -184,7 +184,7 @@ int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx*
         btc_tx_out* tx_out = btc_tx_out_new();
 
         if (!btc_tx_out_deserialize(tx_out, &buf)) {
-            free(tx_out);
+            btc_free(tx_out);
             return false;
         } else {
             vector_add(tx->vout, tx_out);
@@ -305,7 +305,7 @@ void btc_tx_copy(btc_tx* dest, const btc_tx* src)
             btc_tx_in *tx_in_old, *tx_in_new;
 
             tx_in_old = vector_idx(src->vin, i);
-            tx_in_new = malloc(sizeof(*tx_in_new));
+            tx_in_new = btc_malloc(sizeof(*tx_in_new));
             btc_tx_in_copy(tx_in_new, tx_in_old);
             vector_add(dest->vin, tx_in_new);
         }
@@ -326,7 +326,7 @@ void btc_tx_copy(btc_tx* dest, const btc_tx* src)
             btc_tx_out *tx_out_old, *tx_out_new;
 
             tx_out_old = vector_idx(src->vout, i);
-            tx_out_new = malloc(sizeof(*tx_out_new));
+            tx_out_new = btc_malloc(sizeof(*tx_out_new));
             btc_tx_out_copy(tx_out_new, tx_out_old);
             vector_add(dest->vout, tx_out_new);
         }

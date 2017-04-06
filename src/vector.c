@@ -30,7 +30,7 @@
 
 vector* vector_new(size_t res, void (*free_f)(void*))
 {
-    vector* vec = calloc(1, sizeof(vector));
+    vector* vec = btc_calloc(1, sizeof(vector));
     if (!vec)
         return NULL;
 
@@ -39,9 +39,9 @@ vector* vector_new(size_t res, void (*free_f)(void*))
         vec->alloc *= 2;
 
     vec->elem_free_f = free_f;
-    vec->data = malloc(vec->alloc * sizeof(void*));
+    vec->data = btc_malloc(vec->alloc * sizeof(void*));
     if (!vec->data) {
-        free(vec);
+        btc_free(vec);
         return NULL;
     }
 
@@ -62,7 +62,7 @@ static void vector_free_data(vector* vec)
             }
     }
 
-    free(vec->data);
+    btc_free(vec->data);
     vec->data = NULL;
     vec->alloc = 0;
     vec->len = 0;
@@ -77,7 +77,7 @@ void vector_free(vector* vec, btc_bool free_array)
         vector_free_data(vec);
 
     memset(vec, 0, sizeof(*vec));
-    free(vec);
+    btc_free(vec);
 }
 
 static btc_bool vector_grow(vector* vec, size_t min_sz)
