@@ -140,14 +140,14 @@ char* utils_uint8_to_hex(const uint8_t* bin, size_t l)
 
 void utils_reverse_hex(char* h, int len)
 {
-    char *copy = safe_malloc(len);
+    char *copy = btc_malloc(len);
     int i;
     strncpy(copy, h, len);
     for (i = 0; i < len; i += 2) {
         h[i] = copy[len - i - 2];
         h[i + 1] = copy[len - i - 1];
     }
-    free(copy);
+    btc_free(copy);
 }
 
 const signed char p_util_hexdigit[256] =

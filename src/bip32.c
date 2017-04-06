@@ -38,6 +38,8 @@
 #include <btc/ecc.h>
 #include <btc/ecc_key.h>
 
+#include "memory.h"
+
 #include "ripemd160.h"
 
 // write 4 big endian bytes
@@ -62,7 +64,7 @@ static uint32_t read_be(const uint8_t* data)
 btc_hdnode* btc_hdnode_new()
 {
     btc_hdnode *hdnode;
-    hdnode = calloc(1, sizeof(*hdnode));
+    hdnode = btc_calloc(1, sizeof(*hdnode));
     return hdnode;
 }
 
@@ -85,7 +87,7 @@ void btc_hdnode_free(btc_hdnode* hdnode)
     memset(hdnode->chain_code, 0, sizeof(hdnode->chain_code));
     memset(hdnode->private_key, 0, sizeof(hdnode->private_key));
     memset(hdnode->public_key, 0, sizeof(hdnode->public_key));
-    free(hdnode);
+    btc_free(hdnode);
 }
 
 btc_bool btc_hdnode_from_seed(const uint8_t* seed, int seed_len, btc_hdnode* out)
@@ -305,7 +307,7 @@ btc_bool btc_hd_generate_key(btc_hdnode* node, const char* keypath, const uint8_
     static char digits[] = "0123456789";
     uint64_t idx = 0;
     assert(strlens(keypath) < 1024);
-    char *pch, *kp = malloc(strlens(keypath) + 1);
+    char *pch, *kp = btc_malloc(strlens(keypath) + 1);
 
     if (!kp) {
         return false;
@@ -367,11 +369,11 @@ btc_bool btc_hd_generate_key(btc_hdnode* node, const char* keypath, const uint8_
         }
         pch = strtok(NULL, delim);
     }
-    free(kp);
+    btc_free(kp);
     return true;
 
 err:
-    free(kp);
+    btc_free(kp);
     return false;
 }
 

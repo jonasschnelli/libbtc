@@ -48,6 +48,8 @@ libbtc_la_SOURCES = \
     src/cstr.c \
     src/ecc_key.c \
     src/ecc_libsecp256k1.c \
+    src/memory.c \
+    src/memory.h \
     src/random.c \
     src/ripemd160.c \
     src/script.c \

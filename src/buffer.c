@@ -24,18 +24,18 @@ void buffer_free(void* struct_buffer)
     if (!buf)
         return;
 
-    free(buf->p);
-    free(buf);
+    btc_free(buf->p);
+    btc_free(buf);
 }
 
 struct buffer* buffer_copy(const void* data, size_t data_len)
 {
     struct buffer* buf;
-    buf = malloc(sizeof(*buf));
+    buf = btc_malloc(sizeof(*buf));
     if (!buf)
         goto err_out;
 
-    buf->p = malloc(data_len);
+    buf->p = btc_malloc(data_len);
     if (!buf->p)
         goto err_out_free;
 
@@ -45,7 +45,7 @@ struct buffer* buffer_copy(const void* data, size_t data_len)
     return buf;
 
 err_out_free:
-    free(buf);
+    btc_free(buf);
 err_out:
     return NULL;
 }

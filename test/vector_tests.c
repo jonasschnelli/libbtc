@@ -19,9 +19,9 @@ struct teststruct {
 
 void free_dummy(void* data)
 {
-    free(((struct teststruct*)data)->dummy1);
-    free(((struct teststruct*)data)->dummy2);
-    free((struct teststruct*)data);
+    btc_free(((struct teststruct*)data)->dummy1);
+    btc_free(((struct teststruct*)data)->dummy2);
+    btc_free((struct teststruct*)data);
 }
 
 void test_vector()
@@ -99,9 +99,9 @@ void test_vector()
 
 
     /* test custom free callback handler */
-    struct teststruct* some_data = calloc(1, sizeof(struct teststruct));
-    some_data->dummy1 = calloc(1, 10);
-    some_data->dummy2 = calloc(1, 10);
+    struct teststruct* some_data = btc_calloc(1, sizeof(struct teststruct));
+    some_data->dummy1 = btc_calloc(1, 10);
+    some_data->dummy2 = btc_calloc(1, 10);
 
     vec = vector_new(1, free_dummy);
     vector_add(vec, some_data);

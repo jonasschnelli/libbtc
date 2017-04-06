@@ -812,7 +812,7 @@ void test_script_parse()
         btc_privkey_init(&key);
         btc_privkey_gen(&key);
 
-        btc_pubkey* pubkey = malloc(sizeof(btc_pubkey));
+        btc_pubkey* pubkey = btc_malloc(sizeof(btc_pubkey));
         btc_pubkey_init(pubkey);
         btc_pubkey_from_key(&key, pubkey);
         assert(btc_pubkey_is_valid(pubkey) == 1);

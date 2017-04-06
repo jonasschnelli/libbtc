@@ -57,12 +57,12 @@ int cstr_alloc_minsize(cstring* s, size_t new_sz)
 
 cstring* cstr_new_sz(size_t sz)
 {
-    cstring* s = calloc(1, sizeof(cstring));
+    cstring* s = btc_calloc(1, sizeof(cstring));
     if (!s)
         return NULL;
 
     if (!cstr_alloc_min_sz(s, sz)) {
-        free(s);
+        btc_free(s);
         return NULL;
     }
 
@@ -104,10 +104,10 @@ void cstr_free(cstring* s, int free_buf)
         return;
 
     if (free_buf)
-        free(s->str);
+        btc_free(s->str);
 
     memset(s, 0, sizeof(*s));
-    free(s);
+    btc_free(s);
 }
 
 int cstr_resize(cstring* s, size_t new_sz)
