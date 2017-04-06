@@ -44,6 +44,7 @@ libbtc_la_SOURCES = \
     src/bip32.c \
     src/block.c \
     src/buffer.c \
+    src/commontools.c \
     src/cstr.c \
     src/ecc_key.c \
     src/ecc_libsecp256k1.c \
@@ -52,7 +53,6 @@ libbtc_la_SOURCES = \
     src/script.c \
     src/serialize.c \
     src/sha2.c \
-    src/toolfunc.c \
     src/tx.c \
     src/utils.c \
     src/vector.c
