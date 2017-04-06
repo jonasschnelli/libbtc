@@ -153,6 +153,15 @@ bitcointool_SOURCES = \
 bitcointool_CFLAGS = $(libbtc_la_CFLAGS)
 bitcointool_CPPFLAGS = -I$(top_srcdir)/src
 bitcointool_LDFLAGS = -static
+
+inst_PROGRAMS += bitcoin-send-tx
+bitcoin_send_tx_LDADD = libbtc.la
+bitcoin_send_tx_SOURCES = \
+    src/tools/bitcoin-send-tx.c
+bitcoin_send_tx_CFLAGS = $(libbtc_la_CFLAGS)
+bitcoin_send_tx_CPPFLAGS = -I$(top_srcdir)/src
+bitcoin_send_tx_LDFLAGS = -static
+
 endif
 
 clean-local:

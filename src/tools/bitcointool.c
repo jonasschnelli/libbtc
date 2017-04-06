@@ -50,8 +50,6 @@ static struct option long_options[] =
     {"testnet", no_argument, NULL, 't'},
     {"regtest", no_argument, NULL, 'r'},
     {"version", no_argument, NULL, 'v'},
-    {"data", no_argument, NULL, 'd'},
-    {"ips", no_argument, NULL, 'i'},
     {NULL, 0, NULL, 0}
 };
 
@@ -61,7 +59,7 @@ static void print_version() {
 
 static void print_usage() {
     print_version();
-    printf("Usage: bitcointool (-m|-keypath <bip_keypath>) (-k|-pubkey <publickey>) (-p|-privkey <privatekey>) (-d|-data <hex[tx, etc]>) (-i|-ips <ip,ip,...]>) (-t[--testnet]) (-r[--regtest]) -c <command>\n");
+    printf("Usage: bitcointool (-m|-keypath <bip_keypath>) (-k|-pubkey <publickey>) (-p|-privkey <privatekey>) (-t[--testnet]) (-r[--regtest]) -c <command>\n");
     printf("Available commands: pubfrompriv (requires -p WIF), addrfrompub (requires -k HEX), genkey, hdgenmaster, hdprintkey (requires -p), hdderive (requires -m and -p) \n");
     printf("\nExamples: \n");
     printf("Generate a testnet privatekey in WIF/HEX format:\n");
@@ -84,12 +82,10 @@ int main(int argc, char *argv[])
     char *pubkey = 0;
     char *cmd = 0;
     char *keypath = 0;
-    char *data = 0;
-    char *ips = 0;
     const btc_chainparams* chain = &btc_chainparams_main;
 
     /* get arguments */
-    while ((opt = getopt_long_only(argc, argv,"d:i:p:k:m:c:trv", long_options, &long_index )) != -1) {
+    while ((opt = getopt_long_only(argc, argv,"p:k:m:c:trv", long_options, &long_index )) != -1) {
         switch (opt) {
             case 'p' :
                 pkey = optarg;
@@ -107,10 +103,6 @@ int main(int argc, char *argv[])
                 break;
             case 'r' :
                 chain = &btc_chainparams_regtest;
-                break;
-            case 'd' : data = optarg;
-                break;
-            case 'i' : ips = optarg;
                 break;
             case 'v' :
                 print_version();
@@ -211,22 +203,6 @@ int main(int argc, char *argv[])
         else
             hd_print_node(chain, newextkey);
     }
-    else if (strcmp(cmd, "broadcast") == 0)
-    {
-        if (strlen(data) > BTC_MAX_P2P_MSG_SIZE) {
-            return showError("Data to large\n");
-        }
-        uint8_t *data_bin = malloc(strlen(data)/2+1);
-        int outlen = 0;
-        utils_hex_to_bin(data, data_bin, strlen(data), &outlen);
-
-        btc_tx* tx = btc_tx_new();
-        btc_tx_deserialize(data_bin, outlen, tx, NULL);
-
-        broadcast_tx(chain, tx, ips);
-        btc_tx_free(tx);
-    }
-
 
     btc_ecc_stop();
 
