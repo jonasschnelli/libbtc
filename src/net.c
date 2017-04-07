@@ -516,7 +516,7 @@ int btc_get_peers_from_dns(const char* seed, vector* ips_out, int port, int fami
 
         memcpy(ipaddr + strlen(ipaddr), ":", 1);
         memcpy(ipaddr + strlen(ipaddr), def_port, strlen(def_port));
-        ;
+
         vector_add(ips_out, ipaddr);
 
         aiTrav = aiTrav->ai_next;

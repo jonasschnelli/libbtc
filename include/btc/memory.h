@@ -31,6 +31,8 @@
 extern "C" {
 #endif
 
+#include "btc.h"
+
 #include <stddef.h>
 
 typedef struct btc_mem_mapper_ {
@@ -41,11 +43,12 @@ typedef struct btc_mem_mapper_ {
 
 // set's a custom memory mapper
 // this function is _not_ thread safe and must be called before anything else
-void btc_mem_set_mapper(const btc_mem_mapper mapper);
+LIBBTC_API void btc_mem_set_mapper(const btc_mem_mapper mapper);
+LIBBTC_API void btc_mem_set_mapper_default();
 
-void* btc_malloc(size_t size);
-void* btc_calloc(size_t count, size_t size);
-void btc_free(void* ptr);
+LIBBTC_API void* btc_malloc(size_t size);
+LIBBTC_API void* btc_calloc(size_t count, size_t size);
+LIBBTC_API void btc_free(void* ptr);
 
 #ifdef __cplusplus
 }

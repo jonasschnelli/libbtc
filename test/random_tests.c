@@ -40,7 +40,7 @@ void test_random()
 
     u_assert_int_eq(btc_random_bytes(r_buf, 32, 0), false);
 
-    for (uint8_t i = 0; i <= 32; i++) {
+    for (uint8_t i = 0; i < 32; i++) {
         u_assert_int_eq(r_buf[i], 0);
     }
 

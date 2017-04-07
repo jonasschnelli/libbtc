@@ -77,6 +77,7 @@ tests_SOURCES = \
     test/ecc_tests.c \
     test/eckey_tests.c \
     test/hash_tests.c \
+    test/memory_tests.c \
     test/random_tests.c \
     test/serialize_tests.c \
     test/sha2_tests.c \
