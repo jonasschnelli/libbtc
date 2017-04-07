@@ -27,14 +27,13 @@
 #ifndef __LIBBTC_ECC_KEY_H__
 #define __LIBBTC_ECC_KEY_H__
 
-#include "btc.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <stdio.h>
-#include <stdint.h>
+#include "btc.h"
+
+#include <stddef.h>
 
 typedef struct btc_key_ {
     uint8_t privkey[BTC_ECKEY_PKEY_LENGTH];
@@ -60,7 +59,7 @@ LIBBTC_API void btc_pubkey_from_key(btc_key* privkey, btc_pubkey* pubkey_inout);
 LIBBTC_API void btc_pubkey_get_hash160(const btc_pubkey* pubkey, uint8_t* hash160);
 
 //get the hex representation of a pubkey, strsize must be at leat 66 bytes
-LIBBTC_API btc_bool btc_pubkey_get_hex(const btc_pubkey* pubkey, char* str, size_t *strsize);
+LIBBTC_API btc_bool btc_pubkey_get_hex(const btc_pubkey* pubkey, char* str, size_t* strsize);
 
 //sign a 32byte message/hash and returns a DER encoded signature (through *sigout)
 LIBBTC_API btc_bool btc_key_sign_hash(const btc_key* privkey, const uint8_t* hash, unsigned char* sigout, size_t* outlen);

@@ -24,52 +24,50 @@
 
  */
 
-
 #ifndef __LIBBTC_NET_H__
 #define __LIBBTC_NET_H__
-
-#include "btc.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include <event2/event.h>
-#include <btc/chainparams.h>
-#include <btc/buffer.h>
-#include <btc/cstr.h>
-#include "vector.h"
+
+#include "btc.h"
+#include "buffer.h"
+#include "chainparams.h"
+#include "cstr.h"
 #include "protocol.h"
+#include "vector.h"
 
 static const unsigned int BTC_P2P_MESSAGE_CHUNK_SIZE = 4096;
 
 enum NODE_STATE {
-    NODE_CONNECTING	= (1 << 0),
-    NODE_CONNECTED	= (1 << 1),
-    NODE_ERRORED	= (1 << 2),
-    NODE_TIMEOUT	= (1 << 3),
-    NODE_HEADERSYNC	= (1 << 4),
-    NODE_MISSBEHAVED= (1 << 5),
+    NODE_CONNECTING = (1 << 0),
+    NODE_CONNECTED = (1 << 1),
+    NODE_ERRORED = (1 << 2),
+    NODE_TIMEOUT = (1 << 3),
+    NODE_HEADERSYNC = (1 << 4),
+    NODE_MISSBEHAVED = (1 << 5),
 };
 
 /* basic group-of-nodes structure */
 struct btc_node_;
-typedef struct btc_node_group_
-{
-    void *ctx; /* flexible context usefull in conjunction with the callbacks */
-    struct event_base *event_base;
-    vector *nodes; /* the groups nodes */
+typedef struct btc_node_group_ {
+    void* ctx; /* flexible context usefull in conjunction with the callbacks */
+    struct event_base* event_base;
+    vector* nodes; /* the groups nodes */
     char clientstr[1024];
     int desired_amount_connected_nodes;
-    const btc_chainparams *chainparams;
+    const btc_chainparams* chainparams;
 
     /* callbacks */
-    int (*log_write_cb)(const char *format, ...); /* log callback, default=printf */
-    btc_bool (*parse_cmd_cb)(struct btc_node_ *node, btc_p2p_msg_hdr *hdr, struct const_buffer *buf);
-    void (*postcmd_cb)(struct btc_node_ *node, btc_p2p_msg_hdr *hdr, struct const_buffer *buf);
-    void (*node_connection_state_changed_cb)(struct btc_node_ *node);
-    void (*handshake_done_cb)(struct btc_node_ *node);
-    btc_bool (*periodic_timer_cb)(struct btc_node_ *node, uint64_t *time); // return false will cancle the internal logic
+    int (*log_write_cb)(const char* format, ...); /* log callback, default=printf */
+    btc_bool (*parse_cmd_cb)(struct btc_node_* node, btc_p2p_msg_hdr* hdr, struct const_buffer* buf);
+    void (*postcmd_cb)(struct btc_node_* node, btc_p2p_msg_hdr* hdr, struct const_buffer* buf);
+    void (*node_connection_state_changed_cb)(struct btc_node_* node);
+    void (*handshake_done_cb)(struct btc_node_* node);
+    btc_bool (*periodic_timer_cb)(struct btc_node_* node, uint64_t* time); // return false will cancle the internal logic
 } btc_node_group;
 
 enum {
@@ -81,26 +79,25 @@ enum {
 };
 
 /* basic node structure */
-typedef struct btc_node_
-{
+typedef struct btc_node_ {
     struct sockaddr addr;
-    struct bufferevent *event_bev;
-    struct event *timer_event;
-    btc_node_group *nodegroup;
+    struct bufferevent* event_bev;
+    struct event* timer_event;
+    btc_node_group* nodegroup;
     int nodeid;
     uint64_t lastping;
     uint64_t time_started_con;
 
-    cstring *recvBuffer;
+    cstring* recvBuffer;
     uint64_t nonce;
     uint64_t services;
     uint32_t state;
-    int      missbehavescore;
+    int missbehavescore;
     btc_bool version_handshake;
     uint32_t hints; /* can be use for user defined state */
 } btc_node;
 
-LIBBTC_API int net_write_log_printf(const char *format, ...);
+LIBBTC_API int net_write_log_printf(const char* format, ...);
 
 /* =================================== */
 /* NODES */
@@ -108,51 +105,51 @@ LIBBTC_API int net_write_log_printf(const char *format, ...);
 
 /* create new node object */
 LIBBTC_API btc_node* btc_node_new();
-LIBBTC_API void btc_node_free(btc_node *group);
+LIBBTC_API void btc_node_free(btc_node* group);
 
 /* set the nodes ip address and port (ipv4 or ipv6)*/
-LIBBTC_API btc_bool btc_node_set_ipport(btc_node *node, const char *ipport);
+LIBBTC_API btc_bool btc_node_set_ipport(btc_node* node, const char* ipport);
 
 /* disconnect a node */
-LIBBTC_API void btc_node_disconnect(btc_node *node);
+LIBBTC_API void btc_node_disconnect(btc_node* node);
 
 /* mark a node missbehave and disconnect */
-LIBBTC_API btc_bool btc_node_missbehave(btc_node *node);
+LIBBTC_API btc_bool btc_node_missbehave(btc_node* node);
 
 /* =================================== */
 /* NODE GROUPS */
 /* =================================== */
 
 /* create a new node group */
-LIBBTC_API btc_node_group* btc_node_group_new(const btc_chainparams *chainparams);
-LIBBTC_API void btc_node_group_free(btc_node_group *group);
+LIBBTC_API btc_node_group* btc_node_group_new(const btc_chainparams* chainparams);
+LIBBTC_API void btc_node_group_free(btc_node_group* group);
 
 /* add a node to a node group */
-LIBBTC_API void btc_node_group_add_node(btc_node_group *group, btc_node *node);
+LIBBTC_API void btc_node_group_add_node(btc_node_group* group, btc_node* node);
 
 /* start node groups event loop */
-LIBBTC_API void btc_node_group_event_loop(btc_node_group *group);
+LIBBTC_API void btc_node_group_event_loop(btc_node_group* group);
 
 /* connect to more nodex */
-LIBBTC_API btc_bool btc_node_group_connect_next_nodes(btc_node_group *group);
+LIBBTC_API btc_bool btc_node_group_connect_next_nodes(btc_node_group* group);
 
 /* get the amount of connected nodes */
-LIBBTC_API int btc_node_group_amount_of_connected_nodes(btc_node_group *group);
+LIBBTC_API int btc_node_group_amount_of_connected_nodes(btc_node_group* group);
 
 /* sends version command to node */
-LIBBTC_API void btc_node_send_version(btc_node *node);
+LIBBTC_API void btc_node_send_version(btc_node* node);
 
 /* send arbitrary data to node */
-LIBBTC_API void btc_node_send(btc_node *node, cstring *data);
+LIBBTC_API void btc_node_send(btc_node* node, cstring* data);
 
-int btc_node_parse_message(btc_node *node, btc_p2p_msg_hdr *hdr, struct const_buffer *buf);
-void btc_node_connection_state_changed(btc_node *node);
+int btc_node_parse_message(btc_node* node, btc_p2p_msg_hdr* hdr, struct const_buffer* buf);
+void btc_node_connection_state_changed(btc_node* node);
 
 /* =================================== */
 /* DNS */
 /* =================================== */
 
-int btc_get_peers_from_dns(const char *seed, vector *ips_out, int port, int family);
+int btc_get_peers_from_dns(const char* seed, vector* ips_out, int port, int family);
 
 #ifdef __cplusplus
 }

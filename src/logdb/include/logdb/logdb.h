@@ -53,6 +53,8 @@
 extern "C" {
 #endif
 
+#include <stdlib.h>
+
 #include <logdb/logdb_core.h>
 #include <logdb/logdb_rec.h>
 #include <logdb/logdb_memdb_llist.h>

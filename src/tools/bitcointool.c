@@ -27,37 +27,38 @@
 #include "libbtc-config.h"
 
 #include <btc/chainparams.h>
-#include <btc/tool.h>
 #include <btc/ecc.h>
 #include <btc/protocol.h>
+#include <btc/tool.h>
 #include <btc/tx.h>
 #include <btc/utils.h>
 
 #include <assert.h>
+#include <getopt.h>
 #include <stdbool.h>
-#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
-#include <getopt.h>
 
 static struct option long_options[] =
-{
-    {"privkey", required_argument, NULL, 'p'},
-    {"pubkey", required_argument, NULL, 'k'},
-    {"keypath", required_argument, NULL, 'm'},
-    {"command", required_argument, NULL, 'c'},
-    {"testnet", no_argument, NULL, 't'},
-    {"regtest", no_argument, NULL, 'r'},
-    {"version", no_argument, NULL, 'v'},
-    {NULL, 0, NULL, 0}
-};
+    {
+        {"privkey", required_argument, NULL, 'p'},
+        {"pubkey", required_argument, NULL, 'k'},
+        {"keypath", required_argument, NULL, 'm'},
+        {"command", required_argument, NULL, 'c'},
+        {"testnet", no_argument, NULL, 't'},
+        {"regtest", no_argument, NULL, 'r'},
+        {"version", no_argument, NULL, 'v'},
+        {NULL, 0, NULL, 0}};
 
-static void print_version() {
+static void print_version()
+{
     printf("Version: %s %s\n", PACKAGE_NAME, PACKAGE_VERSION);
 }
 
-static void print_usage() {
+static void print_usage()
+{
     print_version();
     printf("Usage: bitcointool (-m|-keypath <bip_keypath>) (-k|-pubkey <publickey>) (-p|-privkey <privatekey>) (-t[--testnet]) (-r[--regtest]) -c <command>\n");
     printf("Available commands: pubfrompriv (requires -p WIF), addrfrompub (requires -k HEX), genkey, hdgenmaster, hdprintkey (requires -p), hdderive (requires -m and -p) \n");
@@ -67,54 +68,57 @@ static void print_usage() {
     printf("> bitcointool -c pubfrompriv -p KzLzeMteBxy8aPPDCeroWdkYPctafGapqBAmWQwdvCkgKniH9zw6\n\n");
 }
 
-static bool showError(const char *er)
+static bool showError(const char* er)
 {
     printf("Error: %s\n", er);
     btc_ecc_stop();
     return 1;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
-    int long_index =0;
-    int opt= 0;
-    char *pkey = 0;
-    char *pubkey = 0;
-    char *cmd = 0;
-    char *keypath = 0;
+    int long_index = 0;
+    int opt = 0;
+    char* pkey = 0;
+    char* pubkey = 0;
+    char* cmd = 0;
+    char* keypath = 0;
     const btc_chainparams* chain = &btc_chainparams_main;
 
     /* get arguments */
-    while ((opt = getopt_long_only(argc, argv,"p:k:m:c:trv", long_options, &long_index )) != -1) {
+    while ((opt = getopt_long_only(argc, argv, "p:k:m:c:trv", long_options, &long_index)) != -1) {
         switch (opt) {
-            case 'p' :
-                pkey = optarg;
-                if (strlen(pkey) < 50)
-                    return showError("Private key must be WIF encoded");
-                break;
-            case 'c' : cmd = optarg;
-                break;
-            case 'm' : keypath = optarg;
-                break;
-            case 'k' : pubkey = optarg;
-                break;
-            case 't' :
-                chain = &btc_chainparams_test;
-                break;
-            case 'r' :
-                chain = &btc_chainparams_regtest;
-                break;
-            case 'v' :
-                print_version();
-                exit(EXIT_SUCCESS);
-                break;
-            default: print_usage();
-                exit(EXIT_FAILURE);
+        case 'p':
+            pkey = optarg;
+            if (strlen(pkey) < 50)
+                return showError("Private key must be WIF encoded");
+            break;
+        case 'c':
+            cmd = optarg;
+            break;
+        case 'm':
+            keypath = optarg;
+            break;
+        case 'k':
+            pubkey = optarg;
+            break;
+        case 't':
+            chain = &btc_chainparams_test;
+            break;
+        case 'r':
+            chain = &btc_chainparams_regtest;
+            break;
+        case 'v':
+            print_version();
+            exit(EXIT_SUCCESS);
+            break;
+        default:
+            print_usage();
+            exit(EXIT_FAILURE);
         }
     }
 
-    if (!cmd)
-    {
+    if (!cmd) {
         /* exit if no command was provided */
         print_usage();
         exit(EXIT_FAILURE);
@@ -124,8 +128,7 @@ int main(int argc, char *argv[])
     btc_ecc_start();
 
 
-    if (strcmp(cmd, "pubfrompriv") == 0)
-    {
+    if (strcmp(cmd, "pubfrompriv") == 0) {
         /* output compressed hex pubkey from hex privkey */
 
         size_t sizeout = 128;
@@ -147,9 +150,7 @@ int main(int argc, char *argv[])
         /* clean memory */
         memset(pubkey_hex, 0, strlen(pubkey_hex));
         memset(address, 0, strlen(address));
-    }
-    else if (strcmp(cmd, "addrfrompub") == 0 || strcmp(cmd, "p2pkhaddrfrompub") == 0)
-    {
+    } else if (strcmp(cmd, "addrfrompub") == 0 || strcmp(cmd, "p2pkhaddrfrompub") == 0) {
         /* get p2pkh address from pubkey */
 
         size_t sizeout = 128;
@@ -159,9 +160,7 @@ int main(int argc, char *argv[])
         printf("p2pkh address: %s\n", address);
         memset(pubkey, 0, strlen(pubkey));
         memset(address, 0, strlen(address));
-    }
-    else if (strcmp(cmd, "genkey") == 0)
-    {
+    } else if (strcmp(cmd, "genkey") == 0) {
         size_t sizeout = 128;
         char newprivkey_wif[sizeout];
         char newprivkey_hex[sizeout];
@@ -172,9 +171,7 @@ int main(int argc, char *argv[])
         printf("privatekey HEX: %s\n", newprivkey_hex);
         memset(newprivkey_wif, 0, strlen(newprivkey_wif));
         memset(newprivkey_hex, 0, strlen(newprivkey_hex));
-    }
-    else if (strcmp(cmd, "hdgenmaster") == 0)
-    {
+    } else if (strcmp(cmd, "hdgenmaster") == 0) {
         size_t sizeout = 128;
         char masterkey[sizeout];
 
@@ -182,16 +179,12 @@ int main(int argc, char *argv[])
         hd_gen_master(chain, masterkey, sizeout);
         printf("masterkey: %s\n", masterkey);
         memset(masterkey, 0, strlen(masterkey));
-    }
-    else if (strcmp(cmd, "hdprintkey") == 0)
-    {
+    } else if (strcmp(cmd, "hdprintkey") == 0) {
         if (!pkey)
             return showError("Missing extended key (use -p)");
         if (!hd_print_node(chain, pkey))
             return showError("Failed. Probably invalid extended key.\n");
-    }
-    else if (strcmp(cmd, "hdderive") == 0)
-    {
+    } else if (strcmp(cmd, "hdderive") == 0) {
         if (!pkey)
             return showError("Missing extended key (use -p)");
         if (!keypath)

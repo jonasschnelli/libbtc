@@ -25,8 +25,8 @@
 */
 
 #include <inttypes.h>
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <string.h>
 
 #include <btc/base58.h>
@@ -153,7 +153,7 @@ btc_bool btc_tx_out_deserialize(btc_tx_out* tx_out, struct const_buffer* buf)
     return true;
 }
 
-int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx* tx, size_t *consumed_length)
+int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx* tx, size_t* consumed_length)
 {
     struct const_buffer buf = {tx_serialized, inlen};
     if (consumed_length)
@@ -172,8 +172,7 @@ int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx*
         if (!btc_tx_in_deserialize(tx_in, &buf)) {
             btc_free(tx_in);
             return false;
-        }
-        else {
+        } else {
             vector_add(tx->vin, tx_in);
         }
     }
@@ -195,7 +194,7 @@ int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx*
         return false;
 
     if (consumed_length)
-        *consumed_length = inlen-buf.len;
+        *consumed_length = inlen - buf.len;
     return true;
 }
 
@@ -488,9 +487,8 @@ btc_bool btc_tx_outpoint_is_null(btc_tx_outpoint* tx)
 
 btc_bool btc_tx_is_coinbase(btc_tx* tx)
 {
-    if (tx->vin->len == 1)
-    {
-        btc_tx_in *vin = vector_idx(tx->vin, 0);
+    if (tx->vin->len == 1) {
+        btc_tx_in* vin = vector_idx(tx->vin, 0);
 
         if (btc_hash_is_empty(vin->prevout.hash) && vin->prevout.n == UINT32_MAX)
             return true;

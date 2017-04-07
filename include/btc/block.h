@@ -28,18 +28,17 @@
 #ifndef LIBBTC_BLOCK_H
 #define LIBBTC_BLOCK_H
 
-
-#include "btc.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <stdint.h>
-#include <sys/types.h>
-#include <btc/buffer.h>
-#include <btc/hash.h>
-#include <btc/cstr.h>
+#include "btc.h"
+
+#include "buffer.h"
+#include "cstr.h"
+#include "hash.h"
+
+#include <stddef.h>
 
 typedef struct btc_block_header_ {
     int32_t version;
@@ -52,10 +51,10 @@ typedef struct btc_block_header_ {
 
 LIBBTC_API btc_block_header* btc_block_header_new();
 LIBBTC_API void btc_block_header_free(btc_block_header* header);
-LIBBTC_API int btc_block_header_deserialize(btc_block_header* header, struct const_buffer *buf);
+LIBBTC_API int btc_block_header_deserialize(btc_block_header* header, struct const_buffer* buf);
 LIBBTC_API void btc_block_header_serialize(cstring* s, const btc_block_header* header);
 LIBBTC_API void btc_block_header_copy(btc_block_header* dest, const btc_block_header* src);
-LIBBTC_API btc_bool btc_block_header_hash(btc_block_header*header, uint8_t* hash);
+LIBBTC_API btc_bool btc_block_header_hash(btc_block_header* header, uint8_t* hash);
 
 #ifdef __cplusplus
 }

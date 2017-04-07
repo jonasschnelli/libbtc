@@ -25,18 +25,16 @@
  
 */
 
-
 #ifndef __LIBBTC_CSTR_H__
 #define __LIBBTC_CSTR_H__
-
-#include "btc.h"
-
-#include <stdlib.h>
-#include <sys/types.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "btc.h"
+
+#include <stddef.h>
 
 typedef struct cstring {
     char* str;    /* string data, incl. NUL */
@@ -56,7 +54,7 @@ LIBBTC_API int cstr_resize(cstring* s, size_t sz);
 LIBBTC_API int cstr_erase(cstring* s, size_t pos, ssize_t len);
 
 LIBBTC_API int cstr_append_buf(cstring* s, const void* buf, size_t sz);
-LIBBTC_API int cstr_append_cstr(cstring* s, cstring *append);
+LIBBTC_API int cstr_append_cstr(cstring* s, cstring* append);
 
 LIBBTC_API int cstr_append_c(cstring* s, char ch);
 

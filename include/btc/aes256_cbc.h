@@ -21,18 +21,17 @@
  
 */
 
-#ifndef SD_AES256_CBC_H__
-#define SD_AES256_CBC_H__
-
-#include <stdint.h>
-#include <stddef.h>
+#ifndef __LIBBTC_AES256_CBC_H_
+#define __LIBBTC_AES256_CBC_H_
 
 #define AES_BLOCK_SIZE 16
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
+#include <stddef.h>
+
 int aes256_cbc_encrypt(const unsigned char aes_key[32], const unsigned char iv[AES_BLOCK_SIZE], const unsigned char* data, int size, int pad, unsigned char* out);
 int aes256_cbc_decrypt(const unsigned char aes_key[32], const unsigned char iv[AES_BLOCK_SIZE], const unsigned char* data, int size, int pad, unsigned char* out);
 
@@ -40,4 +39,4 @@ int aes256_cbc_decrypt(const unsigned char aes_key[32], const unsigned char iv[A
 }
 #endif
 
-#endif /* SD_AES256_CBC_H__ */
+#endif /* __LIBBTC_AES256_CBC_H_ */

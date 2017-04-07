@@ -26,17 +26,17 @@
 #include "btc/bip32.h"
 
 #include <assert.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <inttypes.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include <btc/sha2.h>
-#include <btc/utils.h>
 #include <btc/base58.h>
-#include <btc/hash.h>
 #include <btc/ecc.h>
 #include <btc/ecc_key.h>
+#include <btc/hash.h>
+#include <btc/sha2.h>
+#include <btc/utils.h>
 
 #include "memory.h"
 
@@ -63,7 +63,7 @@ static uint32_t read_be(const uint8_t* data)
 
 btc_hdnode* btc_hdnode_new()
 {
-    btc_hdnode *hdnode;
+    btc_hdnode* hdnode;
     hdnode = btc_calloc(1, sizeof(*hdnode));
     return hdnode;
 }
@@ -72,9 +72,9 @@ btc_hdnode* btc_hdnode_copy(btc_hdnode* hdnode)
 {
     btc_hdnode* newnode = btc_hdnode_new();
 
-    newnode->depth          = hdnode->depth;
-    newnode->fingerprint    = hdnode->fingerprint;
-    newnode->child_num      = hdnode->child_num;
+    newnode->depth = hdnode->depth;
+    newnode->fingerprint = hdnode->fingerprint;
+    newnode->child_num = hdnode->child_num;
     memcpy(newnode->chain_code, hdnode->chain_code, sizeof(hdnode->chain_code));
     memcpy(newnode->private_key, hdnode->private_key, sizeof(hdnode->private_key));
     memcpy(newnode->public_key, hdnode->public_key, sizeof(hdnode->public_key));
@@ -244,7 +244,7 @@ void btc_hdnode_serialize_private(const btc_hdnode* node, const btc_chainparams*
 }
 
 
-void btc_hdnode_get_hash160(const btc_hdnode* node, uint8_t *hash160_out)
+void btc_hdnode_get_hash160(const btc_hdnode* node, uint8_t* hash160_out)
 {
     uint8_t hashout[32];
     btc_hash_sngl_sha256(node->public_key, BTC_ECKEY_COMPRESSED_LENGTH, hashout);
@@ -255,11 +255,11 @@ void btc_hdnode_get_p2pkh_address(const btc_hdnode* node, const btc_chainparams*
 {
     uint8_t hash160[21];
     hash160[0] = chain->b58prefix_pubkey_address;
-    btc_hdnode_get_hash160(node, hash160+1);
+    btc_hdnode_get_hash160(node, hash160 + 1);
     btc_base58_encode_check(hash160, 21, str, strsize);
 }
 
-btc_bool btc_hdnode_get_pub_hex(const btc_hdnode* node, char* str, size_t *strsize)
+btc_bool btc_hdnode_get_pub_hex(const btc_hdnode* node, char* str, size_t* strsize)
 {
     btc_pubkey pubkey;
     btc_pubkey_init(&pubkey);
@@ -328,12 +328,9 @@ btc_bool btc_hd_generate_key(btc_hdnode* node, const char* keypath, const uint8_
     node->child_num = 0;
     node->fingerprint = 0;
     memcpy(node->chain_code, chaincode, BTC_BIP32_CHAINCODE_SIZE);
-    if (usepubckd == true)
-    {
+    if (usepubckd == true) {
         memcpy(node->public_key, keymaster, BTC_ECKEY_COMPRESSED_LENGTH);
-    }
-    else
-    {
+    } else {
         memcpy(node->private_key, keymaster, BTC_ECKEY_PKEY_LENGTH);
         btc_hdnode_fill_public_key(node);
     }
@@ -363,7 +360,7 @@ btc_bool btc_hd_generate_key(btc_hdnode* node, const char* keypath, const uint8_
                 goto err;
             }
         } else {
-            if ( (usepubckd == true ? btc_hdnode_public_ckd(node, idx) : btc_hdnode_private_ckd(node, idx)) != true) {
+            if ((usepubckd == true ? btc_hdnode_public_ckd(node, idx) : btc_hdnode_private_ckd(node, idx)) != true) {
                 goto err;
             }
         }

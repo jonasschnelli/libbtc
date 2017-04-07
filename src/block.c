@@ -25,8 +25,8 @@
 
 */
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <string.h>
 
 
@@ -58,7 +58,7 @@ void btc_block_header_free(btc_block_header* header)
     btc_free(header);
 }
 
-int btc_block_header_deserialize(btc_block_header* header, struct const_buffer *buf)
+int btc_block_header_deserialize(btc_block_header* header, struct const_buffer* buf)
 {
     if (!deser_s32(&header->version, buf))
         return false;

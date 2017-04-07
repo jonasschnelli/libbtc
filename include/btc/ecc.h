@@ -27,13 +27,13 @@
 #ifndef __LIBBTC_ECC_H__
 #define __LIBBTC_ECC_H__
 
-#include "btc.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <stdint.h>
+#include "btc.h"
+
+#include <stddef.h>
 
 //!init static ecc context
 LIBBTC_API void btc_ecc_start(void);
@@ -63,7 +63,7 @@ LIBBTC_API btc_bool btc_ecc_sign(const uint8_t* private_key, const uint8_t* hash
 LIBBTC_API btc_bool btc_ecc_sign_compact(const uint8_t* private_key, const uint8_t* hash, unsigned char* sigcomp, size_t* outlen);
 
 //!converts (and normalized) a compact signature to DER
-LIBBTC_API btc_bool btc_ecc_compact_to_der_normalized(unsigned char* sigcomp_in, unsigned char* sigder_out, size_t *sigder_len_out);
+LIBBTC_API btc_bool btc_ecc_compact_to_der_normalized(unsigned char* sigcomp_in, unsigned char* sigder_out, size_t* sigder_len_out);
 
 //!convert DER signature to compact
 LIBBTC_API btc_bool btc_ecc_der_to_compact(unsigned char* sigder_in, size_t sigder_len, unsigned char* sigcomp_out);

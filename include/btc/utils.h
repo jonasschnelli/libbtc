@@ -25,18 +25,17 @@
 
 */
 
-
 #ifndef __LIBBTC_UTILS_H__
 #define __LIBBTC_UTILS_H__
-
-#include <stdint.h>
-#include <stddef.h>
-
-#include "btc.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "btc.h"
+
+#include <stddef.h>
+#include <stdint.h>
 
 #define TO_UINT8_HEX_BUF_LEN 2048
 #define VARINT_LEN 20
@@ -49,8 +48,8 @@ LIBBTC_API void utils_bin_to_hex(unsigned char* bin_in, size_t inlen, char* hex_
 LIBBTC_API uint8_t* utils_hex_to_uint8(const char* str);
 LIBBTC_API char* utils_uint8_to_hex(const uint8_t* bin, size_t l);
 LIBBTC_API void utils_reverse_hex(char* h, int len);
-LIBBTC_API void utils_uint256_sethex(char *psz, uint8_t *out);
-LIBBTC_API void * safe_malloc(size_t size);
+LIBBTC_API void utils_uint256_sethex(char* psz, uint8_t* out);
+LIBBTC_API void* safe_malloc(size_t size);
 LIBBTC_API void btc_cheap_random_bytes(uint8_t* buf, uint32_t len);
 #ifdef __cplusplus
 }

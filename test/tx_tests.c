@@ -781,7 +781,7 @@ void test_script_parse()
         btc_script_get_ops(script, vec);
         enum btc_tx_out_type type = btc_script_classify_ops(vec);
 
-        assert(type == test->type);
+        assert((int)type == test->type);
         assert(vec->len == (size_t)test->opcodes);
 
         vector_free(vec, true);

@@ -24,11 +24,11 @@
 #ifndef __LIBBTC_BASE58_H__
 #define __LIBBTC_BASE58_H__
 
-#include "btc.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "btc.h"
 
 #include <stdint.h>
 

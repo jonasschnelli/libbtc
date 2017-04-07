@@ -29,9 +29,9 @@
  * SUCH DAMAGE.
  */
 
-#include <string.h>
-#include <stdint.h>
 #include <btc/sha2.h>
+#include <stdint.h>
+#include <string.h>
 
 /*
  * ASSERT NOTE:
@@ -705,7 +705,7 @@ void sha512_Init(SHA512_CTX* context)
 void sha512_Transform(SHA512_CTX* context, const sha2_word64* data)
 {
     sha2_word64 a, b, c, d, e, f, g, h, s0, s1;
-    sha2_word64 T1, *W512 = (sha2_word64 *)context->buffer;
+    sha2_word64 T1, *W512 = (sha2_word64*)context->buffer;
     int j;
 
     /* Initialize registers with the prev. intermediate value */
@@ -761,7 +761,7 @@ void sha512_Transform(SHA512_CTX* context, const sha2_word64* data)
 void sha512_Transform(SHA512_CTX* context, const sha2_word64* data)
 {
     sha2_word64 a, b, c, d, e, f, g, h, s0, s1;
-    sha2_word64 T1, T2, *W512 = (sha2_word64 *)context->buffer;
+    sha2_word64 T1, T2, *W512 = (sha2_word64*)context->buffer;
     int j;
 
     /* Initialize registers with the prev. intermediate value */
@@ -887,7 +887,7 @@ void sha512_Last(SHA512_CTX* context)
 {
     unsigned int usedspace;
     sha2_word64* t;
-    
+
     usedspace = (context->bitcount[0] >> 3) % SHA512_BLOCK_LENGTH;
 #if BYTE_ORDER == LITTLE_ENDIAN
     /* Convert FROM host byte order */
@@ -1022,4 +1022,3 @@ void hmac_sha512(const uint8_t* key, const uint32_t keylen, const uint8_t* msg, 
     sha512_Update(&ctx, buf, SHA512_DIGEST_LENGTH);
     sha512_Final(hmac, &ctx);
 }
-

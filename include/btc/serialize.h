@@ -28,17 +28,19 @@
 #ifndef __LIBBTC_SERIALIZE_H__
 #define __LIBBTC_SERIALIZE_H__
 
-#include <btc/cstr.h>
-#include <btc/buffer.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "btc.h"
+
+#include "buffer.h"
+#include "cstr.h"
 
 #include "portable_endian.h"
 
 #include <stdint.h>
 #include <stdio.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 LIBBTC_API void ser_bytes(cstring* s, const void* p, size_t len);
 LIBBTC_API void ser_u16(cstring* s, uint16_t v_);
@@ -62,7 +64,7 @@ LIBBTC_API int deser_u64(uint64_t* vo, struct const_buffer* buf);
 LIBBTC_API int deser_u256(uint8_t* vo, struct const_buffer* buf);
 
 LIBBTC_API int deser_varlen(uint32_t* lo, struct const_buffer* buf);
-LIBBTC_API int deser_varlen_file(uint32_t* lo, FILE *file, uint8_t *rawdata, size_t *buflen_inout);
+LIBBTC_API int deser_varlen_file(uint32_t* lo, FILE* file, uint8_t* rawdata, size_t* buflen_inout);
 LIBBTC_API int deser_str(char* so, struct const_buffer* buf, size_t maxlen);
 LIBBTC_API int deser_varstr(cstring** so, struct const_buffer* buf);
 

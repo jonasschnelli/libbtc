@@ -27,13 +27,13 @@
 #ifndef __LIBBTC_SCRIPT_H__
 #define __LIBBTC_SCRIPT_H__
 
-#include "btc.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <btc/cstr.h>
+#include "btc.h"
+
+#include "cstr.h"
 
 #include "ecc_key.h"
 #include "vector.h"
@@ -215,8 +215,8 @@ void btc_script_op_free_cb(void* data);
 btc_bool btc_script_get_ops(const cstring* script_in, vector* ops_out);
 
 LIBBTC_API enum btc_tx_out_type btc_script_classify_ops(vector* ops);
-LIBBTC_API enum btc_tx_out_type btc_script_classify(cstring* script, vector *data_out);
-LIBBTC_API btc_bool btc_script_extract_pkh(cstring* script, uint8_t *data);
+LIBBTC_API enum btc_tx_out_type btc_script_classify(cstring* script, vector* data_out);
+LIBBTC_API btc_bool btc_script_extract_pkh(cstring* script, uint8_t* data);
 
 LIBBTC_API enum opcodetype btc_encode_op_n(int n);
 LIBBTC_API void btc_script_append_op(cstring* script_in, enum opcodetype op);

@@ -28,20 +28,20 @@
 #ifndef __LIBBTC_TX_H__
 #define __LIBBTC_TX_H__
 
-#include "btc.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
-#include <btc/chainparams.h>
-#include <btc/cstr.h>
-#include <btc/hash.h>
-#include <btc/script.h>
-#include <btc/vector.h>
+#include "btc.h"
+
+#include "chainparams.h"
+#include "cstr.h"
+#include "hash.h"
+#include "script.h"
+#include "vector.h"
 
 
 typedef struct btc_script_ {
@@ -90,7 +90,7 @@ LIBBTC_API void btc_tx_free(btc_tx* tx);
 LIBBTC_API void btc_tx_copy(btc_tx* dest, const btc_tx* src);
 
 //!deserialize/parse a p2p serialized bitcoin transaction
-LIBBTC_API int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx* tx, size_t *consumed_length);
+LIBBTC_API int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx* tx, size_t* consumed_length);
 
 //!serialize a lbc bitcoin data structure into a p2p serialized buffer
 LIBBTC_API void btc_tx_serialize(cstring* s, const btc_tx* tx);
