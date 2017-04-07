@@ -24,16 +24,16 @@
  
 */
 
-#include "btc/ecc_key.h"
+#include <btc/ecc_key.h>
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "btc/ecc.h"
-#include "btc/hash.h"
-#include "btc/random.h"
+#include <btc/ecc.h>
+#include <btc/hash.h>
+#include <btc/random.h>
 #include <btc/utils.h>
 
 #include "ripemd160.h"
@@ -63,7 +63,7 @@ void btc_privkey_gen(btc_key* privkey)
         return;
 
     do {
-        random_bytes(privkey->privkey, BTC_ECKEY_PKEY_LENGTH, 0);
+        assert(btc_random_bytes(privkey->privkey, BTC_ECKEY_PKEY_LENGTH, 0));
     } while (btc_ecc_verify_privatekey(privkey->privkey) == 0);
 }
 
@@ -71,7 +71,7 @@ void btc_privkey_gen(btc_key* privkey)
 btc_bool btc_privkey_verify_pubkey(btc_key* privkey, btc_pubkey* pubkey)
 {
     uint8_t rnddata[32], hash[32];
-    random_bytes(rnddata, 32, 0);
+    assert(btc_random_bytes(rnddata, 32, 0));
     btc_hash(rnddata, 32, hash);
 
     unsigned char sig[74];

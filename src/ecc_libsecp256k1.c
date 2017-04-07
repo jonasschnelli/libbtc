@@ -4,18 +4,20 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "btc/btc.h"
-#include "btc/random.h"
+#include <btc/btc.h>
+#include <btc/random.h>
 
 static secp256k1_context* secp256k1_ctx = NULL;
 
 void btc_ecc_start(void)
 {
+    btc_random_init();
+
     secp256k1_ctx = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
     assert(secp256k1_ctx != NULL);
 
     uint8_t seed[32];
-    random_bytes(seed, 32, 0);
+    assert(btc_random_bytes(seed, 32, 0));
     int ret = secp256k1_context_randomize(secp256k1_ctx, seed);
     assert(ret);
 }
