@@ -162,7 +162,7 @@ int deser_u64(uint64_t* vo, struct const_buffer* buf)
     return true;
 }
 
-int deser_u256(uint8_t* vo, struct const_buffer* buf)
+int deser_u256(uint256 vo, struct const_buffer* buf)
 {
     return deser_bytes(vo, buf, 32);
 }

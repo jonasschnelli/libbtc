@@ -39,7 +39,7 @@ extern "C" {
 
 typedef struct btc_blockindex {
     uint32_t height;
-    uint8_t hash[32];
+    uint256 hash;
     btc_block_header header;
     struct btc_blockindex* next;
     struct btc_blockindex* prev;

@@ -84,9 +84,9 @@ void postcmd(struct btc_node_ *node, btc_p2p_msg_hdr *hdr, struct const_buffer *
 
         /* request some headers (from the genesis block) */
         vector *blocklocators = vector_new(1, NULL);
-        uint8_t from_hash[32];
+        uint256 from_hash;
         utils_uint256_sethex("000000000000000001e67f0781f5e31a62863e6d7a1a1f786c7f666a9954a648", from_hash); // height 428694
-        uint8_t stop_hash[32];
+        uint256 stop_hash;
         utils_uint256_sethex("00000000000000000378be785f464ef19243baba187cb3791ac92a69ca46bb46", stop_hash); // height 428695
 
         vector_add(blocklocators, from_hash);

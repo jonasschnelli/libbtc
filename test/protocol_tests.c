@@ -57,7 +57,7 @@ void test_protocol()
     btc_p2p_inv_msg inv_msg, inv_msg_check;
     memset(&inv_msg, 0, sizeof(inv_msg));
 
-    uint8_t hash[32] = {0};
+    uint256 hash = {0};
 
     btc_p2p_msg_inv_init(&inv_msg, 1, hash);
     btc_p2p_msg_inv_ser(&inv_msg, inv_msg_cstr);
@@ -65,7 +65,7 @@ void test_protocol()
     struct const_buffer buf_inv = {inv_msg_cstr->str, inv_msg_cstr->len};
     u_assert_int_eq(btc_p2p_msg_inv_deser(&inv_msg_check, &buf_inv), true);
     u_assert_int_eq(inv_msg_check.type, 1);
-    u_assert_mem_eq(inv_msg_check.hash, inv_msg.hash, 32);
+    u_assert_mem_eq(inv_msg_check.hash, inv_msg.hash, sizeof(inv_msg.hash));
     cstr_free(inv_msg_cstr, true);
 
     /* create a version message struct */
@@ -101,7 +101,7 @@ void test_protocol()
     cstr_free(version_msg_cstr, true);
 
     /* getheaders */
-    uint8_t genesis_hash[32] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x19, 0xd6, 0x68, 0x9c, 0x08, 0x5a, 0xe1, 0x65, 0x83, 0x1e, 0x93, 0x4f, 0xf7, 0x63, 0xae, 0x46, 0xa2, 0xa6, 0xc1, 0x72, 0xb3, 0xf1, 0xb6, 0x0a, 0x8c, 0xe2, 0x6f};
+    uint256 genesis_hash = {0x00, 0x00, 0x00, 0x00, 0x00, 0x19, 0xd6, 0x68, 0x9c, 0x08, 0x5a, 0xe1, 0x65, 0x83, 0x1e, 0x93, 0x4f, 0xf7, 0x63, 0xae, 0x46, 0xa2, 0xa6, 0xc1, 0x72, 0xb3, 0xf1, 0xb6, 0x0a, 0x8c, 0xe2, 0x6f};
     vector *blocklocators = vector_new(1, NULL);
     vector_add(blocklocators, genesis_hash);
     cstring *getheader_msg = cstr_new_sz(256);
@@ -116,12 +116,12 @@ void test_protocol()
     u_assert_int_eq(hdr.data_len, getheader_msg->len);
 
 
-    uint8_t hashstop_check[32];
+    uint256 hashstop_check;
     vector *blocklocators_check = vector_new(1, free);
     btc_p2p_deser_msg_getheaders(blocklocators_check, hashstop_check, &buf);
-    u_assert_mem_eq(NULLHASH, hashstop_check, 32);
+    u_assert_mem_eq(NULLHASH, hashstop_check, sizeof(hashstop_check));
     uint8_t *hash_loc_0 = vector_idx(blocklocators_check, 0);
-    u_assert_mem_eq(genesis_hash, hash_loc_0, 32);
+    u_assert_mem_eq(genesis_hash, hash_loc_0, sizeof(genesis_hash));
 
 
     /* cleanup */

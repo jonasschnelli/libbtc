@@ -126,14 +126,14 @@ int btc_base58_decode(void* bin, size_t* binszp, const char* b58)
 
 int btc_b58check(const void* bin, size_t binsz, const char* base58str)
 {
-    unsigned char buf[32];
+    uint256 buf;
     const uint8_t* binc = bin;
     unsigned i;
     if (binsz < 4) {
         return -4;
     }
     sha256_Raw(bin, binsz - 4, buf);
-    sha256_Raw(buf, 32, buf);
+    sha256_Raw(buf, sizeof(buf), buf);
     if (memcmp(&binc[binsz - 4], buf, 4)) {
         return -1;
     }

@@ -58,7 +58,7 @@ void btc_net_spv_post_cmd(btc_node* node, btc_p2p_msg_hdr* hdr, struct const_buf
 /* callback function to dispatch messages once version/verack handshake has been done */
 void btc_net_spv_node_handshake_done(btc_node* node);
 
-void btc_net_spv_send_getheaders(btc_node* node, vector* blocklocators, uint8_t* hashstop);
+void btc_net_spv_send_getheaders(btc_node* node, vector* blocklocators, uint256 hashstop);
 
 void btc_net_spv_get_peers_from_dns(const char* seed, vector* ips_out, int family);
 

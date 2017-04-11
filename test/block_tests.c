@@ -41,10 +41,10 @@ void test_block_header()
         cstring* serialized = cstr_new_sz(80);
         const struct blockheadertest* test = &block_header_tests[i];
         uint8_t header_data[80];
-        uint8_t hash_data[32];
+        uint256 hash_data;
 
         utils_hex_to_bin(test->hexheader, header_data, 160, &outlen);
-        utils_hex_to_bin(test->hexhash, hash_data, 32, &outlen);
+        utils_hex_to_bin(test->hexhash, hash_data, sizeof(hash_data), &outlen);
 
         btc_block_header* header = btc_block_header_new();
         struct const_buffer buf = {header_data, 80};
@@ -61,12 +61,12 @@ void test_block_header()
         assert(memcmp(hexbuf, test->hexheader, 160) == 0);
 
         // Check the block hash
-        uint8_t blockhash[32];
+        uint256 blockhash;
         btc_block_header_hash(header, blockhash);
 
-        utils_bin_to_hex(blockhash, 32, hexbuf);
-        utils_reverse_hex(hexbuf, 64);
-        assert(memcmp(hexbuf, test->hexhash, 64) == 0);
+        utils_bin_to_hex(blockhash, BTC_HASH_LENGTH, hexbuf);
+        utils_reverse_hex(hexbuf, BTC_HASH_LENGTH*2);
+        assert(memcmp(hexbuf, test->hexhash, BTC_HASH_LENGTH*2) == 0);
 
         // Check version, ts, bits, nonce
         assert(header->version == test->version);
@@ -133,10 +133,10 @@ void test_block_header()
     utils_bin_to_hex((unsigned char *)blockheader_ser->str, blockheader_ser->len, headercheck);
     u_assert_str_eq(headercheck, blockheader_h427928);
 
-    uint8_t checkhash[32];
+    uint256 checkhash;
     btc_block_header_hash(&bheader, (uint8_t *)&checkhash);
-    char hashhex[65];
-    utils_bin_to_hex(checkhash, 32, hashhex);
+    char hashhex[sizeof(checkhash)*2];
+    utils_bin_to_hex(checkhash, sizeof(checkhash), hashhex);
     utils_reverse_hex(hashhex, strlen(hashhex));
     u_assert_str_eq(blockheader_hash_h427928, hashhex);
 
@@ -149,5 +149,5 @@ void test_block_header()
 
 
     btc_block_header_hash(&bheaderprev, (uint8_t *)&checkhash);
-    u_assert_mem_eq(&checkhash, &bheader.prev_block, 32);
+    u_assert_mem_eq(&checkhash, &bheader.prev_block, sizeof(checkhash));
 }

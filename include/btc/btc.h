@@ -71,4 +71,6 @@ extern "C" {
 #define BTC_ECKEY_PKEY_LENGTH 32
 #define BTC_HASH_LENGTH 32
 
+typedef uint8_t uint256[32];
+
 #endif //_LIBBTC_H_

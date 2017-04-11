@@ -51,7 +51,7 @@ static const unsigned int BTC_MAX_P2P_MSG_SIZE = 0x02000000;
 
 static const unsigned int BTC_P2P_HDRSZ = 24; //(4 + 12 + 4 + 4)  magic, command, length, checksum
 
-static unsigned int NULLHASH[32] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+static uint256 NULLHASH = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 enum service_bits {
     BTC_NODE_NETWORK = (1 << 0),
@@ -87,7 +87,7 @@ typedef struct btc_p2p_msg_hdr_ {
 
 typedef struct btc_p2p_inv_msg_ {
     uint32_t type;
-    uint8_t hash[32];
+    uint256 hash;
 } btc_p2p_inv_msg;
 
 typedef struct btc_p2p_address_ {
@@ -127,7 +127,7 @@ LIBBTC_API btc_bool btc_p2p_msg_version_deser(btc_p2p_version_msg* msg, struct c
 /* =================================== */
 
 /* sets an inv message-element*/
-LIBBTC_API void btc_p2p_msg_inv_init(btc_p2p_inv_msg* msg, uint32_t type, uint8_t* hash);
+LIBBTC_API void btc_p2p_msg_inv_init(btc_p2p_inv_msg* msg, uint32_t type, uint256 hash);
 
 /* serialize a p2p "inv" message to an existing cstring */
 LIBBTC_API void btc_p2p_msg_inv_ser(btc_p2p_inv_msg* msg, cstring* buf);
@@ -172,10 +172,10 @@ LIBBTC_API cstring* btc_p2p_message_new(const unsigned char netmagic[4], const c
 /* =================================== */
 
 /* creates a getheader message */
-LIBBTC_API void btc_p2p_msg_getheaders(vector* blocklocators, uint8_t* hashstop, cstring* str_out);
+LIBBTC_API void btc_p2p_msg_getheaders(vector* blocklocators, uint256 hashstop, cstring* str_out);
 
 /* directly deserialize a getheaders message to blocklocators, hashstop */
-LIBBTC_API btc_bool btc_p2p_deser_msg_getheaders(vector* blocklocators, uint8_t* hashstop, struct const_buffer* buf);
+LIBBTC_API btc_bool btc_p2p_deser_msg_getheaders(vector* blocklocators, uint256 hashstop, struct const_buffer* buf);
 
 
 #ifdef __cplusplus
