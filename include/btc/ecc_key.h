@@ -56,7 +56,7 @@ LIBBTC_API void btc_pubkey_cleanse(btc_pubkey* pubkey);
 LIBBTC_API void btc_pubkey_from_key(btc_key* privkey, btc_pubkey* pubkey_inout);
 
 //get the hash160 (single SHA256 + RIPEMD160)
-LIBBTC_API void btc_pubkey_get_hash160(const btc_pubkey* pubkey, uint8_t* hash160);
+LIBBTC_API void btc_pubkey_get_hash160(const btc_pubkey* pubkey, uint160 hash160);
 
 //get the hex representation of a pubkey, strsize must be at leat 66 bytes
 LIBBTC_API btc_bool btc_pubkey_get_hex(const btc_pubkey* pubkey, char* str, size_t* strsize);

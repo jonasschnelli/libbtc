@@ -107,7 +107,7 @@ LIBBTC_API btc_hdnode* btc_wallet_find_hdnode_byaddr(btc_wallet* wallet, const c
 LIBBTC_API btc_bool btc_wallet_add_wtx(btc_wallet* wallet, btc_wtx* wtx);
 
 /** looks if a key with the hash160 (SHA256/RIPEMD) exists */
-LIBBTC_API btc_bool btc_wallet_have_key(btc_wallet* wallet, uint8_t* hash160);
+LIBBTC_API btc_bool btc_wallet_have_key(btc_wallet* wallet, uint160 hash160);
 
 /** gets credit from given transaction */
 LIBBTC_API int64_t btc_wallet_get_balance(btc_wallet* wallet);

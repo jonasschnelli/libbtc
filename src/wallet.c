@@ -215,12 +215,12 @@ void btc_wallet_logdb_append_cb(void* ctx, logdb_bool load_phase, logdb_record* 
             wallet->masterkey = btc_hdnode_new();
             btc_hdnode_deserialize(rec->value->str, wallet->chain, wallet->masterkey);
         }
-        if (rec->key->len == strlen(hdkey_key) + 20 && memcmp(rec->key->str, hdkey_key, strlen(hdkey_key)) == 0) {
+        if (rec->key->len == strlen(hdkey_key) + sizeof(uint160) && memcmp(rec->key->str, hdkey_key, strlen(hdkey_key)) == 0) {
             btc_hdnode* hdnode = btc_hdnode_new();
             btc_hdnode_deserialize(rec->value->str, wallet->chain, hdnode);
 
             /* rip out the hash from the record key (avoid re-SHA256) */
-            cstring* keyhash160 = cstr_new_buf(rec->key->str + strlen(hdkey_key), 20);
+            cstring* keyhash160 = cstr_new_buf(rec->key->str + strlen(hdkey_key), sizeof(uint160));
 
             /* add hdnode to the rbtree */
             RBTreeInsert(wallet->hdkeys_rbtree, keyhash160, hdnode);
@@ -334,7 +334,7 @@ btc_hdnode* btc_wallet_next_key_new(btc_wallet* wallet)
     btc_hdnode_serialize_public(node, wallet->chain, value.str, value.alloc);
     value.len = strlen(str);
 
-    uint8_t key_int[strlen(hdkey_key) + 20];
+    uint8_t key_int[strlen(hdkey_key) + sizeof(uint160)];
     key.alloc = sizeof(key_int);
     key.len = key.alloc;
     key.str = (char*)&key_int;
@@ -345,7 +345,7 @@ btc_hdnode* btc_wallet_next_key_new(btc_wallet* wallet)
     logdb_flush(wallet->db);
 
     //add key to the rbtree
-    cstring* hdnodehash = cstr_new_buf(key.str + strlen(hdkey_key), 20);
+    cstring* hdnodehash = cstr_new_buf(key.str + strlen(hdkey_key), sizeof(uint160));
     RBTreeInsert(wallet->hdkeys_rbtree, hdnodehash, btc_hdnode_copy(node));
 
     //increase the in-memory counter (cache)
@@ -363,13 +363,13 @@ void btc_wallet_get_addresses(btc_wallet* wallet, vector* addr_out)
 
     while ((hdkey_rbtree_node = rbtree_enumerate_next(wallet->hdkeys_rbtree))) {
         cstring* key = hdkey_rbtree_node->key;
-        uint8_t hash160[21];
+        uint8_t hash160[sizeof(uint160)+1];
         hash160[0] = wallet->chain->b58prefix_pubkey_address;
-        memcpy(hash160 + 1, key->str, 20);
+        memcpy(hash160 + 1, key->str, sizeof(uint160));
 
         size_t addrsize = 98;
         char* addr = btc_calloc(1, addrsize);
-        btc_base58_encode_check(hash160, 21, addr, addrsize);
+        btc_base58_encode_check(hash160, sizeof(uint160)+1, addr, addrsize);
         vector_add(addr_out, addr);
     }
 }
@@ -380,12 +380,12 @@ btc_hdnode* btc_wallet_find_hdnode_byaddr(btc_wallet* wallet, const char* search
         return NULL;
 
     uint8_t hashdata[strlen(search_addr)];
-    memset(hashdata, 0, 20);
+    memset(hashdata, 0, sizeof(uint160));
     btc_base58_decode_check(search_addr, hashdata, strlen(search_addr));
 
     cstring keyhash160;
     keyhash160.str = (char*)hashdata + 1;
-    keyhash160.len = 20;
+    keyhash160.len = sizeof(uint160);
     rb_red_blk_node* node = RBExactQuery(wallet->hdkeys_rbtree, &keyhash160);
     if (node && node->info)
         return (btc_hdnode*)node->info;
@@ -419,14 +419,14 @@ btc_bool btc_wallet_add_wtx(btc_wallet* wallet, btc_wtx* wtx)
     return true;
 }
 
-btc_bool btc_wallet_have_key(btc_wallet* wallet, uint8_t* hash160)
+btc_bool btc_wallet_have_key(btc_wallet* wallet, uint160 hash160)
 {
     if (!wallet)
         return false;
 
     cstring keyhash160;
     keyhash160.str = (char*)hash160;
-    keyhash160.len = 20;
+    keyhash160.len = sizeof(uint160);
     rb_red_blk_node* node = RBExactQuery(wallet->hdkeys_rbtree, &keyhash160);
     if (node && node->info)
         return true;

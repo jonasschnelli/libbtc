@@ -72,5 +72,6 @@ extern "C" {
 #define BTC_HASH_LENGTH 32
 
 typedef uint8_t uint256[32];
+typedef uint8_t uint160[20];
 
 #endif //_LIBBTC_H_
