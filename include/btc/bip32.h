@@ -62,7 +62,7 @@ LIBBTC_API void btc_hdnode_serialize_public(const btc_hdnode* node, const btc_ch
 LIBBTC_API void btc_hdnode_serialize_private(const btc_hdnode* node, const btc_chainparams* chain, char* str, int strsize);
 
 /* gives out the raw sha256/ripemd160 hash */
-LIBBTC_API void btc_hdnode_get_hash160(const btc_hdnode* node, uint8_t* hash160_out);
+LIBBTC_API void btc_hdnode_get_hash160(const btc_hdnode* node, uint160 hash160_out);
 LIBBTC_API void btc_hdnode_get_p2pkh_address(const btc_hdnode* node, const btc_chainparams* chain, char* str, int strsize);
 LIBBTC_API btc_bool btc_hdnode_get_pub_hex(const btc_hdnode* node, char* str, size_t* strsize);
 LIBBTC_API btc_bool btc_hdnode_deserialize(const char* str, const btc_chainparams* chain, btc_hdnode* node);

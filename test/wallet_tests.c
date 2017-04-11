@@ -52,7 +52,7 @@ void test_wallet()
     //now it should be equal
     u_assert_int_eq(memcmp(node2->private_key, node3->private_key, sizeof(node2->private_key)), 0);
 
-    uint8_t hash160[20];
+    uint160 hash160;
 
     vector *addrs = vector_new(1, free);
     btc_wallet_get_addresses(wallet, addrs);
@@ -83,7 +83,7 @@ void test_wallet()
 
     size_t addrsize = 98;
     char addr[addrsize];
-    btc_base58_encode_check(hash160, 21, addr, addrsize);
+    btc_base58_encode_check(hash160, sizeof(uint160)+1, addr, addrsize);
     u_assert_int_eq(strcmp(addr, addrs->data[0]), 0);
     vector_free(addrs, true);
 
