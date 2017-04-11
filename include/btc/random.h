@@ -36,8 +36,18 @@ extern "C" {
 #include <stdint.h>
 #include <stdlib.h>
 
-LIBBTC_API void random_init(void);
-LIBBTC_API btc_bool random_bytes(uint8_t* buf, uint32_t len, const uint8_t update_seed);
+typedef struct btc_rnd_mapper_ {
+    void (*btc_random_init)(void);
+    btc_bool (*btc_random_bytes)(uint8_t* buf, uint32_t len, const uint8_t update_seed);
+} btc_rnd_mapper;
+
+// set's a custom random callback mapper
+// this function is _not_ thread safe and should be called before anything else
+LIBBTC_API void btc_rnd_set_mapper(const btc_rnd_mapper mapper);
+LIBBTC_API void btc_rnd_set_mapper_default();
+
+LIBBTC_API void btc_random_init(void);
+LIBBTC_API btc_bool btc_random_bytes(uint8_t* buf, uint32_t len, const uint8_t update_seed);
 
 #ifdef __cplusplus
 }

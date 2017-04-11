@@ -24,9 +24,9 @@
 
 */
 
-#include "btc/protocol.h"
-#include "btc/hash.h"
-#include "btc/portable_endian.h"
+#include <btc/protocol.h>
+#include <btc/hash.h>
+#include <btc/portable_endian.h>
 #include <btc/buffer.h>
 #include <btc/serialize.h>
 #include <btc/utils.h>

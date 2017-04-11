@@ -41,7 +41,7 @@ extern void test_cstr();
 extern void test_buffer();
 extern void test_utils();
 extern void test_serialize();
-
+extern void test_memory();
 extern void test_random();
 extern void test_bitcoin_hash();
 extern void test_base58check();
@@ -94,6 +94,7 @@ int main()
     u_run_test(test_buffer);
     u_run_test(test_serialize);
 
+    u_run_test(test_memory);
     u_run_test(test_random);
     u_run_test(test_bitcoin_hash);
     u_run_test(test_base58check);

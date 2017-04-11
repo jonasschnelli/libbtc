@@ -21,7 +21,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "btc/base58.h"
+#include <btc/base58.h>
 
 #include <string.h>
 #include <sys/types.h>

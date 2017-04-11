@@ -45,8 +45,6 @@ typedef uint8_t btc_bool; //!serialize, c/c++ save bool
 extern "C" {
 #endif
 
-#include "memory.h"
-
 #ifndef LIBBTC_API
 #if defined(_WIN32)
 #ifdef LIBBTC_BUILD
@@ -60,6 +58,8 @@ extern "C" {
 #define LIBBTC_API
 #endif
 #endif
+
+#include "memory.h"
 
 #ifdef __cplusplus
 }

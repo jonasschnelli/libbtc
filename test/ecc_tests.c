@@ -21,10 +21,10 @@ void test_ecc()
 {
     unsigned char r_buf[32];
     memset(r_buf, 0, 32);
-    random_init();
+    btc_random_init();
 
     while (btc_ecc_verify_privatekey(r_buf) == 0) {
-        random_bytes(r_buf, 32, 0);
+        u_assert_int_eq(btc_random_bytes(r_buf, 32, 0), true);
     }
 
     memset(r_buf, 0xFF, 32);
