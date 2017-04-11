@@ -169,7 +169,6 @@ void event_cb(struct bufferevent* ev, short type, void* ctx)
     UNUSED(ev);
     btc_node* node = (btc_node*)ctx;
     node->nodegroup->log_write_cb("Event callback on node %d\n", node->nodeid);
-    node->nodegroup->log_write_cb("Connected nodes: %d\n", btc_node_group_amount_of_connected_nodes(node->nodegroup));
 
     if (((type & BEV_EVENT_TIMEOUT) != 0) && ((node->state & NODE_CONNECTING) == NODE_CONNECTING)) {
         node->nodegroup->log_write_cb("Timout connecting to node %d.\n", node->nodeid);
@@ -191,6 +190,7 @@ void event_cb(struct bufferevent* ev, short type, void* ctx)
         btc_node_connection_state_changed(node);
         /* if callback is set, fire */
     }
+    node->nodegroup->log_write_cb("Connected nodes: %d\n", btc_node_group_amount_of_connected_nodes(node->nodegroup, NODE_CONNECTED));
 }
 
 btc_node* btc_node_new()
@@ -249,6 +249,7 @@ void btc_node_disconnect(btc_node* node)
 
     node->state &= ~NODE_CONNECTING;
     node->state &= ~NODE_CONNECTED;
+    node->state |= NODE_DISCONNECTED;
 
     node->time_started_con = 0;
 }
@@ -283,6 +284,7 @@ btc_node_group* btc_node_group_new(const btc_chainparams* chainparams)
     /* nullify callbacks */
     node_group->postcmd_cb = NULL;
     node_group->node_connection_state_changed_cb = NULL;
+    node_group->should_connect_to_more_nodes_cb = NULL;
     node_group->handshake_done_cb = NULL;
     node_group->log_write_cb = net_write_log_null;
     node_group->desired_amount_connected_nodes = 3;
@@ -317,12 +319,12 @@ void btc_node_group_add_node(btc_node_group* group, btc_node* node)
     node->nodeid = group->nodes->len;
 }
 
-int btc_node_group_amount_of_connected_nodes(btc_node_group* group)
+int btc_node_group_amount_of_connected_nodes(btc_node_group* group, enum NODE_STATE state)
 {
     int cnt = 0;
     for (size_t i = 0; i < group->nodes->len; i++) {
         btc_node* node = vector_idx(group->nodes, i);
-        if ((node->state & NODE_CONNECTED) == NODE_CONNECTED)
+        if ((node->state & state) == state)
             cnt++;
     }
     return cnt;
@@ -331,7 +333,7 @@ int btc_node_group_amount_of_connected_nodes(btc_node_group* group)
 btc_bool btc_node_group_connect_next_nodes(btc_node_group* group)
 {
     btc_bool connected_at_least_to_one_node = false;
-    int connect_amount = group->desired_amount_connected_nodes - btc_node_group_amount_of_connected_nodes(group);
+    int connect_amount = group->desired_amount_connected_nodes - btc_node_group_amount_of_connected_nodes(group, NODE_CONNECTED);
     if (connect_amount <= 0)
         return true;
 
@@ -341,6 +343,7 @@ btc_bool btc_node_group_connect_next_nodes(btc_node_group* group)
         if (
             !((node->state & NODE_CONNECTED) == NODE_CONNECTED) &&
             !((node->state & NODE_CONNECTING) == NODE_CONNECTING) &&
+            !((node->state & NODE_DISCONNECTED) == NODE_DISCONNECTED) &&
             !((node->state & NODE_ERRORED) == NODE_ERRORED)) {
             /* setup buffer event */
             node->event_bev = bufferevent_socket_new(group->event_base, -1, BEV_OPT_CLOSE_ON_FREE);
@@ -363,6 +366,9 @@ btc_bool btc_node_group_connect_next_nodes(btc_node_group* group)
             event_add(node->timer_event, &tv);
             node->state |= NODE_CONNECTING;
             connected_at_least_to_one_node = true;
+
+            node->nodegroup->log_write_cb("Trying to connect to %d...\n", node->nodeid);
+
             connect_amount--;
             if (connect_amount <= 0)
                 return true;
@@ -381,7 +387,11 @@ void btc_node_connection_state_changed(btc_node* node)
         btc_node_release_events(node);
 
         /* connect to more nodes are required */
-        if (btc_node_group_amount_of_connected_nodes(node->nodegroup) < node->nodegroup->desired_amount_connected_nodes)
+        btc_bool should_connect_to_more_nodes = true;
+        if (node->nodegroup->should_connect_to_more_nodes_cb)
+            should_connect_to_more_nodes = node->nodegroup->should_connect_to_more_nodes_cb(node);
+
+        if (should_connect_to_more_nodes && (btc_node_group_amount_of_connected_nodes(node->nodegroup, NODE_CONNECTED) + btc_node_group_amount_of_connected_nodes(node->nodegroup, NODE_CONNECTING) < node->nodegroup->desired_amount_connected_nodes))
             btc_node_group_connect_next_nodes(node->nodegroup);
     }
     if ((node->state & NODE_MISSBEHAVED) == NODE_MISSBEHAVED) {

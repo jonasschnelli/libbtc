@@ -49,6 +49,7 @@ enum NODE_STATE {
     NODE_TIMEOUT = (1 << 3),
     NODE_HEADERSYNC = (1 << 4),
     NODE_MISSBEHAVED = (1 << 5),
+    NODE_DISCONNECTED = (1 << 6),
 };
 
 /* basic group-of-nodes structure */
@@ -66,6 +67,7 @@ typedef struct btc_node_group_ {
     btc_bool (*parse_cmd_cb)(struct btc_node_* node, btc_p2p_msg_hdr* hdr, struct const_buffer* buf);
     void (*postcmd_cb)(struct btc_node_* node, btc_p2p_msg_hdr* hdr, struct const_buffer* buf);
     void (*node_connection_state_changed_cb)(struct btc_node_* node);
+    btc_bool (*should_connect_to_more_nodes_cb)(struct btc_node_* node);
     void (*handshake_done_cb)(struct btc_node_* node);
     btc_bool (*periodic_timer_cb)(struct btc_node_* node, uint64_t* time); // return false will cancle the internal logic
 } btc_node_group;
@@ -134,7 +136,7 @@ LIBBTC_API void btc_node_group_event_loop(btc_node_group* group);
 LIBBTC_API btc_bool btc_node_group_connect_next_nodes(btc_node_group* group);
 
 /* get the amount of connected nodes */
-LIBBTC_API int btc_node_group_amount_of_connected_nodes(btc_node_group* group);
+LIBBTC_API int btc_node_group_amount_of_connected_nodes(btc_node_group* group, enum NODE_STATE state);
 
 /* sends version command to node */
 LIBBTC_API void btc_node_send_version(btc_node* node);
