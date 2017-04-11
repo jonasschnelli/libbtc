@@ -50,8 +50,8 @@ void btc_block_header_free(btc_block_header* header)
         return;
 
     header->version = 1;
-    memset(&header->prev_block, 0, 32);
-    memset(&header->merkle_root, 0, 32);
+    memset(&header->prev_block, 0, BTC_HASH_LENGTH);
+    memset(&header->merkle_root, 0, BTC_HASH_LENGTH);
     header->bits = 0;
     header->timestamp = 0;
     header->nonce = 0;
@@ -96,13 +96,13 @@ void btc_block_header_copy(btc_block_header* dest, const btc_block_header* src)
     dest->nonce = src->nonce;
 }
 
-btc_bool btc_block_header_hash(btc_block_header* header, uint8_t* hash)
+btc_bool btc_block_header_hash(btc_block_header* header, uint256 hash)
 {
     cstring* s = cstr_new_sz(80);
     btc_block_header_serialize(s, header);
 
     sha256_Raw((const uint8_t*)s->str, s->len, hash);
-    sha256_Raw(hash, 32, hash);
+    sha256_Raw(hash, SHA256_DIGEST_LENGTH, hash);
     cstr_free(s, true);
 
     btc_bool ret = true;

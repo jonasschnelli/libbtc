@@ -62,13 +62,13 @@ LIBBTC_API void btc_pubkey_get_hash160(const btc_pubkey* pubkey, uint8_t* hash16
 LIBBTC_API btc_bool btc_pubkey_get_hex(const btc_pubkey* pubkey, char* str, size_t* strsize);
 
 //sign a 32byte message/hash and returns a DER encoded signature (through *sigout)
-LIBBTC_API btc_bool btc_key_sign_hash(const btc_key* privkey, const uint8_t* hash, unsigned char* sigout, size_t* outlen);
+LIBBTC_API btc_bool btc_key_sign_hash(const btc_key* privkey, const uint256 hash, unsigned char* sigout, size_t* outlen);
 
 //sign a 32byte message/hash and returns a 64 byte compact signature (through *sigout)
-LIBBTC_API btc_bool btc_key_sign_hash_compact(const btc_key* privkey, const uint8_t* hash, unsigned char* sigout, size_t* outlen);
+LIBBTC_API btc_bool btc_key_sign_hash_compact(const btc_key* privkey, const uint256 hash, unsigned char* sigout, size_t* outlen);
 
 //verifies a DER encoded signature with given pubkey and return true if valid
-LIBBTC_API btc_bool btc_pubkey_verify_sig(const btc_pubkey* pubkey, const uint8_t* hash, unsigned char* sigder, int len);
+LIBBTC_API btc_bool btc_pubkey_verify_sig(const btc_pubkey* pubkey, const uint256 hash, unsigned char* sigder, int len);
 
 #ifdef __cplusplus
 }

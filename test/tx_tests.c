@@ -714,8 +714,8 @@ void test_tx_sighash()
         uint8_t script_data[strlen(test->script) / 2];
         utils_hex_to_bin(test->script, script_data, strlen(test->script), &outlen);
         cstring* script = cstr_new_buf(script_data, outlen);
-        uint8_t sighash[32];
-        memset(sighash, 0, 32);
+        uint256 sighash;
+        memset(sighash, 0, sizeof(sighash));
         btc_tx_sighash(tx, script, test->inputindex, test->hashtype, sighash);
 
         vector* vec = vector_new(10, btc_script_op_free_cb);
@@ -728,9 +728,9 @@ void test_tx_sighash()
 
         cstr_free(script, true);
 
-        char hexbuf[65];
-        utils_bin_to_hex(sighash, 32, hexbuf);
-        utils_reverse_hex(hexbuf, 64);
+        char hexbuf[sizeof(sighash)*2];
+        utils_bin_to_hex(sighash, sizeof(sighash), hexbuf);
+        utils_reverse_hex(hexbuf, sizeof(hexbuf));
 
         if (i != 0)
             assert(strcmp(hexbuf, test->hashhex) == 0);
@@ -856,11 +856,11 @@ void test_script_parse()
     u_assert_str_eq(hexbuf, "01000000000100ca9a3b000000001976a91457b78cc8347175aee968eaa91846e840ef36ff9288ac00000000");
     cstr_free(txser, true);
 
-    uint8_t txhash[32];
+    uint256 txhash;
     btc_tx_hash(tx, txhash);
-    char txhashhex[65];
-    utils_bin_to_hex((unsigned char*)txhash, 32, txhashhex);
-    utils_reverse_hex(txhashhex, 64);
+    char txhashhex[sizeof(txhash)*2];
+    utils_bin_to_hex((unsigned char*)txhash, sizeof(txhash), txhashhex);
+    utils_reverse_hex(txhashhex, sizeof(txhashhex));
 
     u_assert_str_eq(txhashhex, "41a86af25423391b1d9d78df1143e3a237f20db27511d8b72e25f2dec7a81d80");
 

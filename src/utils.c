@@ -177,7 +177,7 @@ signed char utils_hex_digit(char c)
 
 void utils_uint256_sethex(char* psz, uint8_t* out)
 {
-    memset(out, 0, 32);
+    memset(out, 0, sizeof(uint256));
 
     // skip leading spaces
     while (isspace(*psz))
@@ -193,7 +193,7 @@ void utils_uint256_sethex(char* psz, uint8_t* out)
         psz++;
     psz--;
     unsigned char* p1 = (unsigned char*)out;
-    unsigned char* pend = p1 + 32;
+    unsigned char* pend = p1 + sizeof(uint256);
     while (psz >= pbegin && p1 < pend) {
         *p1 = utils_hex_digit(*psz--);
         if (psz >= pbegin) {

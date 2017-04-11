@@ -40,8 +40,6 @@ extern "C" {
 #include "sha2.h"
 #include "vector.h"
 
-typedef uint8_t uint256[32];
-
 LIBBTC_API static inline btc_bool btc_hash_is_empty(uint256 hash)
 {
     return hash[0] == 0 && !memcmp(hash, hash + 1, 19);

@@ -61,7 +61,7 @@ LIBBTC_API int deser_u16(uint16_t* vo, struct const_buffer* buf);
 LIBBTC_API int deser_u32(uint32_t* vo, struct const_buffer* buf);
 LIBBTC_API int deser_s32(int32_t* vo, struct const_buffer* buf);
 LIBBTC_API int deser_u64(uint64_t* vo, struct const_buffer* buf);
-LIBBTC_API int deser_u256(uint8_t* vo, struct const_buffer* buf);
+LIBBTC_API int deser_u256(uint256 vo, struct const_buffer* buf);
 
 LIBBTC_API int deser_varlen(uint32_t* lo, struct const_buffer* buf);
 LIBBTC_API int deser_varlen_file(uint32_t* lo, FILE* file, uint8_t* rawdata, size_t* buflen_inout);

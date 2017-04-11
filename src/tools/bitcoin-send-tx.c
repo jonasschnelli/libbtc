@@ -192,7 +192,7 @@ void broadcast_handshake_done(struct btc_node_* node)
     btc_p2p_inv_msg inv_msg;
     memset(&inv_msg, 0, sizeof(inv_msg));
 
-    uint8_t hash[32];
+    uint256 hash;
     btc_tx_hash(ctx->tx, hash);
     btc_p2p_msg_inv_init(&inv_msg, BTC_INV_TYPE_TX, hash);
 
@@ -216,7 +216,7 @@ void broadcast_post_cmd(struct btc_node_* node, btc_p2p_msg_hdr* hdr, struct con
     if (strcmp(hdr->command, BTC_MSG_INV) == 0) {
         /* hash the tx */
         /* TODO: cache the hash */
-        uint8_t hash[32];
+        uint256 hash;
         btc_tx_hash(ctx->tx, hash);
 
         //  decompose
@@ -231,7 +231,7 @@ void broadcast_post_cmd(struct btc_node_* node, btc_p2p_msg_hdr* hdr, struct con
                 btc_node_missbehave(node);
                 return;
             }
-            if (memcmp(hash, inv_msg.hash, 32) == 0) {
+            if (memcmp(hash, inv_msg.hash, sizeof(hash)) == 0) {
                 // txfound
                 /* set hint bit 2 == tx found on peer*/
                 node->hints |= (1 << 2);

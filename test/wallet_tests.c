@@ -144,10 +144,10 @@ void test_wallet()
     for (i = 0; i < unspents->len; i++)
     {
         btc_output *output = unspents->data[i];
-        uint8_t hash[32];
+        uint256 hash;
         btc_tx_hash(output->wtx->tx, hash);
         char str[65];
-        utils_bin_to_hex(hash, 32, str);
+        utils_bin_to_hex(hash, sizeof(hash), str);
         utils_reverse_hex(str, 64);
         if (strcmp(str, "963b8b8e2d2025b64fd8144557604e98d2fa67a5386f8a06597d810f27ab60d7") == 0)
             found++;

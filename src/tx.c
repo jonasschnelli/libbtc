@@ -40,7 +40,7 @@ void btc_tx_in_free(btc_tx_in* tx_in)
     if (!tx_in)
         return;
 
-    memset(&tx_in->prevout.hash, 0, 32);
+    memset(&tx_in->prevout.hash, 0, sizeof(tx_in->prevout.hash));
     tx_in->prevout.n = 0;
 
     if (tx_in->script_sig) {
@@ -242,14 +242,14 @@ void btc_tx_serialize(cstring* s, const btc_tx* tx)
     ser_u32(s, tx->locktime);
 }
 
-void btc_tx_hash(const btc_tx* tx, uint8_t* hashout)
+void btc_tx_hash(const btc_tx* tx, uint256 hashout)
 {
     cstring* txser = cstr_new_sz(1024);
     btc_tx_serialize(txser, tx);
 
 
     sha256_Raw((const uint8_t*)txser->str, txser->len, hashout);
-    sha256_Raw(hashout, 32, hashout);
+    sha256_Raw(hashout, BTC_HASH_LENGTH, hashout);
     cstr_free(txser, true);
 }
 
@@ -332,7 +332,7 @@ void btc_tx_copy(btc_tx* dest, const btc_tx* src)
     }
 }
 
-btc_bool btc_tx_sighash(const btc_tx* tx_to, const cstring* fromPubKey, unsigned int in_num, int hashtype, uint8_t* hash)
+btc_bool btc_tx_sighash(const btc_tx* tx_to, const cstring* fromPubKey, unsigned int in_num, int hashtype, uint256 hash)
 {
     if (in_num >= tx_to->vin->len)
         return false;
@@ -416,7 +416,7 @@ btc_bool btc_tx_sighash(const btc_tx* tx_to, const cstring* fromPubKey, unsigned
     ser_s32(s, hashtype);
 
     sha256_Raw((const uint8_t*)s->str, s->len, hash);
-    sha256_Raw(hash, 32, hash);
+    sha256_Raw(hash, BTC_HASH_LENGTH, hash);
 
     cstr_free(s, true);
 

@@ -525,7 +525,7 @@ btc_bool btc_wallet_is_spent(btc_wallet* wallet, uint256 hash, uint32_t n)
     unsigned int i = 0;
     for (i = wallet->spends->len; i > 0; i--) {
         btc_tx_outpoint* outpoint = vector_idx(wallet->spends, i - 1);
-        if (memcmp(outpoint->hash, hash, SHA256_DIGEST_LENGTH) == 0 && n == outpoint->n)
+        if (memcmp(outpoint->hash, hash, BTC_HASH_LENGTH) == 0 && n == outpoint->n)
             return true;
     }
     return false;
