@@ -51,6 +51,7 @@ static struct option long_options[] =
         {"ips", no_argument, NULL, 'i'},
         {"debug", no_argument, NULL, 'd'},
         {"timeout", no_argument, NULL, 's'},
+        {"maxnodes", no_argument, NULL, 'm'},
         {NULL, 0, NULL, 0}};
 
 static void print_version()
@@ -61,7 +62,7 @@ static void print_version()
 static void print_usage()
 {
     print_version();
-    printf("Usage: bitcoin-send-tx (-i|-ips <ip,ip,...]>) (-t[--testnet]) (-r[--regtest]) (-d[--debug]) (-s[--timeout] <secs>) <txhex>\n");
+    printf("Usage: bitcoin-send-tx (-i|-ips <ip,ip,...]>) (-m[--maxpeers] <int>) (-t[--testnet]) (-r[--regtest]) (-d[--debug]) (-s[--timeout] <secs>) <txhex>\n");
     printf("\nExamples: \n");
     printf("Send a TX to random peers on testnet:\n");
     printf("> bitcoin-send-tx --testnet <txhex>\n\n");
@@ -75,7 +76,7 @@ static bool showError(const char* er)
     return 1;
 }
 
-btc_bool broadcast_tx(const btc_chainparams* chain, const btc_tx* tx, const char* ips, int timeout, btc_bool debug);
+btc_bool broadcast_tx(const btc_chainparams* chain, const btc_tx* tx, const char* ips, int maxpeers, int timeout, btc_bool debug);
 
 int main(int argc, char* argv[])
 {
@@ -85,7 +86,8 @@ int main(int argc, char* argv[])
     char* data = 0;
     char* ips = 0;
     int debug = 0;
-    int timeout = 10;
+    int timeout = 15;
+    int maxnodes = 10;
     const btc_chainparams* chain = &btc_chainparams_main;
 
     if (argc <= 1 || strlen(argv[argc - 1]) == 0 || argv[argc - 1][0] == '-') {
@@ -96,7 +98,7 @@ int main(int argc, char* argv[])
     data = argv[argc - 1];
 
     /* get arguments */
-    while ((opt = getopt_long_only(argc, argv, "i:trds:", long_options, &long_index)) != -1) {
+    while ((opt = getopt_long_only(argc, argv, "i:trds:m:", long_options, &long_index)) != -1) {
         switch (opt) {
         case 't':
             chain = &btc_chainparams_test;
@@ -112,6 +114,9 @@ int main(int argc, char* argv[])
             break;
         case 'i':
             ips = optarg;
+            break;
+        case 'm':
+            maxnodes = (int)strtol(optarg, (char**)NULL, 10);
             break;
         case 'v':
             print_version();
@@ -132,7 +137,7 @@ int main(int argc, char* argv[])
 
     btc_tx* tx = btc_tx_new();
     if (btc_tx_deserialize(data_bin, outlen, tx, NULL)) {
-        broadcast_tx(chain, tx, ips, timeout, debug);
+        broadcast_tx(chain, tx, ips, maxnodes, timeout, debug);
     } else {
         showError("Transaction is invalid\n");
         ret = 1;
@@ -145,7 +150,7 @@ int main(int argc, char* argv[])
 
 struct broadcast_ctx {
     const btc_tx* tx;
-    int timeout;
+    unsigned int timeout;
     int debuglevel;
     int connected_to_peers;
     int max_peers_to_connect;
@@ -153,6 +158,7 @@ struct broadcast_ctx {
     int inved_to_peers;
     int getdata_from_peers;
     int found_on_non_inved_peers;
+    uint64_t start_time;
 };
 
 static btc_bool broadcast_timer_cb(btc_node* node, uint64_t* now)
@@ -160,9 +166,9 @@ static btc_bool broadcast_timer_cb(btc_node* node, uint64_t* now)
     struct broadcast_ctx* ctx = (struct broadcast_ctx*)node->nodegroup->ctx;
 
     if (node->time_started_con > 0) {
-        node->nodegroup->log_write_cb("timer node %d, delta: %" PRIu64 " secs\n", node->nodeid, (*now - node->time_started_con));
+        node->nodegroup->log_write_cb("timer node %d, delta: %" PRIu64 " secs (timeout is: %d)\n", node->nodeid, (*now - ctx->start_time), ctx->timeout);
     }
-    if (node->time_started_con + ctx->timeout < *now)
+    if ((*now - ctx->start_time) > ctx->timeout)
         btc_node_disconnect(node);
 
     if ((node->hints & (1 << 1)) == (1 << 1)) {
@@ -179,7 +185,11 @@ static btc_bool broadcast_timer_cb(btc_node* node, uint64_t* now)
 
 void broadcast_handshake_done(struct btc_node_* node)
 {
-    printf("Successfully connected to peer %d\n", node->nodeid);
+    char ipaddr[256];
+    struct sockaddr_in *ad = (struct sockaddr_in *) &node->addr;
+    evutil_inet_ntop(node->addr.sa_family, &ad->sin_addr, ipaddr, sizeof(ipaddr));
+
+    printf("Successfully connected to peer %d (%s)\n", node->nodeid, ipaddr);
     struct broadcast_ctx* ctx = (struct broadcast_ctx*)node->nodegroup->ctx;
     ctx->connected_to_peers++;
 
@@ -208,6 +218,16 @@ void broadcast_handshake_done(struct btc_node_* node)
     /* set hint bit 0 == inv sent */
     node->hints |= (1 << 0);
     ctx->inved_to_peers++;
+}
+
+btc_bool broadcast_should_connect_more(btc_node* node)
+{
+    struct broadcast_ctx* ctx = (struct broadcast_ctx*)node->nodegroup->ctx;
+    node->nodegroup->log_write_cb("check if more nodes are required (connected to already: %d)\n", ctx->connected_to_peers);
+    if (ctx->connected_to_peers >= ctx->max_peers_to_connect) {
+        return false;
+    }
+    return true;
 }
 
 void broadcast_post_cmd(struct btc_node_* node, btc_p2p_msg_hdr* hdr, struct const_buffer* buf)
@@ -271,7 +291,7 @@ void broadcast_post_cmd(struct btc_node_* node, btc_p2p_msg_hdr* hdr, struct con
     }
 }
 
-btc_bool broadcast_tx(const btc_chainparams* chain, const btc_tx* tx, const char* ips, int timeout, btc_bool debug)
+btc_bool broadcast_tx(const btc_chainparams* chain, const btc_tx* tx, const char* ips, int maxpeers, int timeout, btc_bool debug)
 {
     struct broadcast_ctx ctx;
     ctx.tx = tx;
@@ -282,8 +302,7 @@ btc_bool broadcast_tx(const btc_chainparams* chain, const btc_tx* tx, const char
     ctx.getdata_from_peers = 0;
     ctx.inved_to_peers = 0;
     ctx.connected_to_peers = 0;
-    ctx.max_peers_to_connect = 6;
-
+    ctx.max_peers_to_connect = maxpeers;
     /* create a node group */
     btc_node_group* group = btc_node_group_new(chain);
     group->desired_amount_connected_nodes = ctx.max_peers_to_connect;
@@ -298,6 +317,7 @@ btc_bool broadcast_tx(const btc_chainparams* chain, const btc_tx* tx, const char
     }
     group->postcmd_cb = broadcast_post_cmd;
     group->handshake_done_cb = broadcast_handshake_done;
+    group->should_connect_to_more_nodes_cb = broadcast_should_connect_more;
 
     if (ips == NULL) {
         /* === DNS QUERY === */
@@ -342,8 +362,15 @@ btc_bool broadcast_tx(const btc_chainparams* chain, const btc_tx* tx, const char
     }
 
 
+    uint256 txhash;
+    btc_tx_hash(tx, txhash);
+    char hexout[sizeof(txhash)*2+1];
+    utils_bin_to_hex(txhash, sizeof(txhash), hexout);
+    hexout[sizeof(txhash)*2] = 0;
+    utils_reverse_hex(hexout, strlen(hexout));
+    printf("Start broadcasting transaction: %s with timeout %d seconds\n", hexout, timeout);
     /* connect to the next node */
-    printf("Start broadcasting process with timeout of %d seconds\n", timeout);
+    ctx.start_time = time(NULL);
     printf("Trying to connect to nodes...\n");
     btc_node_group_connect_next_nodes(group);
 
@@ -355,9 +382,18 @@ btc_bool broadcast_tx(const btc_chainparams* chain, const btc_tx* tx, const char
 
     printf("\n\nResult:\n=============\n");
     printf("Max nodes to connect to: %d\n", ctx.max_peers_to_connect);
-    printf("Connected to nodes: %d\n", ctx.connected_to_peers);
+    printf("Successfully connected to nodes: %d\n", ctx.connected_to_peers);
     printf("Informed nodes: %d\n", ctx.inved_to_peers);
     printf("Requested from nodes: %d\n", ctx.getdata_from_peers);
     printf("Seen on other nodes: %d\n", ctx.found_on_non_inved_peers);
+
+    if (ctx.getdata_from_peers == 0)
+    {
+        printf("\nError: The transaction was not requested by the informed nodes. This usually happens when the transaction has already been broadcasted\n");
+    }
+    else if (ctx.found_on_non_inved_peers == 0)
+    {
+        printf("\nError: The transaction was not relayed back. Your transaction is very likely invalid (or was already broadcased and picked up by an invalid node)\n");
+    }
     return 1;
 }
