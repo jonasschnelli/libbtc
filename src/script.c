@@ -172,7 +172,7 @@ err_out:
     return false;
 }
 
-static inline btc_bool btc_script_is_pushdata(enum opcodetype op)
+static inline btc_bool btc_script_is_pushdata(const enum opcodetype op)
 {
     return (op <= OP_PUSHDATA4);
 }
@@ -201,7 +201,7 @@ static btc_bool btc_script_is_op_pubkeyhash(const btc_script_op* op)
 }
 
 // OP_PUBKEY, OP_CHECKSIG
-btc_bool btc_script_is_pubkey(vector* ops)
+btc_bool btc_script_is_pubkey(const vector* ops)
 {
     return ((ops->len == 2) &&
             btc_script_is_op(vector_idx(ops, 1), OP_CHECKSIG) &&
@@ -209,7 +209,7 @@ btc_bool btc_script_is_pubkey(vector* ops)
 }
 
 // OP_DUP, OP_HASH160, OP_PUBKEYHASH, OP_EQUALVERIFY, OP_CHECKSIG,
-btc_bool btc_script_is_pubkeyhash(vector* ops, vector* data_out)
+btc_bool btc_script_is_pubkeyhash(const vector* ops, vector* data_out)
 {
     if ((ops->len == 5) &&
         btc_script_is_op(vector_idx(ops, 0), OP_DUP) &&
@@ -230,7 +230,7 @@ btc_bool btc_script_is_pubkeyhash(vector* ops, vector* data_out)
 }
 
 // OP_HASH160, OP_PUBKEYHASH, OP_EQUAL
-btc_bool btc_script_is_scripthash(vector* ops)
+btc_bool btc_script_is_scripthash(const vector* ops)
 {
     return ((ops->len == 3) &&
             btc_script_is_op(vector_idx(ops, 0), OP_HASH160) &&
@@ -244,7 +244,7 @@ static btc_bool btc_script_is_op_smallint(const btc_script_op* op)
             (op->op >= OP_1 && op->op <= OP_16));
 }
 
-btc_bool btc_script_is_multisig(vector* ops)
+btc_bool btc_script_is_multisig(const vector* ops)
 {
     if ((ops->len < 3) || (ops->len > (16 + 3)) ||
         !btc_script_is_op_smallint(vector_idx(ops, 0)) ||
@@ -260,7 +260,7 @@ btc_bool btc_script_is_multisig(vector* ops)
     return true;
 }
 
-enum btc_tx_out_type btc_script_classify_ops(vector* ops)
+enum btc_tx_out_type btc_script_classify_ops(const vector* ops)
 {
     if (btc_script_is_pubkeyhash(ops, NULL))
         return BTC_TX_PUBKEYHASH;
@@ -274,7 +274,7 @@ enum btc_tx_out_type btc_script_classify_ops(vector* ops)
     return BTC_TX_NONSTANDARD;
 }
 
-enum btc_tx_out_type btc_script_classify(cstring* script, vector* data_out)
+enum btc_tx_out_type btc_script_classify(const cstring* script, vector* data_out)
 {
     //INFO: could be speed up by not forming a vector
     //      and directly parse the script cstring
@@ -296,7 +296,7 @@ enum btc_tx_out_type btc_script_classify(cstring* script, vector* data_out)
     return tx_out_type;
 }
 
-btc_bool btc_script_extract_pkh(cstring* script, uint8_t* data)
+btc_bool btc_script_extract_pkh(const cstring* script, uint8_t* data)
 {
     // expected that data is a 20byte buffer
 
@@ -313,7 +313,7 @@ btc_bool btc_script_extract_pkh(cstring* script, uint8_t* data)
     return suc;
 }
 
-enum opcodetype btc_encode_op_n(int n)
+enum opcodetype btc_encode_op_n(const int n)
 {
     assert(n >= 0 && n <= 16);
     if (n == 0)
@@ -328,7 +328,7 @@ void btc_script_append_op(cstring* script_in, enum opcodetype op)
 }
 
 
-void btc_script_append_pushdata(cstring* script_in, unsigned char* data, size_t datalen)
+void btc_script_append_pushdata(cstring* script_in, const unsigned char* data, const size_t datalen)
 {
     if (datalen < OP_PUSHDATA1) {
         cstr_append_buf(script_in, (unsigned char*)&datalen, 1);
@@ -347,7 +347,7 @@ void btc_script_append_pushdata(cstring* script_in, unsigned char* data, size_t 
     cstr_append_buf(script_in, data, datalen);
 }
 
-btc_bool btc_script_build_multisig(cstring* script_in, unsigned int required_signatures, vector* pubkeys_chars)
+btc_bool btc_script_build_multisig(cstring* script_in, const unsigned int required_signatures, const vector* pubkeys_chars)
 {
     cstr_resize(script_in, 0); //clear script
 
