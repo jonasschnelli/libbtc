@@ -256,7 +256,7 @@ void btc_hdnode_get_p2pkh_address(const btc_hdnode* node, const btc_chainparams*
     uint8_t hash160[sizeof(uint160)+1];
     hash160[0] = chain->b58prefix_pubkey_address;
     btc_hdnode_get_hash160(node, hash160 + 1);
-    btc_base58_encode_check(hash160, sizeof(uint160)+1, str, strsize);
+    btc_base58_encode_check(hash160, sizeof(hash160), str, strsize);
 }
 
 btc_bool btc_hdnode_get_pub_hex(const btc_hdnode* node, char* str, size_t* strsize)

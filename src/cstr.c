@@ -23,7 +23,7 @@ static int cstr_alloc_min_sz(cstring* s, size_t sz)
     while ((al_sz = (1 << shift)) < sz)
         shift++;
 
-    new_s = realloc(s->str, al_sz);
+    new_s = btc_realloc(s->str, al_sz);
     if (!new_s)
         return 0;
 

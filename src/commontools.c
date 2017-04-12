@@ -39,7 +39,7 @@ btc_bool address_from_pubkey(const btc_chainparams* chain, const char* pubkey_he
     hash160[0] = chain->b58prefix_pubkey_address;
     btc_pubkey_get_hash160(&pubkey, hash160 + 1);
 
-    btc_base58_encode_check(hash160, sizeof(uint160)+1, address, 98);
+    btc_base58_encode_check(hash160, sizeof(hash160), address, 98);
 
     return true;
 }
