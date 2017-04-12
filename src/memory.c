@@ -31,10 +31,11 @@
 
 void* btc_malloc_internal(size_t size);
 void* btc_calloc_internal(size_t count, size_t size);
+void* btc_realloc_internal(void *ptr, size_t size);
 void btc_free_internal(void* ptr);
 
-const static btc_mem_mapper default_mem_mapper = {btc_malloc_internal, btc_calloc_internal, btc_free_internal};
-static btc_mem_mapper current_mem_mapper = {btc_malloc_internal, btc_calloc_internal, btc_free_internal};
+const static btc_mem_mapper default_mem_mapper = {btc_malloc_internal, btc_calloc_internal, btc_realloc_internal, btc_free_internal};
+static btc_mem_mapper current_mem_mapper = {btc_malloc_internal, btc_calloc_internal, btc_realloc_internal, btc_free_internal};
 
 void btc_mem_set_mapper_default()
 {
@@ -54,6 +55,11 @@ void* btc_malloc(size_t size)
 void* btc_calloc(size_t count, size_t size)
 {
     return current_mem_mapper.btc_calloc(count, size);
+}
+
+void* btc_realloc(void *ptr, size_t size)
+{
+    return current_mem_mapper.btc_realloc(ptr, size);
 }
 
 void btc_free(void* ptr)
@@ -80,6 +86,20 @@ void* btc_calloc_internal(size_t count, size_t size)
     void* result;
 
     if ((result = calloc(count, size))) { /* assignment intentional */
+        return (result);
+    } else {
+        printf("memory overflow: calloc failed in btc_malloc.");
+        printf("  Exiting Program.\n");
+        exit(-1);
+        return (0);
+    }
+}
+
+void* btc_realloc_internal(void *ptr, size_t size)
+{
+    void* result;
+
+    if ((result = realloc(ptr, size))) { /* assignment intentional */
         return (result);
     } else {
         printf("memory overflow: calloc failed in btc_malloc.");

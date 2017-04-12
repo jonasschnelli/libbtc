@@ -38,6 +38,7 @@ extern "C" {
 typedef struct btc_mem_mapper_ {
     void* (*btc_malloc)(size_t size);
     void* (*btc_calloc)(size_t count, size_t size);
+    void* (*btc_realloc)(void* ptr, size_t size);
     void (*btc_free)(void* ptr);
 } btc_mem_mapper;
 
@@ -48,6 +49,7 @@ LIBBTC_API void btc_mem_set_mapper_default();
 
 LIBBTC_API void* btc_malloc(size_t size);
 LIBBTC_API void* btc_calloc(size_t count, size_t size);
+LIBBTC_API void* btc_realloc(void* ptr, size_t size);
 LIBBTC_API void btc_free(void* ptr);
 
 #ifdef __cplusplus

@@ -89,7 +89,7 @@ static btc_bool vector_grow(vector* vec, size_t min_sz)
     if (vec->alloc == new_alloc)
         return true;
 
-    void* new_data = realloc(vec->data, new_alloc * sizeof(void*));
+    void* new_data = btc_realloc(vec->data, new_alloc * sizeof(void*));
     if (!new_data)
         return false;
 
