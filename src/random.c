@@ -41,7 +41,7 @@
 void btc_random_init_internal(void);
 btc_bool btc_random_bytes_internal(uint8_t* buf, uint32_t len, const uint8_t update_seed);
 
-const static btc_rnd_mapper default_rnd_mapper = {btc_random_init_internal, btc_random_bytes_internal};
+static const btc_rnd_mapper default_rnd_mapper = {btc_random_init_internal, btc_random_bytes_internal};
 static btc_rnd_mapper current_rnd_mapper = {btc_random_init_internal, btc_random_bytes_internal};
 
 void btc_rnd_set_mapper_default()
