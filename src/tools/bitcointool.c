@@ -127,12 +127,15 @@ int main(int argc, char* argv[])
     /* start ECC context */
     btc_ecc_start();
 
+    const char *pkey_error = "Missing extended key (use -p)";
 
     if (strcmp(cmd, "pubfrompriv") == 0) {
         /* output compressed hex pubkey from hex privkey */
 
         size_t sizeout = 128;
         char pubkey_hex[sizeout];
+        if (!pkey)
+            return showError(pkey_error);
         if (!pubkey_from_privatekey(chain, pkey, pubkey_hex, &sizeout))
             return showError("Operation failed");
 
@@ -155,6 +158,8 @@ int main(int argc, char* argv[])
 
         size_t sizeout = 128;
         char address[sizeout];
+        if (!pubkey)
+            return showError("Missing public key (use -k)");
         if (!address_from_pubkey(chain, pubkey, address))
             return showError("Operation failed, invalid pubkey");
         printf("p2pkh address: %s\n", address);
@@ -181,12 +186,12 @@ int main(int argc, char* argv[])
         memset(masterkey, 0, strlen(masterkey));
     } else if (strcmp(cmd, "hdprintkey") == 0) {
         if (!pkey)
-            return showError("Missing extended key (use -p)");
+            return showError(pkey_error);
         if (!hd_print_node(chain, pkey))
             return showError("Failed. Probably invalid extended key.\n");
     } else if (strcmp(cmd, "hdderive") == 0) {
         if (!pkey)
-            return showError("Missing extended key (use -p)");
+            return showError(pkey_error);
         if (!keypath)
             return showError("Missing keypath (use -m)");
         size_t sizeout = 128;
