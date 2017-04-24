@@ -145,7 +145,8 @@ btc_bool hd_derive(const btc_chainparams* chain, const char* masterkey, const ch
     bool pubckd = !btc_hdnode_has_privkey(&node);
 
     //derive child key, use pubckd or privckd
-    btc_hd_generate_key(&nodenew, keypath, pubckd ? node.public_key : node.private_key, node.chain_code, pubckd);
+    if (!btc_hd_generate_key(&nodenew, keypath, pubckd ? node.public_key : node.private_key, node.chain_code, pubckd))
+        return false;
 
     if (pubckd)
         btc_hdnode_serialize_public(&nodenew, chain, extkeyout, extkeyout_size);
