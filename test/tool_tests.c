@@ -44,12 +44,19 @@ void test_tool()
 
     size_t extoutsize = 200;
     char extout[extoutsize];
-    u_assert_int_eq(hd_derive(&btc_chainparams_main, "xprv9s21ZrQH143K2JF8RafpqtKiTbsbaxEeUaMnNHsm5o6wCW3z8ySyH4UxFVSfZ8n7ESu7fgir8imbZKLYVBxFPND1pniTZ81vKfd45EHKX73", "m/1", extout, extoutsize), true);
+    const char *privkey = "xprv9s21ZrQH143K2JF8RafpqtKiTbsbaxEeUaMnNHsm5o6wCW3z8ySyH4UxFVSfZ8n7ESu7fgir8imbZKLYVBxFPND1pniTZ81vKfd45EHKX73";
+
+    u_assert_int_eq(hd_derive(&btc_chainparams_main, privkey, "m/1", extout, extoutsize), true);
     u_assert_str_eq(extout, "xprv9tzRNW1ZnrURGVu66TgodMCdZfYms8dVapp4q24RswKY7hChXwrdnbyEFpfz26yVJh5h4zgBWiJ2nD8Qj3oGjjVNtyTFZFUrWQiYwwAfYdg");
 
-    u_assert_int_eq(hd_derive(&btc_chainparams_main, "xprv9s21ZrQH143K2JF8RafpqtKiTbsbaxEeUaMnNHsm5o6wCW3z8ySyH4UxFVSfZ8n7ESu7fgir8imbZKLYVBxFPND1pniTZ81vKfd45EHKX73", "m/1'", extout, extoutsize), true);
+    u_assert_int_eq(hd_derive(&btc_chainparams_main, privkey, "m/1'", extout, extoutsize), true);
     u_assert_str_eq(extout, "xprv9tzRNW1i8X1PSWBU8w1T7f8xCejSahmGsBLXi2XUqJPF7gLpn99mnuUK9jUKUP9hZbi5bbMCcHKi7MceLJ2ya3ArinuB3rDgcUnSzks1iWk");
 
     u_assert_int_eq(hd_derive(&btc_chainparams_main, "xpub661MyMwAqRbcEnKbXcCqD2GT1di5zQxVqoHPAgHNe8dv5JP8gWmDproS6kFHJnLZd23tWevhdn4urGJ6b264DfTGKr8zjmYDjyDTi9U7iyT", "m/1", extout, extoutsize), true);
-    
+
+    u_assert_int_eq(hd_derive(&btc_chainparams_main, privkey, "m/", extout, extoutsize), true);
+    u_assert_str_eq(extout, privkey);
+
+    u_assert_int_eq(hd_derive(&btc_chainparams_main, privkey, "m", extout, extoutsize), false);
+    u_assert_int_eq(hd_derive(&btc_chainparams_main, privkey, "n/1", extout, extoutsize), false);
 }

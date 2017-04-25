@@ -24,7 +24,10 @@ commands.append(["-c pubfrompriv -p L15mEfW7s13utgsTrziK52z6HC1jEZbp3R9", 1]) #i
 commands.append(["-c addrfrompub -p 02b905509e4c9bd9b2fc87c95a6e6897f70ee9fd8bd2f1d9dc9a270b62ec11f47e", 1])
 commands.append(["-c addrfrompub -k 02b905509e4c9bd9b2fc87c95a6e6897f70ee9fd8bd2f1d9dc9a270b62ec11f47e", 0])
 commands.append(["-c hdgenmaster", 0])
-commands.append(["-c hdderive -p xpub6MR9tbm8V5pGFTQ9hTATxd4kPgdKKqU75ED8s3rddrSknLHgZy1H4Wh596jgoYNH7WNcKEVM1wfKD2pTSdj5Hm7CMJwwyRjHYPQCT2LJXwm -m m/100h/10h/100/10", 0])
+commands.append(["-c hdderive -p xpub6MR9tbm8V5pGFTQ9hTATxd4kPgdKKqU75ED8s3rddrSknLHgZy1H4Wh596jgoYNH7WNcKEVM1wfKD2pTSdj5Hm7CMJwwyRjHYPQCT2LJXwm -m m/100h/10h/100/10", 1]) #hardened keypath with pubkey
+commands.append(["-c hdderive -p xprv9s21ZrQH143K3jC7xiaZ4EWrJdwJgtrEBmbVBpnoLNo91RCkdzkviG2GjgmN7xaDSDgPihJWu7JRGVcLUSoJdW8fHhGSpjQGUMoU2e8KjBY -m m/100h/10h/100/10", 0])
+commands.append(["-c hdderive -p xprv9s21ZrQH143K3jC7xiaZ4EWrJdwJgtrEBmbVBpnoLNo91RCkdzkviG2GjgmN7xaDSDgPihJWu7JRGVcLUSoJdW8fHhGSpjQGUMoU2e8KjBY -m n/100h/10h/100/10", 1]) #wrong keypath prefix
+commands.append(["-c hdderive -p xpub6MR9tbm8V5pGFTQ9hTATxd4kPgdKKqU75ED8s3rddrSknLHgZy1H4Wh596jgoYNH7WNcKEVM1wfKD2pTSdj5Hm7CMJwwyRjHYPQCT2LJXwm -m m/100/10/100/10", 0])
 commands.append(["-c hdderive", 1]) #missing key
 commands.append(["-c hdderive -p xpub6MR9tbm8V5pGFTQ9hTATxd4kPgdKKqU75ED8s3rddrSknLHgZy1H4Wh596jgoYNH7WNcKEVM1wfKD2pTSdj5Hm7CMJwwyRjHYPQCT2LJXwm", 1]) #missing keypath
 
