@@ -19,6 +19,7 @@ commands.append(["-c hdprintkey -p xpub6MR9tbm8V5pGFTQ9hTATxd4kPgdKKqU75ED8s3rdd
 commands.append(["-c hdprintkey -p tprv8ZgxMBicQKsPegfnEE6sgR64tuPn72fX965MeazaJC72Sfi5JfqLrCnQmA9vTJTCxfDpiq2jWBSLc8L2Uy497ij5iT4KDvXYZRWxCNWPugm", 1])
 commands.append(["-c hdprintkey -p tprv8ZgxMBicQKsPegfnEE6sgR64tuPn72fX965MeazaJC72Sfi5JfqLrCnQmA9vTJTCxfDpiq2jWBSLc8L2Uy497ij5iT4KDvXYZRWxCNWPugm --testnet", 0])
 commands.append(["-c pubfrompriv -p L15mEfW7s13utgsTrziK52z6HC1jEZbp3R9ma7qPfwCphhtJFmjp", 0]) #successfull WIF to pub
+commands.append(["-c pubfrompriv", 1]) #missing required argument
 commands.append(["-c pubfrompriv -p L15mEfW7s13utgsTrziK52z6HC1jEZbp3R9", 1]) #invalid WIF key
 commands.append(["-c addrfrompub -p 02b905509e4c9bd9b2fc87c95a6e6897f70ee9fd8bd2f1d9dc9a270b62ec11f47e", 1])
 commands.append(["-c addrfrompub -k 02b905509e4c9bd9b2fc87c95a6e6897f70ee9fd8bd2f1d9dc9a270b62ec11f47e", 0])
