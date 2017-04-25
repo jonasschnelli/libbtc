@@ -57,6 +57,18 @@ AC_ARG_ENABLE([net],
   [with_net=$enableval],
   [with_net=yes])
 
+case $host in
+  *mingw*)
+     TARGET_OS=windows
+     ;;
+  *darwin*)
+     TARGET_OS=darwin
+     ;;
+  *linux*)
+     TARGET_OS=linux
+     ;;
+esac
+
 if test "x$with_wallet" = xyes; then
   AC_DEFINE_UNQUOTED([WITH_WALLET],[1],[Define to 1 to enable wallet compilation])
 fi
@@ -129,3 +141,18 @@ unset PKG_CONFIG_PATH
 PKG_CONFIG_PATH="$PKGCONFIG_PATH_TEMP"
 
 AC_OUTPUT
+
+echo 
+echo "Options used to compile and link:"
+echo "  with wallet   = $with_wallet"
+echo "  with tools    = $with_tools"
+echo "  with net      = $with_net"
+echo
+echo "  target os     = $TARGET_OS"
+echo
+echo "  CC            = $CC"
+echo "  CFLAGS        = $CFLAGS"
+echo "  CXX           = $CXX"
+echo "  CXXFLAGS      = $CXXFLAGS"
+echo "  LDFLAGS       = $LDFLAGS"
+echo 
