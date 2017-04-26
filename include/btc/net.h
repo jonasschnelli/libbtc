@@ -98,6 +98,9 @@ typedef struct btc_node_ {
     uint32_t state;
     int missbehavescore;
     btc_bool version_handshake;
+
+    unsigned int bestknownheight;
+
     uint32_t hints; /* can be use for user defined state */
 } btc_node;
 
@@ -146,8 +149,8 @@ LIBBTC_API void btc_node_send_version(btc_node* node);
 /* send arbitrary data to node */
 LIBBTC_API void btc_node_send(btc_node* node, cstring* data);
 
-int btc_node_parse_message(btc_node* node, btc_p2p_msg_hdr* hdr, struct const_buffer* buf);
-void btc_node_connection_state_changed(btc_node* node);
+LIBBTC_API int btc_node_parse_message(btc_node* node, btc_p2p_msg_hdr* hdr, struct const_buffer* buf);
+LIBBTC_API void btc_node_connection_state_changed(btc_node* node);
 
 /* =================================== */
 /* DNS */

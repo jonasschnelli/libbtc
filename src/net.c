@@ -468,6 +468,10 @@ int btc_node_parse_message(btc_node* node, btc_p2p_msg_hdr* hdr, struct const_bu
             if (!btc_p2p_msg_version_deser(&v_msg_check, buf)) {
                 return btc_node_missbehave(node);
             }
+            if ((v_msg_check.services & BTC_NODE_NETWORK) != BTC_NODE_NETWORK) {
+                btc_node_disconnect(node);
+            }
+            node->bestknownheight = v_msg_check.start_height;
             node->nodegroup->log_write_cb("Connected to node %d: %s (%d)\n", node->nodeid, v_msg_check.useragent, v_msg_check.start_height);
             /* confirm version via verack */
             cstring* verack = btc_p2p_message_new(node->nodegroup->chainparams->netmagic, BTC_MSG_VERACK, NULL, 0);
