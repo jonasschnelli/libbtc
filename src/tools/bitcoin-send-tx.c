@@ -320,48 +320,7 @@ btc_bool broadcast_tx(const btc_chainparams* chain, const btc_tx* tx, const char
     group->handshake_done_cb = broadcast_handshake_done;
     group->should_connect_to_more_nodes_cb = broadcast_should_connect_more;
 
-    if (ips == NULL) {
-        /* === DNS QUERY === */
-        /* get a couple of peers from a seed */
-        vector* ips_dns = vector_new(10, free);
-        const btc_dns_seed seed = chain->dnsseeds[0];
-        if (strlen(seed.domain) == 0) {
-            return -1;
-        }
-        /* todo: make sure we have enought peers, eventually */
-        /* call another seeder */
-        btc_get_peers_from_dns(seed.domain, ips_dns, chain->default_port, AF_INET);
-        for (unsigned int i = 0; i < ips_dns->len; i++) {
-            char* ip = (char*)vector_idx(ips_dns, i);
-
-            /* create a node */
-            btc_node* node = btc_node_new();
-            if (btc_node_set_ipport(node, ip) > 0) {
-                /* add the node to the group */
-                btc_node_group_add_node(group, node);
-            }
-        }
-        vector_free(ips_dns, true);
-    } else {
-        // add comma seperated ips (nodes)
-        char working_str[64];
-        memset(working_str, 0, sizeof(working_str));
-        size_t offset = 0;
-        for (unsigned int i = 0; i <= strlen(ips); i++) {
-            if (i == strlen(ips) || ips[i] == ',') {
-                btc_node* node = btc_node_new();
-                if (btc_node_set_ipport(node, working_str) > 0) {
-                    btc_node_group_add_node(group, node);
-                }
-                offset = 0;
-                memset(working_str, 0, sizeof(working_str));
-            } else if (ips[i] != ' ' && offset < sizeof(working_str)) {
-                working_str[offset] = ips[i];
-                offset++;
-            }
-        }
-    }
-
+    btc_node_group_add_peers_by_ip_or_seed(group, ips);
 
     uint256 txhash;
     btc_tx_hash(tx, txhash);

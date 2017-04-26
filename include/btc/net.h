@@ -151,7 +151,8 @@ void btc_node_connection_state_changed(btc_node* node);
 /* DNS */
 /* =================================== */
 
-int btc_get_peers_from_dns(const char* seed, vector* ips_out, int port, int family);
+LIBBTC_API btc_bool btc_node_group_add_peers_by_ip_or_seed(btc_node_group *group, const char *ips);
+LIBBTC_API int btc_get_peers_from_dns(const char* seed, vector* ips_out, int port, int family);
 
 #ifdef __cplusplus
 }
