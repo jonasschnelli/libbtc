@@ -178,9 +178,16 @@ void event_cb(struct bufferevent* ev, short type, void* ctx)
         btc_node_connection_state_changed(node);
     } else if (((type & BEV_EVENT_EOF) != 0) ||
                ((type & BEV_EVENT_ERROR) != 0)) {
-        node->nodegroup->log_write_cb("Error connecting to node %d.\n", node->nodeid);
         node->state = 0;
         node->state |= NODE_ERRORED;
+        node->state |= NODE_DISCONNECTED;
+        if ((type & BEV_EVENT_EOF) != 0) {
+            node->nodegroup->log_write_cb("Disconnected from the remote peer %d.\n", node->nodeid);
+            node->state |= NODE_DISCONNECTED_FROM_REMOTE_PEER;
+        }
+        else {
+            node->nodegroup->log_write_cb("Error connecting to node %d.\n", node->nodeid);
+        }
         btc_node_connection_state_changed(node);
     } else if (type & BEV_EVENT_CONNECTED) {
         node->nodegroup->log_write_cb("Successfull connected to node %d.\n", node->nodeid);

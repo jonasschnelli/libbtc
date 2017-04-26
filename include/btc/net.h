@@ -48,8 +48,10 @@ enum NODE_STATE {
     NODE_ERRORED = (1 << 2),
     NODE_TIMEOUT = (1 << 3),
     NODE_HEADERSYNC = (1 << 4),
-    NODE_MISSBEHAVED = (1 << 5),
-    NODE_DISCONNECTED = (1 << 6),
+    NODE_BLOCKSYNC	= (1 << 5),
+    NODE_MISSBEHAVED = (1 << 6),
+    NODE_DISCONNECTED = (1 << 7),
+    NODE_DISCONNECTED_FROM_REMOTE_PEER = (1 << 8),
 };
 
 /* basic group-of-nodes structure */
