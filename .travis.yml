@@ -11,7 +11,6 @@ addons:
   apt:
     packages:
         - valgrind
-        - g++-arm-linux-gnueabihf
         - binutils-mingw-w64
         - g++-mingw-w64-x86-64
         - gcc-mingw-w64
@@ -28,25 +27,42 @@ matrix:
     include:
       - os: osx
         compiler: clang
-        env: RUN_MAKE_CHECK="yes" $BUILD_CONFIG='--enable-debug CFLAGS='"'"'-fprofile-arcs -ftest-coverage'"'"'
+        env: RUN_MAKE_CHECK="yes" $BUILD_CONFIG='--enable-debug'
       - os: osx
         compiler: gcc
         env: RUN_TOOLTESTS="yes" $BUILD_CONFIG=""
       - os: linux
         compiler: gcc
-        env: VALGRIND_UNIT_TESTS="yes" RUN_TOOLTESTS="yes" SUBMIT_COVERALLS="yes" $BUILD_CONFIG='--enable-debug CFLAGS='"'"'-fprofile-arcs -ftest-coverage'"'"'
+        env: VALGRIND_UNIT_TESTS="yes" RUN_TOOLTESTS="yes" SUBMIT_COVERALLS="yes" $BUILD_CONFIG='--enable-debug'
       - os: linux
         compiler: x86_64-w64-mingw32
         env: HOST="x86_64-w64-mingw32" CROSS_COMPILE="yes" RUN_WINE_UNIT_TESTS="yes" $BUILD_CONFIG="--disable-shared --enable-static"
       - os: linux
+        compiler: i686-w64-mingw32
+        env: HOST="i686-w64-mingw32" CROSS_COMPILE="yes" RUN_WINE_UNIT_TESTS="yes" $BUILD_CONFIG="--disable-shared --enable-static"
+      - os: linux
         compiler: arm-linux-gnueabihf
         env: HOST="arm-linux-gnueabihf" CROSS_COMPILE="yes"
+        addons:
+          apt:
+            packages:
+            - g++-arm-linux-gnueabihf
+      - os: linux
+        compiler: i686-pc-linux-gnu
+        env: HOST="i686-pc-linux-gnu" CROSS_COMPILE="yes"
+        addons:
+          apt:
+            packages:
+            - g++-arm-linux-gnueabihf
+            - g++-multilib
 
 before_script:
     - ./autogen.sh
     - if [ "$CROSS_COMPILE" == "yes" ]; then
           make -C depends HOST=$HOST;
           LIBTOOL_APP_LDFLAGS='-all-static' LDFLAGS='-static' ./configure --prefix=$TRAVIS_BUILD_DIR/depends/$HOST $BUILD_CONFIG; cat config.log;
+      elif [ "$SUBMIT_COVERALLS" == "yes" ]; then
+          ./configure $BUILD_CONFIG CFLAGS='-fprofile-arcs -ftest-coverage'; cat config.log;
       else
           ./configure $BUILD_CONFIG; cat config.log;
       fi
