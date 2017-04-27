@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
 {
     int ret = 0;
     int long_index = 0;
-    char opt = 0;
+    int opt = 0;
     char* data = 0;
     char* ips = 0;
     int debug = 0;
