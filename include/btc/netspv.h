@@ -44,14 +44,12 @@ enum SPV_CLIENT_STATE {
 typedef struct btc_spv_client_
 {
     btc_node_group *nodegroup;
-    uint64_t last_getheadermessage;
-    uint64_t oldest_item_of_interest; /* a.k.a. oldest key birthday */
+    uint64_t last_headersrequest_time;
+    uint64_t oldest_item_of_interest; /* oldest key birthday (or similar) */
     btc_bool use_checkpoints; /* if false, the client will create a headers chain starting from genesis */
     const btc_chainparams *chainparams;
     int stateflags;
-    uint64_t last_statecheck;
-
-
+    uint64_t last_statecheck_time;
 
     void *headers_db_ctx; /* flexible headers db context */
     const btc_headers_db_interface *headers_db; /* headers db interface */
@@ -62,6 +60,8 @@ typedef struct btc_spv_client_
     /* callback when a block(header) was connected */
     void (*header_connected)(struct btc_spv_client_ *client);
 
+    void (*sync_completed)(struct btc_spv_client_ *client);
+
     /* callback when the header message has been processed */
     /* return false will abort further logic (like continue loading headers, etc.) */
     btc_bool (*header_message_processed)(struct btc_spv_client_ *client, btc_node *node, btc_blockindex *newtip);
@@ -71,38 +71,20 @@ typedef struct btc_spv_client_
 } btc_spv_client;
 
 
-btc_spv_client* btc_spv_client_new(const btc_chainparams *params, btc_bool debug);
-void btc_spv_client_free(btc_spv_client *client);
-btc_bool btc_spv_client_load(btc_spv_client *client, const char *file_path);
+LIBBTC_API btc_spv_client* btc_spv_client_new(const btc_chainparams *params, btc_bool debug);
+LIBBTC_API void btc_spv_client_free(btc_spv_client *client);
 
-void btc_spv_client_discover_peers(btc_spv_client *client, const char *ips);
-void btc_spv_client_runloop(btc_spv_client *client);
+/* load the eventually existing headers db */
+LIBBTC_API btc_bool btc_spv_client_load(btc_spv_client *client, const char *file_path);
 
-/* set the nodegroup SPV callbacks */
-void btc_net_set_spv(btc_node_group *nodegroup);
+/* discover peers or set peers by IP(s) (CSV) */
+LIBBTC_API void btc_spv_client_discover_peers(btc_spv_client *client, const char *ips);
 
-/* callback function for pre-command logic
-   returns true to allow executig base message logic (version/verack, ping/pong)
- */
-btc_bool btc_net_spv_pre_cmd(btc_node *node, btc_p2p_msg_hdr *hdr, struct const_buffer *buf);
+/* start the spv client main run loop */
+LIBBTC_API void btc_spv_client_runloop(btc_spv_client *client);
 
 /* try to request headers from a single node in the nodegroup */
-btc_bool btc_net_spv_request_headers(btc_spv_client *client);
-
-/* callback function triggered periodically */
-static btc_bool btc_net_spv_node_timer_callback(btc_node *node, uint64_t *now);
-
-/* callback function to inject SPV message logic */
-void btc_net_spv_post_cmd(btc_node *node, btc_p2p_msg_hdr *hdr, struct const_buffer *buf);
-
-/* callback function to dispatch messages once version/verack handshake has been done */
-void btc_net_spv_node_handshake_done(btc_node *node);
-
-void btc_net_spv_send_getheaders(btc_node *node, vector *blocklocators, uint8_t *hashstop);
-
-void btc_net_spv_get_peers_from_dns(const char *seed, vector *ips_out, int family);
-
-void btc_spv_find_header_by_hash(btc_spv_client *client, const uint256 hash);
+LIBBTC_API btc_bool btc_net_spv_request_headers(btc_spv_client *client);
 
 #ifdef __cplusplus
 }

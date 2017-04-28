@@ -315,7 +315,7 @@ btc_blockindex * btc_headers_db_connect_hdr(btc_headers_db* db, struct const_buf
                 }
 
                 if (scan_tip && i == db->max_hdr_in_mem && scan_tip != &db->genesis) {
-                    if (scan_tip->prev) {
+                    if (scan_tip->prev && scan_tip->prev != &db->genesis) {
                         tdelete(scan_tip->prev, &db->tree_root, btc_header_compar);
                         btc_free(scan_tip->prev);
 

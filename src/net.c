@@ -7,6 +7,7 @@
 #include <btc/buffer.h>
 #include <btc/chainparams.h>
 #include <btc/cstr.h>
+#include <btc/hash.h>
 #include <btc/protocol.h>
 #include <btc/serialize.h>
 #include <btc/utils.h>
@@ -210,6 +211,8 @@ btc_node* btc_node_new()
     node->services = 0;
     node->lastping = 0;
     node->time_started_con = 0;
+    node->time_last_request = 0;
+    btc_hash_clear(node->last_requested_inv);
 
     node->recvBuffer = cstr_new_sz(BTC_P2P_MESSAGE_CHUNK_SIZE);
     node->hints = 0;
@@ -297,6 +300,13 @@ btc_node_group* btc_node_group_new(const btc_chainparams* chainparams)
     node_group->desired_amount_connected_nodes = 3;
 
     return node_group;
+}
+
+void btc_node_group_shutdown(btc_node_group *group) {
+    for (size_t i = 0; i < group->nodes->len; i++) {
+        btc_node* node = vector_idx(group->nodes, i);
+        btc_node_disconnect(node);
+    }
 }
 
 void btc_node_group_free(btc_node_group* group)

@@ -91,6 +91,8 @@ typedef struct btc_node_ {
     int nodeid;
     uint64_t lastping;
     uint64_t time_started_con;
+    uint64_t time_last_request;
+    uint256 last_requested_inv;
 
     cstring* recvBuffer;
     uint64_t nonce;
@@ -130,6 +132,9 @@ LIBBTC_API btc_bool btc_node_missbehave(btc_node* node);
 /* create a new node group */
 LIBBTC_API btc_node_group* btc_node_group_new(const btc_chainparams* chainparams);
 LIBBTC_API void btc_node_group_free(btc_node_group* group);
+
+/* disconnect all peers */
+LIBBTC_API void btc_node_group_shutdown(btc_node_group* group);
 
 /* add a node to a node group */
 LIBBTC_API void btc_node_group_add_node(btc_node_group* group, btc_node* node);
