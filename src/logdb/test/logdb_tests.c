@@ -42,8 +42,8 @@ void test_logdb(logdb_log_db* (*new_func)())
     char hexrev[98];
     int outlenrev;
     long fsize;
-    char *buf;
-    char *wrk_buf;
+    uint8_t *buf;
+    uint8_t *wrk_buf;
     FILE *f;
     unsigned int i;
     char bufs[300][65];
@@ -120,7 +120,7 @@ void test_logdb(logdb_log_db* (*new_func)())
     u_assert_int_eq(memcmp(value_test->str, value->str, value->len), 0);
 
     value_test = logdb_find(db, key2);
-    u_assert_int_eq((int)value_test, 0); /* should be null */
+    u_assert_is_null(value_test);
 
     /* overwrite a key */
     logdb_append(db, NULL, key, value0);

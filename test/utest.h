@@ -195,6 +195,34 @@
         } while (0);                                                     \
     }
 
+#define u_assert_is_null(R)                                              \
+    {                                                                    \
+        const void* r_ = (R);                                            \
+        do {                                                             \
+            if (r_) {                                                    \
+                printf("FAILED - %s() - Line %d\n", __func__, __LINE__); \
+                printf("\tExpect: \tNULL\n");                            \
+                printf("\tReceive:\t%p\n", r_);                          \
+                U_TESTS_FAIL++;                                          \
+                return;                                                  \
+            };                                                           \
+        } while (0);                                                     \
+    }
+
+#define u_assert_not_null(R)                                             \
+    {                                                                    \
+        const void* r_ = (R);                                            \
+        do {                                                             \
+            if (!r_) {                                                   \
+                printf("FAILED - %s() - Line %d\n", __func__, __LINE__); \
+                printf("\tExpect: \tnot NULL\n");                        \
+                printf("\tReceive:\tNULL\n", r_);                        \
+                U_TESTS_FAIL++;                                          \
+                return;                                                  \
+            };                                                           \
+        } while (0);                                                     \
+    }
+
 extern int U_TESTS_RUN;
 extern int U_TESTS_FAIL;
 
