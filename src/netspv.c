@@ -56,6 +56,7 @@ static const unsigned int HEADERS_MAX_RESPONSE_TIME = 60;
 static const unsigned int MIN_TIME_DELTA_FOR_STATE_CHECK = 5;
 static const unsigned int BLOCK_GAP_TO_DEDUCT_TO_START_SCAN_FROM = 5;
 static const unsigned int BLOCKS_DELTA_IN_S = 600;
+static const unsigned int COMPLETED_WHEN_NUM_NODES_AT_SAME_HEIGHT = 2;
 
 static btc_bool btc_net_spv_node_timer_callback(btc_node *node, uint64_t *now);
 void btc_net_spv_post_cmd(btc_node *node, btc_p2p_msg_hdr *hdr, struct const_buffer *buf);
@@ -303,6 +304,7 @@ btc_bool btc_net_spv_request_headers(btc_spv_client *client)
     /* We are not downloading headers at this point */
     /* try to request headers from a peer where the version handshake has been done */
     btc_bool new_headers_available = false;
+    unsigned int nodes_at_same_height = 0;
     for(size_t i =0;i< client->nodegroup->nodes->len; i++)
     {
         btc_node *check_node = vector_idx(client->nodegroup->nodes, i);
@@ -312,6 +314,8 @@ btc_bool btc_net_spv_request_headers(btc_spv_client *client)
                 btc_net_spv_node_request_headers_or_blocks(check_node, false);
                 new_headers_available = true;
                 return true;
+            } else if (check_node->bestknownheight == client->headers_db->getchaintip(client->headers_db_ctx)->height) {
+                nodes_at_same_height++;
             }
         }
     }
@@ -322,10 +326,20 @@ btc_bool btc_net_spv_request_headers(btc_spv_client *client)
             btc_node *check_node = vector_idx(client->nodegroup->nodes, i);
             if ( ((check_node->state & NODE_CONNECTED) == NODE_CONNECTED) && check_node->version_handshake)
             {
-                btc_net_spv_node_request_headers_or_blocks(check_node, true);
-                return true;
+                if (check_node->bestknownheight > client->headers_db->getchaintip(client->headers_db_ctx)->height) {
+                    btc_net_spv_node_request_headers_or_blocks(check_node, true);
+                    return true;
+                } else if (check_node->bestknownheight == client->headers_db->getchaintip(client->headers_db_ctx)->height) {
+                    nodes_at_same_height++;
+                }
             }
         }
+    }
+
+    if (nodes_at_same_height >= COMPLETED_WHEN_NUM_NODES_AT_SAME_HEIGHT)
+    {
+        client->nodegroup->log_write_cb("%d peers have the same height then we have. Calling sync complete\n", nodes_at_same_height);
+        if (client->sync_completed) { client->sync_completed(client); }
     }
 
     /* we could not request more headers, need more peers to connect to */
