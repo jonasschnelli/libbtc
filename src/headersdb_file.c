@@ -237,7 +237,7 @@ int btc_headers_db_load(btc_headers_db* db, const char *file_path) {
             }
         }
     }
-    printf("Connected %ld headers\n",  connected_headers_count);    
+    printf("Connected %ld headers, now at height: %d\n",  connected_headers_count, db->chaintip->height);
     return (db->headers_tree_file != NULL);
 }
 
