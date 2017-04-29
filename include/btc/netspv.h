@@ -50,6 +50,7 @@ typedef struct btc_spv_client_
     const btc_chainparams *chainparams;
     int stateflags;
     uint64_t last_statecheck_time;
+    btc_bool called_sync_completed;
 
     void *headers_db_ctx; /* flexible headers db context */
     const btc_headers_db_interface *headers_db; /* headers db interface */

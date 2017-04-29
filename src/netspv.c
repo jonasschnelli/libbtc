@@ -100,6 +100,7 @@ btc_spv_client* btc_spv_client_new(const btc_chainparams *params, btc_bool debug
 
     // set callbacks
     client->header_connected = NULL;
+    client->called_sync_completed = false;
     client->sync_completed = NULL;
     client->header_message_processed = NULL;
     client->sync_transaction = NULL;
@@ -336,10 +337,12 @@ btc_bool btc_net_spv_request_headers(btc_spv_client *client)
         }
     }
 
-    if (nodes_at_same_height >= COMPLETED_WHEN_NUM_NODES_AT_SAME_HEIGHT)
+    if ( nodes_at_same_height >= COMPLETED_WHEN_NUM_NODES_AT_SAME_HEIGHT &&
+         !client->called_sync_completed &&
+         client->sync_completed )
     {
-        client->nodegroup->log_write_cb("%d peers have the same height then we have. Calling sync complete\n", nodes_at_same_height);
-        if (client->sync_completed) { client->sync_completed(client); }
+        client->sync_completed(client);
+        client->called_sync_completed = true;
     }
 
     /* we could not request more headers, need more peers to connect to */
@@ -448,7 +451,7 @@ void btc_net_spv_post_cmd(btc_node *node, btc_p2p_msg_hdr *hdr, struct const_buf
 
         if (btc_hash_equal(node->last_requested_inv, pindex->hash)) {
             // last requested block reached, consider stop syncing
-            if (client->sync_completed) { client->sync_completed(client); }
+            if (!client->called_sync_completed && client->sync_completed) { client->sync_completed(client); client->called_sync_completed = true; }
         }
     }
     if (strcmp(hdr->command, BTC_MSG_HEADERS) == 0)
