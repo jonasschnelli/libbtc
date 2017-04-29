@@ -52,7 +52,7 @@ typedef struct btc_headers_db_interface_
     void (*free)(void *db);
 
     /* loads database from filename */
-    int (*load)(void *db, const char *filename);
+    btc_bool (*load)(void *db, const char *filename);
 
     /* fill in blocklocator up to the tip */
     void (*fill_blocklocator_tip)(void* db, vector *blocklocators);

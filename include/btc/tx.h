@@ -104,6 +104,9 @@ LIBBTC_API btc_bool btc_tx_add_p2sh_hash160_out(btc_tx* tx, int64_t amount, uint
 LIBBTC_API btc_bool btc_tx_add_p2pkh_hash160_out(btc_tx* tx, int64_t amount, uint160 hash160);
 LIBBTC_API btc_bool btc_tx_add_p2pkh_out(btc_tx* tx, int64_t amount, const btc_pubkey* pubkey);
 
+LIBBTC_API btc_bool btc_tx_add_data_out(btc_tx* tx, const int64_t amount, const uint8_t *data, const size_t datalen);
+LIBBTC_API btc_bool btc_tx_add_puzzle_out(btc_tx* tx, const int64_t amount, const uint8_t *puzzle, const size_t puzzlelen);
+
 LIBBTC_API btc_bool btc_tx_outpoint_is_null(btc_tx_outpoint* tx);
 LIBBTC_API btc_bool btc_tx_is_coinbase(btc_tx* tx);
 #ifdef __cplusplus

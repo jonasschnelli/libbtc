@@ -31,9 +31,38 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #include <btc/utils.h>
 
+#ifdef WIN32
+
+#ifdef _MSC_VER
+#pragma warning(disable:4786)
+#pragma warning(disable:4804)
+#pragma warning(disable:4805)
+#pragma warning(disable:4717)
+#endif
+
+#ifdef _WIN32_WINNT
+#undef _WIN32_WINNT
+#endif
+#define _WIN32_WINNT 0x0501
+
+#ifdef _WIN32_IE
+#undef _WIN32_IE
+#endif
+#define _WIN32_IE 0x0501
+
+#define WIN32_LEAN_AND_MEAN 1
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+#include <io.h> /* for _commit */
+#include <shlobj.h>
+
+#endif
 
 static uint8_t buffer_hex_to_uint8[TO_UINT8_HEX_BUF_LEN];
 static char buffer_uint8_to_hex[TO_UINT8_HEX_BUF_LEN];
@@ -223,4 +252,51 @@ void btc_cheap_random_bytes(uint8_t* buf, uint32_t len)
     for (uint32_t i = 0; i < len; i++) {
         buf[i] = rand();
     }
+}
+
+void btc_get_default_datadir(cstring *path_out)
+{
+    // Windows < Vista: C:\Documents and Settings\Username\Application Data\Bitcoin
+    // Windows >= Vista: C:\Users\Username\AppData\Roaming\Bitcoin
+    // Mac: ~/Library/Application Support/Bitcoin
+    // Unix: ~/.bitcoin
+#ifdef WIN32
+    // Windows
+    char* homedrive = getenv("HOMEDRIVE");
+    char* homepath = getenv("HOMEDRIVE");
+    cstr_append_buf(path_out, homedrive, strlen(homedrive));
+    cstr_append_buf(path_out, homepath, strlen(homepath));
+#else
+    char* home = getenv("HOME");
+    if (home == NULL || strlen(home) == 0)
+        cstr_append_c(path_out, '/');
+    else
+        cstr_append_buf(path_out, home, strlen(home));
+#ifdef __APPLE__
+    // Mac
+    char *osx_home = "/Library/Application Support/Bitcoin";
+    cstr_append_buf(path_out, osx_home, strlen(osx_home));
+#else
+    // Unix
+    char *posix_home = "/.bitcoin";
+    cstr_append_buf(path_out, posix_home, strlen(posix_home));
+#endif
+#endif
+}
+
+void btc_file_commit(FILE *file)
+{
+    fflush(file); // harmless if redundantly called
+#ifdef WIN32
+    HANDLE hFile = (HANDLE)_get_osfhandle(_fileno(file));
+    FlushFileBuffers(hFile);
+#else
+    #if defined(__linux__) || defined(__NetBSD__)
+    fdatasync(fileno(file));
+    #elif defined(__APPLE__) && defined(F_FULLFSYNC)
+    fcntl(fileno(file), F_FULLFSYNC, 0);
+    #else
+    fsync(fileno(file));
+    #endif
+#endif
 }

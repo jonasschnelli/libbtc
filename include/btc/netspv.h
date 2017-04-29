@@ -61,6 +61,8 @@ typedef struct btc_spv_client_
     /* callback when a block(header) was connected */
     void (*header_connected)(struct btc_spv_client_ *client);
 
+    /* callback called when we have reached the ~chaintip
+       will be called only once */
     void (*sync_completed)(struct btc_spv_client_ *client);
 
     /* callback when the header message has been processed */
@@ -68,7 +70,8 @@ typedef struct btc_spv_client_
     btc_bool (*header_message_processed)(struct btc_spv_client_ *client, btc_node *node, btc_blockindex *newtip);
 
     /* callback, executed on each transaction (when getting a block, merkle-block txns or inv txns) */
-    void (*sync_transaction)(struct btc_spv_client_ *client, btc_tx *tx, btc_blockindex *blockindex);
+    void (*sync_transaction)(void *ctx, btc_tx *tx, unsigned int pos, btc_blockindex *blockindex);
+    void *sync_transaction_ctx;
 } btc_spv_client;
 
 

@@ -59,11 +59,6 @@ extern void test_invalid_tx_deser();
 extern void test_eckey();
 
 #ifdef WITH_WALLET
-extern void test_red_black_tree();
-extern void test_logdb_memdb();
-extern void test_logdb_rbtree();
-
-extern void test_logdb();
 extern void test_wallet();
 #endif
 
@@ -114,12 +109,9 @@ int main()
 
     u_run_test(test_eckey);
 
-#ifdef WITH_WALLET
-    u_run_test(test_wallet);
 
-    u_run_test(test_red_black_tree);
-    u_run_test(test_logdb_memdb);
-    u_run_test(test_logdb_rbtree);
+#ifdef WITH_WALLET
+    //u_run_test(test_wallet);
 #endif
 
 #ifdef WITH_TOOLS
@@ -131,7 +123,6 @@ int main()
 
     u_run_test(test_protocol);
     u_run_test(test_net_basics_plus_download_block);
-
 #endif
 
     btc_ecc_stop();

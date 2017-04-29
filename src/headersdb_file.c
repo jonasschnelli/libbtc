@@ -30,58 +30,13 @@
 #include <btc/utils.h>
 
 #include <sys/stat.h>
-#include <unistd.h>
 
 #include <search.h>
 
-void btc_headersdb_get_default_datadir(cstring *path_out)
-{
-    // Windows < Vista: C:\Documents and Settings\Username\Application Data\Bitcoin
-    // Windows >= Vista: C:\Users\Username\AppData\Roaming\Bitcoin
-    // Mac: ~/Library/Application Support/Bitcoin
-    // Unix: ~/.bitcoin
-#ifdef WIN32
-    // Windows
-    char* homedrive = getenv("HOMEDRIVE");
-    char* homepath = getenv("HOMEDRIVE");
-    cstr_append_buf(path_out, homedrive, strlen(homedrive));
-    cstr_append_buf(path_out, homepath, strlen(homepath));
-#else
-    char* home = getenv("HOME");
-    if (home == NULL || strlen(home) == 0)
-        cstr_append_c(path_out, '/');
-    else
-        cstr_append_buf(path_out, home, strlen(home));
-#ifdef __APPLE__
-    // Mac
-    char *osx_home = "/Library/Application Support/Bitcoin";
-    cstr_append_buf(path_out, osx_home, strlen(osx_home));
-#else
-    // Unix
-    char *posix_home = "/.bitcoin";
-    cstr_append_buf(path_out, posix_home, strlen(posix_home));
-#endif
-#endif
-}
+static const unsigned char file_hdr_magic[4] = {0xA8, 0xF0, 0x11, 0xC5}; /* header magic */
+static const uint32_t current_version = 1;
 
-void db_file_commit(FILE *file)
-{
-    fflush(file); // harmless if redundantly called
-#ifdef WIN32
-    HANDLE hFile = (HANDLE)_get_osfhandle(_fileno(file));
-    FlushFileBuffers(hFile);
-#else
-    #if defined(__linux__) || defined(__NetBSD__)
-    fdatasync(fileno(file));
-    #elif defined(__APPLE__) && defined(F_FULLFSYNC)
-    fcntl(fileno(file), F_FULLFSYNC, 0);
-    #else
-    fsync(fileno(file));
-    #endif
-#endif
-}
-
-int btc_header_compar(const void *l, const void *r)
+int btc_header_compare(const void *l, const void *r)
 {
     const btc_blockindex *lm = l;
     const btc_blockindex *lr = r;
@@ -100,35 +55,6 @@ int btc_header_compar(const void *l, const void *r)
     }
 
     return 0;
-}
-
-void btc_walk_action(const void *nodep_, const VISIT which, const int depth) {
-    if (which == leaf || which == endorder) {
-        btc_blockindex *nodep = (*(btc_blockindex **)nodep_);
-        printf("Height: %d %d %d\n", nodep->height, which, depth);
-    }
-}
-
-/* support substitude for GNU only tdestroy */
-/* Let's hope the node struct is always compatible */
-
-struct btc_btree_node {
-    void *key;
-    struct btc_btree_node *left;
-    struct btc_btree_node *right;
-};
-
-void btc_btree_tdestroy(void *root, void (*freekey)(void *))
-{
-    struct btc_btree_node *r = root;
-
-    if (r == 0)
-        return;
-    btc_btree_tdestroy(r->left, freekey);
-    btc_btree_tdestroy(r->right, freekey);
-
-    if (freekey) freekey(r->key);
-    free(r);
 }
 
 btc_headers_db* btc_headers_db_new(const btc_chainparams* chainparams, btc_bool inmem_only) {
@@ -171,7 +97,7 @@ void btc_headers_db_free(btc_headers_db* db) {
     btc_free(db);
 }
 
-int btc_headers_db_load(btc_headers_db* db, const char *file_path) {
+btc_bool btc_headers_db_load(btc_headers_db* db, const char *file_path) {
     if (!db->read_write_file) {
         /* stop at this point if we do inmem only */
         return 1;
@@ -181,7 +107,7 @@ int btc_headers_db_load(btc_headers_db* db, const char *file_path) {
     cstring *path_ret = cstr_new_sz(1024);
     if (!file_path)
     {
-        btc_headersdb_get_default_datadir(path_ret);
+        btc_get_default_datadir(path_ret);
         char *filename = "/headers.db";
         cstr_append_buf(path_ret, filename, strlen(filename));
         cstr_append_c(path_ret, 0);
@@ -195,6 +121,28 @@ int btc_headers_db_load(btc_headers_db* db, const char *file_path) {
 
     db->headers_tree_file = fopen(file_path_local, create ? "a+b" : "r+b");
     cstr_free(path_ret, true);
+    if (create) {
+        // write file-header-magic
+        fwrite(file_hdr_magic, 4, 1, db->headers_tree_file);
+        uint32_t v = htole32(current_version);
+        fwrite(&v, sizeof(v), 1, db->headers_tree_file); /* uint32_t, LE */
+    }
+    else {
+        // check file-header-magic
+        uint8_t buf[sizeof(file_hdr_magic)+sizeof(current_version)];
+        if ( (uint32_t)buffer.st_size < (uint32_t)(sizeof(file_hdr_magic)+sizeof(current_version)) ||
+             fread(buf, sizeof(file_hdr_magic)+sizeof(current_version), 1, db->headers_tree_file) != 1 ||
+             memcmp(buf, file_hdr_magic, sizeof(file_hdr_magic))
+            )
+        {
+            fprintf(stderr, "Error reading database file\n");
+            return false;
+        }
+        if (le32toh(*(buf+sizeof(file_hdr_magic))) > current_version) {
+            fprintf(stderr, "Unsupported file version\n");
+            return false;
+        }
+    }
     btc_bool firstblock = true;
     size_t connected_headers_count = 0;
     if (db->headers_tree_file && !create)
@@ -212,13 +160,20 @@ int btc_headers_db_load(btc_headers_db* db, const char *file_path) {
                 uint32_t height;
                 deser_u256(hash, &cbuf_all);
                 deser_u32(&height, &cbuf_all);
-
+                if (height >= 1120874) {
+                    //TODO: test hack, remove me
+                    continue;
+                }
                 btc_bool connected;
                 if (firstblock)
                 {
                     btc_blockindex *chainheader = calloc(1, sizeof(btc_blockindex));
                     chainheader->height = height;
-                    if (!btc_block_header_deserialize(&chainheader->header, &cbuf_all)) return -1;
+                    if (!btc_block_header_deserialize(&chainheader->header, &cbuf_all)) {
+                        btc_free(chainheader);
+                        fprintf(stderr, "Error: Invalid data found.\n");
+                        return -1;
+                    }
                     btc_block_header_hash(&chainheader->header, (uint8_t *)&chainheader->hash);
                     chainheader->prev = NULL;
                     db->chaintip = chainheader;
@@ -247,7 +202,7 @@ btc_bool btc_headers_db_write(btc_headers_db* db, btc_blockindex *blockindex) {
     ser_u32(rec, blockindex->height);
     btc_block_header_serialize(rec, &blockindex->header);
     size_t res = fwrite(rec->str, rec->len, 1, db->headers_tree_file);
-    db_file_commit(db->headers_tree_file);
+    btc_file_commit(db->headers_tree_file);
     cstr_free(rec, true);
     return (res == 1);
 }
@@ -299,7 +254,7 @@ btc_blockindex * btc_headers_db_connect_hdr(btc_headers_db* db, struct const_buf
             }
         }
         if (db->use_binary_tree) {
-            btc_blockindex *retval = tsearch(blockindex, &db->tree_root, btc_header_compar);
+            btc_blockindex *retval = tsearch(blockindex, &db->tree_root, btc_header_compare);
         }
 
         if (db->max_hdr_in_mem > 0) {
@@ -316,7 +271,7 @@ btc_blockindex * btc_headers_db_connect_hdr(btc_headers_db* db, struct const_buf
 
                 if (scan_tip && i == db->max_hdr_in_mem && scan_tip != &db->genesis) {
                     if (scan_tip->prev && scan_tip->prev != &db->genesis) {
-                        tdelete(scan_tip->prev, &db->tree_root, btc_header_compar);
+                        tdelete(scan_tip->prev, &db->tree_root, btc_header_compare);
                         btc_free(scan_tip->prev);
 
                         scan_tip->prev = NULL;
@@ -362,7 +317,7 @@ btc_blockindex * btc_headersdb_find(btc_headers_db* db, uint256 hash) {
     {
         btc_blockindex *blockindex = btc_calloc(1, sizeof(btc_blockindex));
         memcpy(blockindex->hash, hash, sizeof(uint256));
-        btc_blockindex *blockindex_f = tfind(blockindex, &db->tree_root, btc_header_compar); /* read */
+        btc_blockindex *blockindex_f = tfind(blockindex, &db->tree_root, btc_header_compare); /* read */
         if (blockindex_f) {
             blockindex_f = *(btc_blockindex **)blockindex_f;
         }
@@ -382,7 +337,7 @@ btc_bool btc_headersdb_disconnect_tip(btc_headers_db* db) {
         btc_blockindex *oldtip = db->chaintip;
         db->chaintip = db->chaintip->prev;
         /* disconnect/remove the chaintip */
-        tdelete(oldtip, &db->tree_root, btc_header_compar);
+        tdelete(oldtip, &db->tree_root, btc_header_compare);
         btc_free(oldtip);
         return true;
     }

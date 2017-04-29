@@ -31,10 +31,12 @@
 #include <btc/net.h>
 #include <btc/netspv.h>
 #include <btc/protocol.h>
+#include <btc/random.h>
 #include <btc/serialize.h>
 #include <btc/tool.h>
 #include <btc/tx.h>
 #include <btc/utils.h>
+#include <btc/wallet.h>
 
 #include <assert.h>
 #include <getopt.h>
@@ -64,16 +66,16 @@ static void print_version()
 static void print_usage()
 {
     print_version();
-    printf("Usage: bitcoin-spv (-c|continuous) (-i|-ips <ip,ip,...]>) (-m[--maxpeers] <int>) (-t[--testnet]) (-r[--regtest]) (-d[--debug]) (-s[--timeout] <secs>) <command>\n");
+    printf("Usage: bitcoin-spv (-c|continuous) (-i|-ips <ip,ip,...]>) (-m[--maxpeers] <int>) (-t[--testnet]) (-f <headersfile|0 for in mem only>) (-r[--regtest]) (-d[--debug]) (-s[--timeout] <secs>) <command>\n");
     printf("Supported commands:\n");
-    printf("        sync      (scan blocks up to the tip, creates header.db file)\n");
+    printf("        scan      (scan blocks up to the tip, creates header.db file)\n");
     printf("\nExamples: \n");
     printf("Sync up to the chain tip and stores all headers in headers.db (quit once synced):\n");
     printf("> bitcoin-spv scan\n\n");
     printf("Sync up to the chain tip and give some debug output during that process:\n");
     printf("> bitcoin-spv -d scan\n\n");
     printf("Sync up, show debug info, don't store headers in file (only in memory), wait for new blocks:\n");
-    printf("> bitcoin-spv -d -f=0 -c scan\n\n");
+    printf("> bitcoin-spv -d -f 0 -c scan\n\n");
 }
 
 static bool showError(const char* er)
@@ -160,17 +162,61 @@ int main(int argc, char* argv[])
     }
 
     if (strcmp(data, "scan") == 0) {
+        btc_ecc_start();
+        btc_wallet *wallet = btc_wallet_new(chain);
+        int error;
+        btc_bool created;
+        int res = btc_wallet_load(wallet, "wallet.db", &error, &created);
+        if (!res) {
+            fprintf(stdout, "Loading wallet failed\n");
+            exit(EXIT_FAILURE);
+        }
+        if (created) {
+            // create a new key
+
+            btc_hdnode node;
+            uint8_t seed[32];
+            assert(btc_random_bytes(seed, sizeof(seed), true));
+            btc_hdnode_from_seed(seed, sizeof(seed), &node);
+            btc_wallet_set_master_key_copy(wallet, &node);
+        }
+        else {
+            // ensure we have a key
+            // TODO
+        }
+
+        btc_wallet_hdnode* node = btc_wallet_next_key(wallet);
+        size_t strsize = 128;
+        char str[strsize];
+        btc_hdnode_get_p2pkh_address(node->hdnode, chain, str, strsize);
+        printf("Wallet addr: %s (child %d)\n", str, node->hdnode->child_num);
+
+        vector *addrs = vector_new(1, free);
+        btc_wallet_get_addresses(wallet, addrs);
+        for (unsigned int i = 0; i < addrs->len; i++) {
+            char* addr= vector_idx(addrs, i);
+            printf("Addr: %s\n", addr);
+        }
+        vector_free(addrs, true);
         btc_spv_client* client = btc_spv_client_new(chain, debug, (dbfile && (dbfile[0] == '0' || (strlen(dbfile) > 1 && dbfile[0] == 'n' && dbfile[0] == 'o'))) ? true : false);
         client->header_message_processed = spv_header_message_processed;
         client->sync_completed = spv_sync_completed;
-        btc_spv_client_load(client, (dbfile ? dbfile : "headers.db"));
-
-        printf("Discover peers...");
-        btc_spv_client_discover_peers(client, ips);
-        printf("done\n");
-        printf("Connecting to the p2p network...\n");
-        btc_spv_client_runloop(client);
-        btc_spv_client_free(client);
+        client->sync_transaction = btc_wallet_check_transaction;
+        client->sync_transaction_ctx = wallet;
+        if (!btc_spv_client_load(client, (dbfile ? dbfile : "headers.db"))) {
+            printf("Could not load or create headers database...aborting\n");
+            ret = EXIT_FAILURE;
+        }
+        else {
+            printf("Discover peers...");
+            btc_spv_client_discover_peers(client, ips);
+            printf("done\n");
+            printf("Connecting to the p2p network...\n");
+            btc_spv_client_runloop(client);
+            btc_spv_client_free(client);
+            ret = EXIT_SUCCESS;
+        }
+        btc_ecc_stop();
     }
     else {
         printf("Invalid command (use -?)\n");

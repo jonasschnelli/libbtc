@@ -59,7 +59,7 @@ typedef struct btc_headers_db_
 btc_headers_db *btc_headers_db_new(const btc_chainparams* chainparams, btc_bool inmem_only);
 void btc_headers_db_free(btc_headers_db *db);
 
-int btc_headers_db_load(btc_headers_db* db, const char *filename);
+btc_bool btc_headers_db_load(btc_headers_db* db, const char *filename);
 btc_blockindex * btc_headers_db_connect_hdr(btc_headers_db* db, struct const_buffer *buf, btc_bool load_process, btc_bool *connected);
 
 void btc_headers_db_fill_block_locator(btc_headers_db* db, vector *blocklocators);
@@ -76,7 +76,7 @@ void btc_headersdb_set_checkpoint_start(btc_headers_db* db, uint256 hash, uint32
 static const btc_headers_db_interface btc_headers_db_interface_file = {
     (void* (*)(const btc_chainparams*, btc_bool))btc_headers_db_new,
     (void (*)(void *))btc_headers_db_free,
-    (int (*)(void *, const char *))btc_headers_db_load,
+    (btc_bool (*)(void *, const char *))btc_headers_db_load,
     (void (*)(void* , vector *))btc_headers_db_fill_block_locator,
     (btc_blockindex *(*)(void* , struct const_buffer *, btc_bool , btc_bool *))btc_headers_db_connect_hdr,
 
