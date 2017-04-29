@@ -362,7 +362,10 @@ btc_blockindex * btc_headersdb_find(btc_headers_db* db, uint256 hash) {
     {
         btc_blockindex *blockindex = btc_calloc(1, sizeof(btc_blockindex));
         memcpy(blockindex->hash, hash, sizeof(uint256));
-        btc_blockindex *blockindex_f = (*(btc_blockindex **)tfind(blockindex, &db->tree_root, btc_header_compar)); /* read */
+        btc_blockindex *blockindex_f = tfind(blockindex, &db->tree_root, btc_header_compar); /* read */
+        if (blockindex_f) {
+            blockindex_f = *(btc_blockindex **)blockindex_f;
+        }
         btc_free(blockindex);
         return blockindex_f;
     }
