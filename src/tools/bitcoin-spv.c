@@ -53,6 +53,7 @@ static struct option long_options[] =
         {"debug", no_argument, NULL, 'd'},
         {"maxnodes", no_argument, NULL, 'm'},
         {"dbfile", no_argument, NULL, 'f'},
+        {"continuous", no_argument, NULL, 'c'},
         {NULL, 0, NULL, 0}};
 
 static void print_version()
@@ -63,12 +64,16 @@ static void print_version()
 static void print_usage()
 {
     print_version();
-    printf("Usage: bitcoin-spv (-i|-ips <ip,ip,...]>) (-m[--maxpeers] <int>) (-t[--testnet]) (-r[--regtest]) (-d[--debug]) (-s[--timeout] <secs>) <txhex>\n");
+    printf("Usage: bitcoin-spv (-c|continuous) (-i|-ips <ip,ip,...]>) (-m[--maxpeers] <int>) (-t[--testnet]) (-r[--regtest]) (-d[--debug]) (-s[--timeout] <secs>) <command>\n");
+    printf("Supported commands:\n");
+    printf("        sync      (scan blocks up to the tip, creates header.db file)\n");
     printf("\nExamples: \n");
-    printf("Send a TX to random peers on testnet:\n");
-    printf("> bitcoin-send-tx --testnet <txhex>\n\n");
-    printf("Send a TX to specific peers on mainnet:\n");
-    printf("> bitcoin-send-tx -i 127.0.0.1:8333,192.168.0.1:8333 <txhex>\n\n");
+    printf("Sync up to the chain tip and stores all headers in headers.db (quit once synced):\n");
+    printf("> bitcoin-spv scan\n\n");
+    printf("Sync up to the chain tip and give some debug output during that process:\n");
+    printf("> bitcoin-spv -d scan\n\n");
+    printf("Sync up, show debug info, don't store headers in file (only in memory), wait for new blocks:\n");
+    printf("> bitcoin-spv -d -f=0 -c scan\n\n");
 }
 
 static bool showError(const char* er)
@@ -86,9 +91,15 @@ btc_bool spv_header_message_processed(struct btc_spv_client_ *client, btc_node *
     return true;
 }
 
+static btc_bool quit_when_synced = true;
 void spv_sync_completed(btc_spv_client* client) {
     printf("Sync completed, at height %d\n", client->headers_db->getchaintip(client->headers_db_ctx)->height);
-    btc_node_group_shutdown(client->nodegroup);
+    if (quit_when_synced) {
+        btc_node_group_shutdown(client->nodegroup);
+    }
+    else {
+        printf("Waiting for new blocks or relevant transactions...\n");
+    }
 }
 
 int main(int argc, char* argv[])
@@ -112,8 +123,11 @@ int main(int argc, char* argv[])
     data = argv[argc - 1];
 
     /* get arguments */
-    while ((opt = getopt_long_only(argc, argv, "i:trds:m:f:", long_options, &long_index)) != -1) {
+    while ((opt = getopt_long_only(argc, argv, "i:ctrds:m:f:", long_options, &long_index)) != -1) {
         switch (opt) {
+        case 'c':
+            quit_when_synced = false;
+            break;
         case 't':
             chain = &btc_chainparams_test;
             break;
@@ -154,7 +168,7 @@ int main(int argc, char* argv[])
         printf("Discover peers...");
         btc_spv_client_discover_peers(client, ips);
         printf("done\n");
-        printf("Start interacting with the p2p network...\n");
+        printf("Connecting to the p2p network...\n");
         btc_spv_client_runloop(client);
         btc_spv_client_free(client);
     }
