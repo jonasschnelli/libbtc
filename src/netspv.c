@@ -91,7 +91,9 @@ btc_spv_client* btc_spv_client_new(const btc_chainparams *params, btc_bool debug
         client->nodegroup->log_write_cb = net_write_log_printf;
     }
 
-    client->use_checkpoints = true;
+    if (params == &btc_chainparams_main) {
+        client->use_checkpoints = true;
+    }
     client->headers_db = &btc_headers_db_interface_file;
     client->headers_db_ctx = client->headers_db->init(params, false);
 
