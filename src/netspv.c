@@ -69,7 +69,7 @@ void btc_net_set_spv(btc_node_group *nodegroup)
     nodegroup->periodic_timer_cb = btc_net_spv_node_timer_callback;
 }
 
-btc_spv_client* btc_spv_client_new(const btc_chainparams *params, btc_bool debug)
+btc_spv_client* btc_spv_client_new(const btc_chainparams *params, btc_bool debug, btc_bool headers_memonly)
 {
     btc_spv_client* client;
     client = calloc(1, sizeof(*client));
@@ -95,7 +95,7 @@ btc_spv_client* btc_spv_client_new(const btc_chainparams *params, btc_bool debug
         client->use_checkpoints = true;
     }
     client->headers_db = &btc_headers_db_interface_file;
-    client->headers_db_ctx = client->headers_db->init(params, false);
+    client->headers_db_ctx = client->headers_db->init(params, headers_memonly);
 
     // set callbacks
     client->header_connected = NULL;

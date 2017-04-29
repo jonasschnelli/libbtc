@@ -71,7 +71,7 @@ typedef struct btc_spv_client_
 } btc_spv_client;
 
 
-LIBBTC_API btc_spv_client* btc_spv_client_new(const btc_chainparams *params, btc_bool debug);
+LIBBTC_API btc_spv_client* btc_spv_client_new(const btc_chainparams *params, btc_bool debug, btc_bool headers_memonly);
 LIBBTC_API void btc_spv_client_free(btc_spv_client *client);
 
 /* load the eventually existing headers db */

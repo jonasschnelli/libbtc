@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
     }
 
     if (strcmp(data, "scan") == 0) {
-        btc_spv_client* client = btc_spv_client_new(chain, debug);
+        btc_spv_client* client = btc_spv_client_new(chain, debug, (dbfile && (dbfile[0] == '0' || (strlen(dbfile) > 1 && dbfile[0] == 'n' && dbfile[0] == 'o'))) ? true : false);
         client->header_message_processed = spv_header_message_processed;
         btc_spv_client_load(client, (dbfile ? dbfile : "headers.db"));
 
