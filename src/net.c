@@ -354,6 +354,7 @@ btc_bool btc_node_group_connect_next_nodes(btc_node_group* group)
     if (connect_amount <= 0)
         return true;
 
+    connect_amount = connect_amount*3;
     /* search for a potential node that has not errored and is not connected or in connecting state */
     for (size_t i = 0; i < group->nodes->len; i++) {
         btc_node* node = vector_idx(group->nodes, i);
