@@ -86,6 +86,11 @@ btc_bool spv_header_message_processed(struct btc_spv_client_ *client, btc_node *
     return true;
 }
 
+void spv_sync_completed(btc_spv_client* client) {
+    printf("Sync completed, at height %d\n", client->headers_db->getchaintip(client->headers_db_ctx)->height);
+    btc_node_group_shutdown(client->nodegroup);
+}
+
 int main(int argc, char* argv[])
 {
     int ret = 0;
@@ -143,6 +148,7 @@ int main(int argc, char* argv[])
     if (strcmp(data, "scan") == 0) {
         btc_spv_client* client = btc_spv_client_new(chain, debug, (dbfile && (dbfile[0] == '0' || (strlen(dbfile) > 1 && dbfile[0] == 'n' && dbfile[0] == 'o'))) ? true : false);
         client->header_message_processed = spv_header_message_processed;
+        client->sync_completed = spv_sync_completed;
         btc_spv_client_load(client, (dbfile ? dbfile : "headers.db"));
 
         printf("Discover peers...");
