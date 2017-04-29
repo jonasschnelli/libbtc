@@ -45,6 +45,7 @@ libbtc_la_SOURCES = \
     src/bip32.c \
     src/block.c \
     src/buffer.c \
+    src/chainparams.c \
     src/commontools.c \
     src/cstr.c \
     src/ctaes.c \

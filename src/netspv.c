@@ -21,7 +21,7 @@
  OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
- 
+
 */
 
 #include <btc/block.h>
@@ -226,6 +226,7 @@ void btc_net_spv_fill_block_locator(btc_spv_client *client, vector *blocklocator
             int64_t min_timestamp = client->oldest_item_of_interest - BLOCK_GAP_TO_DEDUCT_TO_START_SCAN_FROM * BLOCKS_DELTA_IN_S; /* ensure we going back ~144 blocks */
             for (int i = (sizeof(btc_mainnet_checkpoint_array) / sizeof(btc_mainnet_checkpoint_array[0]))-1; i >= 0 ; i--)
             {
+                const btc_checkpoint *cp = &btc_mainnet_checkpoint_array[i];
                 if ( btc_mainnet_checkpoint_array[i].timestamp < min_timestamp)
                 {
                     uint256 *hash = btc_calloc(1, sizeof(uint256));
