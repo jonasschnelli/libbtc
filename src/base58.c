@@ -25,6 +25,7 @@
 
 #include <string.h>
 #include <sys/types.h>
+#include <malloc.h>
 
 #include <btc/sha2.h>
 
@@ -44,8 +45,8 @@ int btc_base58_decode(void* bin, size_t* binszp, const char* b58)
     size_t binsz = *binszp;
     const unsigned char* b58u = (const void*)b58;
     unsigned char* binu = bin;
-    size_t outisz = (binsz + 3) / 4;
-    uint32_t outi[outisz];
+    const size_t outisz = (binsz + 3) / 4;
+    uint32_t *outi = (uint32_t *)alloca(sizeof(uint32_t) * outisz);
     uint64_t t;
     uint32_t c;
     size_t i, j;
@@ -163,7 +164,7 @@ int btc_base58_encode(char* b58, size_t* b58sz, const void* data, size_t binsz)
     }
 
     size = (binsz - zcount) * 138 / 100 + 1;
-    uint8_t buf[size];
+    uint8_t *buf = (uint8_t *)alloca(sizeof(uint8_t) * size);
     memset(buf, 0, size);
 
     for (i = zcount, high = size - 1; i < (ssize_t)binsz; ++i, high = j) {
@@ -202,7 +203,7 @@ int btc_base58_encode_check(const uint8_t* data, int datalen, char* str, int str
     if (datalen > 128) {
         return 0;
     }
-    uint8_t buf[datalen + 32];
+    uint8_t *buf = (uint8_t *)alloca(sizeof(uint8_t) * (datalen + 32));
     uint8_t* hash = buf + datalen;
     memcpy(buf, data, datalen);
     sha256_Raw(data, datalen, hash);
@@ -211,7 +212,7 @@ int btc_base58_encode_check(const uint8_t* data, int datalen, char* str, int str
     if (btc_base58_encode(str, &res, buf, datalen + 4) != true) {
         ret = 0;
     } else {
-        ret = res;
+        ret = (int)res;
     }
     memset(buf, 0, sizeof(buf));
     return ret;
@@ -239,7 +240,7 @@ int btc_base58_decode_check(const char* str, uint8_t* data, size_t datalen)
     if (btc_b58check(data, binsize, str) < 0) {
         ret = 0;
     } else {
-        ret = binsize;
+        ret = (int)binsize;
     }
     return ret;
 }

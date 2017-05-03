@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <malloc.h>
 
 #include <btc/base58.h>
 #include <btc/ecc.h>
@@ -273,7 +274,7 @@ btc_bool btc_hdnode_get_pub_hex(const btc_hdnode* node, char* str, size_t* strsi
 // check for validity of curve point in case of public data not performed
 btc_bool btc_hdnode_deserialize(const char* str, const btc_chainparams* chain, btc_hdnode* node)
 {
-    uint8_t node_data[strlen(str)];
+    uint8_t *node_data = (uint8_t *)alloca(sizeof(uint8_t) * strlen(str));
     memset(node, 0, sizeof(btc_hdnode));
     size_t outlen = 0;
 

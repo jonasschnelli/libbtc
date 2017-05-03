@@ -38,6 +38,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <malloc.h>
 
 #define COINBASE_MATURITY 100
 
@@ -305,7 +306,7 @@ void btc_wallet_set_master_key_copy(btc_wallet* wallet, btc_hdnode* masterkey)
     btc_hdnode_serialize_private(wallet->masterkey, wallet->chain, value.str, value.alloc);
     value.len = strlen(str);
 
-    uint8_t key_int[strlen(hdmasterkey_key) + SHA256_DIGEST_LENGTH];
+    uint8_t *key_int = (uint8_t *)alloca(sizeof(uint8_t) * (strlen(hdmasterkey_key) + SHA256_DIGEST_LENGTH));
     // form a stack cstring for the key
     key.alloc = sizeof(key);
     key.len = key.alloc;
@@ -334,7 +335,7 @@ btc_hdnode* btc_wallet_next_key_new(btc_wallet* wallet)
     btc_hdnode_serialize_public(node, wallet->chain, value.str, value.alloc);
     value.len = strlen(str);
 
-    uint8_t key_int[strlen(hdkey_key) + sizeof(uint160)];
+    uint8_t *key_int = (uint8_t *)alloca(sizeof(uint8_t) * (strlen(hdkey_key) + sizeof(uint160)));
     key.alloc = sizeof(key_int);
     key.len = key.alloc;
     key.str = (char*)&key_int;
@@ -379,7 +380,7 @@ btc_hdnode* btc_wallet_find_hdnode_byaddr(btc_wallet* wallet, const char* search
     if (!wallet || !search_addr)
         return NULL;
 
-    uint8_t hashdata[strlen(search_addr)];
+    uint8_t *hashdata = (uint8_t *)alloca(sizeof(uint8_t) * strlen(search_addr));
     memset(hashdata, 0, sizeof(uint160));
     btc_base58_decode_check(search_addr, hashdata, strlen(search_addr));
 
@@ -402,7 +403,7 @@ btc_bool btc_wallet_add_wtx(btc_wallet* wallet, btc_wtx* wtx)
     btc_wallet_wtx_serialize(txser, wtx);
 
     cstring key;
-    uint8_t key_int[strlen(tx_key) + SHA256_DIGEST_LENGTH];
+    uint8_t *key_int = (uint8_t *)alloca(sizeof(uint8_t) * (strlen(tx_key) + SHA256_DIGEST_LENGTH));
     key.alloc = sizeof(key_int);
     key.len = key.alloc;
     key.str = (char*)&key_int;
@@ -522,8 +523,7 @@ btc_bool btc_wallet_is_spent(btc_wallet* wallet, uint256 hash, uint32_t n)
     if (!wallet)
         return false;
 
-    unsigned int i = 0;
-    for (i = wallet->spends->len; i > 0; i--) {
+    for (size_t i = wallet->spends->len; i > 0; i--) {
         btc_tx_outpoint* outpoint = vector_idx(wallet->spends, i - 1);
         if (memcmp(outpoint->hash, hash, BTC_HASH_LENGTH) == 0 && n == outpoint->n)
             return true;

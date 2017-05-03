@@ -10,6 +10,9 @@
 #include <stdio.h>
 #include <math.h>
 #include "sys/time.h"
+#ifdef _MSC_VER
+#  include <WinSock2.h>
+#endif
 
 static double gettimedouble(void) {
     struct timeval tv;
