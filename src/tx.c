@@ -430,8 +430,9 @@ out:
 
 btc_bool btc_tx_add_address_out(btc_tx* tx, const btc_chainparams* chain, int64_t amount, const char* address)
 {
-    uint8_t *buf = (uint8_t *)alloca(sizeof(uint8_t) * strlen(address) * 2);
-    int r = btc_base58_decode_check(address, buf, sizeof(buf));
+    const size_t buflen = sizeof(uint8_t) * strlen(address) * 2;
+    uint8_t *buf = (uint8_t *)alloca(buflen);
+    int r = btc_base58_decode_check(address, buf, buflen);
     if (r <= 0)
         return false;
 

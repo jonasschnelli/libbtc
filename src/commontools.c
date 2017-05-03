@@ -8,7 +8,9 @@
 #include <btc/bip32.h>
 #include <btc/ecc.h>
 #include <btc/ecc_key.h>
-#include <btc/net.h>
+#ifdef HAVE_CONFIG_H
+#  include <btc/net.h>
+#endif
 #include <btc/random.h>
 #include <btc/serialize.h>
 #include <btc/tx.h>
@@ -49,9 +51,10 @@ btc_bool address_from_pubkey(const btc_chainparams* chain, const char* pubkey_he
 
 btc_bool pubkey_from_privatekey(const btc_chainparams* chain, const char* privkey_wif, char* pubkey_hex, size_t* sizeout)
 {
-    uint8_t *privkey_data = (uint8_t *)alloca(sizeof(uint8_t) * strlen(privkey_wif));
+    const size_t privkey_len = sizeof(uint8_t) * strlen(privkey_wif);
+    uint8_t *privkey_data = (uint8_t *)alloca(privkey_len);
     size_t outlen = 0;
-    outlen = btc_base58_decode_check(privkey_wif, privkey_data, sizeof(privkey_data));
+    outlen = btc_base58_decode_check(privkey_wif, privkey_data, sizeof(privkey_len));
     if (privkey_data[0] != chain->b58prefix_secret_address)
         return false;
 

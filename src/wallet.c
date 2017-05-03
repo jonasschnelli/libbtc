@@ -306,11 +306,12 @@ void btc_wallet_set_master_key_copy(btc_wallet* wallet, btc_hdnode* masterkey)
     btc_hdnode_serialize_private(wallet->masterkey, wallet->chain, value.str, value.alloc);
     value.len = strlen(str);
 
-    uint8_t *key_int = (uint8_t *)alloca(sizeof(uint8_t) * (strlen(hdmasterkey_key) + SHA256_DIGEST_LENGTH));
+    const size_t key_len = sizeof(uint8_t)  * (strlen(hdmasterkey_key) + SHA256_DIGEST_LENGTH);
+    uint8_t *key_int = (uint8_t *)alloca(key_len);
     // form a stack cstring for the key
-    key.alloc = sizeof(key);
+    key.alloc = key_len;
     key.len = key.alloc;
-    key.str = (char*)&key_int;
+    key.str = (char*)key_int;
     memcpy(key.str, hdmasterkey_key, strlen(hdmasterkey_key));
     btc_hash(wallet->masterkey->public_key, BTC_ECKEY_COMPRESSED_LENGTH, (uint8_t*)key.str + strlen(hdmasterkey_key));
 
@@ -335,10 +336,11 @@ btc_hdnode* btc_wallet_next_key_new(btc_wallet* wallet)
     btc_hdnode_serialize_public(node, wallet->chain, value.str, value.alloc);
     value.len = strlen(str);
 
-    uint8_t *key_int = (uint8_t *)alloca(sizeof(uint8_t) * (strlen(hdkey_key) + sizeof(uint160)));
-    key.alloc = sizeof(key_int);
+    const size_t key_len = sizeof(uint8_t) * (strlen(hdkey_key) + sizeof(uint160));
+    uint8_t *key_int = (uint8_t *)alloca(key_len);
+    key.alloc = key_len;
     key.len = key.alloc;
-    key.str = (char*)&key_int;
+    key.str = (char*)key_int;
     memcpy(key.str, hdkey_key, strlen(hdkey_key));                       //set the key prefix for the kv store
     btc_hdnode_get_hash160(node, (uint8_t*)key.str + strlen(hdkey_key)); //append the hash160
 
@@ -380,9 +382,10 @@ btc_hdnode* btc_wallet_find_hdnode_byaddr(btc_wallet* wallet, const char* search
     if (!wallet || !search_addr)
         return NULL;
 
-    uint8_t *hashdata = (uint8_t *)alloca(sizeof(uint8_t) * strlen(search_addr));
-    memset(hashdata, 0, sizeof(uint160));
-    btc_base58_decode_check(search_addr, hashdata, strlen(search_addr));
+    const size_t hashlen = sizeof(uint8_t) * strlen(search_addr);
+    uint8_t *hashdata = (uint8_t *)alloca(hashlen);
+    memset(hashdata, 0, hashlen);
+    btc_base58_decode_check(search_addr, hashdata, hashlen);
 
     cstring keyhash160;
     keyhash160.str = (char*)hashdata + 1;
@@ -403,10 +406,11 @@ btc_bool btc_wallet_add_wtx(btc_wallet* wallet, btc_wtx* wtx)
     btc_wallet_wtx_serialize(txser, wtx);
 
     cstring key;
-    uint8_t *key_int = (uint8_t *)alloca(sizeof(uint8_t) * (strlen(tx_key) + SHA256_DIGEST_LENGTH));
-    key.alloc = sizeof(key_int);
+    const size_t key_len = sizeof(uint8_t) * (strlen(tx_key) + SHA256_DIGEST_LENGTH);
+    uint8_t *key_int = (uint8_t *)alloca(key_len);
+    key.alloc = key_len;
     key.len = key.alloc;
-    key.str = (char*)&key_int;
+    key.str = (char*)key_int;
     memcpy(key.str, tx_key, strlen(tx_key));
     btc_hash((const uint8_t*)txser->str, txser->len, (uint8_t*)key.str + strlen(tx_key));
 

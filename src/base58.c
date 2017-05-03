@@ -46,7 +46,8 @@ int btc_base58_decode(void* bin, size_t* binszp, const char* b58)
     const unsigned char* b58u = (const void*)b58;
     unsigned char* binu = bin;
     const size_t outisz = (binsz + 3) / 4;
-    uint32_t *outi = (uint32_t *)alloca(sizeof(uint32_t) * outisz);
+    const size_t outilen = sizeof(uint32_t) * outisz;
+    uint32_t *outi = (uint32_t *)alloca(outilen);
     uint64_t t;
     uint32_t c;
     size_t i, j;
@@ -57,7 +58,7 @@ int btc_base58_decode(void* bin, size_t* binszp, const char* b58)
 
     b58sz = strlen(b58);
 
-    memset(outi, 0, outisz * sizeof(*outi));
+    memset(outi, 0, outilen);
 
     // Leading zeros, just count
     for (i = 0; i < b58sz && !b58digits_map[b58u[i]]; ++i) {
@@ -81,12 +82,12 @@ int btc_base58_decode(void* bin, size_t* binszp, const char* b58)
         }
         if (c) {
             // Output number too big (carry to the next int32)
-            memset(outi, 0, outisz * sizeof(*outi));
+            memset(outi, 0, outilen);
             return false;
         }
         if (outi[0] & zeromask) {
             // Output number too big (last int32 filled too far)
-            memset(outi, 0, outisz * sizeof(*outi));
+            memset(outi, 0, outilen);
             return false;
         }
     }
@@ -121,7 +122,7 @@ int btc_base58_decode(void* bin, size_t* binszp, const char* b58)
     }
     *binszp += zerocount;
 
-    memset(outi, 0, outisz * sizeof(*outi));
+    memset(outi, 0, outilen);
     return true;
 }
 
@@ -164,8 +165,9 @@ int btc_base58_encode(char* b58, size_t* b58sz, const void* data, size_t binsz)
     }
 
     size = (binsz - zcount) * 138 / 100 + 1;
-    uint8_t *buf = (uint8_t *)alloca(sizeof(uint8_t) * size);
-    memset(buf, 0, size);
+    const size_t buflen = sizeof(uint8_t) * size;
+    uint8_t *buf = (uint8_t *)alloca(buflen);
+    memset(buf, 0, buflen);
 
     for (i = zcount, high = size - 1; i < (ssize_t)binsz; ++i, high = j) {
         for (carry = bin[i], j = size - 1; (j > high) || carry; --j) {
@@ -180,7 +182,7 @@ int btc_base58_encode(char* b58, size_t* b58sz, const void* data, size_t binsz)
 
     if (*b58sz <= zcount + size - j) {
         *b58sz = zcount + size - j + 1;
-        memset(buf, 0, size);
+        memset(buf, 0, buflen);
         return false;
     }
 
@@ -193,7 +195,7 @@ int btc_base58_encode(char* b58, size_t* b58sz, const void* data, size_t binsz)
     b58[i] = '\0';
     *b58sz = i + 1;
 
-    memset(buf, 0, size);
+    memset(buf, 0, buflen);
     return true;
 }
 
@@ -203,7 +205,8 @@ int btc_base58_encode_check(const uint8_t* data, int datalen, char* str, int str
     if (datalen > 128) {
         return 0;
     }
-    uint8_t *buf = (uint8_t *)alloca(sizeof(uint8_t) * (datalen + 32));
+    const size_t buflen = sizeof(uint8_t) * (datalen + 32);
+    uint8_t *buf = (uint8_t *)alloca(buflen);
     uint8_t* hash = buf + datalen;
     memcpy(buf, data, datalen);
     sha256_Raw(data, datalen, hash);
@@ -214,7 +217,7 @@ int btc_base58_encode_check(const uint8_t* data, int datalen, char* str, int str
     } else {
         ret = (int)res;
     }
-    memset(buf, 0, sizeof(buf));
+    memset(buf, 0, buflen);
     return ret;
 }
 

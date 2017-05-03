@@ -274,11 +274,12 @@ btc_bool btc_hdnode_get_pub_hex(const btc_hdnode* node, char* str, size_t* strsi
 // check for validity of curve point in case of public data not performed
 btc_bool btc_hdnode_deserialize(const char* str, const btc_chainparams* chain, btc_hdnode* node)
 {
-    uint8_t *node_data = (uint8_t *)alloca(sizeof(uint8_t) * strlen(str));
+    const size_t ndlen = sizeof(uint8_t) * strlen(str);
+    uint8_t *node_data = (uint8_t *)alloca(ndlen);
     memset(node, 0, sizeof(btc_hdnode));
     size_t outlen = 0;
 
-    outlen = btc_base58_decode_check(str, node_data, sizeof(node_data));
+    outlen = btc_base58_decode_check(str, node_data, ndlen);
     if (!outlen) {
         return false;
     }
