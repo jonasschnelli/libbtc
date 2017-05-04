@@ -28,7 +28,6 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-#include <malloc.h>
 
 #include <btc/base58.h>
 #include <btc/serialize.h>
@@ -431,10 +430,12 @@ out:
 btc_bool btc_tx_add_address_out(btc_tx* tx, const btc_chainparams* chain, int64_t amount, const char* address)
 {
     const size_t buflen = sizeof(uint8_t) * strlen(address) * 2;
-    uint8_t *buf = (uint8_t *)alloca(buflen);
+    uint8_t *buf = (uint8_t *)btc_malloc(buflen);
     int r = btc_base58_decode_check(address, buf, buflen);
-    if (r <= 0)
+    if (r <= 0) {
+        btc_free(buf);
         return false;
+    }
 
     if (buf[0] == chain->b58prefix_pubkey_address) {
         btc_tx_add_p2pkh_hash160_out(tx, amount, &buf[1]);
@@ -442,6 +443,7 @@ btc_bool btc_tx_add_address_out(btc_tx* tx, const btc_chainparams* chain, int64_
         btc_tx_add_p2sh_hash160_out(tx, amount, &buf[1]);
     }
 
+    btc_free(buf);
     return true;
 }
 

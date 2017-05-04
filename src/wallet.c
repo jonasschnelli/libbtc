@@ -38,13 +38,13 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <malloc.h>
+
 
 #define COINBASE_MATURITY 100
 
-static const char* hdkey_key = "hdkey";
-static const char* hdmasterkey_key = "mstkey";
-static const char* tx_key = "tx";
+static const char hdkey_key[] = "hdkey";
+static const char hdmasterkey_key[] = "mstkey";
+static const char tx_key[] = "tx";
 
 
 /* static interface */
@@ -212,16 +212,16 @@ void btc_wallet_logdb_append_cb(void* ctx, logdb_bool load_phase, logdb_record* 
 {
     btc_wallet* wallet = (btc_wallet*)ctx;
     if (load_phase) {
-        if (wallet->masterkey == NULL && rec->mode == RECORD_TYPE_WRITE && rec->key->len > strlen(hdmasterkey_key) && memcmp(rec->key->str, hdmasterkey_key, strlen(hdmasterkey_key)) == 0) {
+        if (wallet->masterkey == NULL && rec->mode == RECORD_TYPE_WRITE && rec->key->len > sizeof(hdmasterkey_key) && memcmp(rec->key->str, hdmasterkey_key, sizeof(hdmasterkey_key)) == 0) {
             wallet->masterkey = btc_hdnode_new();
             btc_hdnode_deserialize(rec->value->str, wallet->chain, wallet->masterkey);
         }
-        if (rec->key->len == strlen(hdkey_key) + sizeof(uint160) && memcmp(rec->key->str, hdkey_key, strlen(hdkey_key)) == 0) {
+        if (rec->key->len == sizeof(hdkey_key) + sizeof(uint160) && memcmp(rec->key->str, hdkey_key, sizeof(hdkey_key)) == 0) {
             btc_hdnode* hdnode = btc_hdnode_new();
             btc_hdnode_deserialize(rec->value->str, wallet->chain, hdnode);
 
             /* rip out the hash from the record key (avoid re-SHA256) */
-            cstring* keyhash160 = cstr_new_buf(rec->key->str + strlen(hdkey_key), sizeof(uint160));
+            cstring* keyhash160 = cstr_new_buf(rec->key->str + sizeof(hdkey_key), sizeof(uint160));
 
             /* add hdnode to the rbtree */
             RBTreeInsert(wallet->hdkeys_rbtree, keyhash160, hdnode);
@@ -230,7 +230,7 @@ void btc_wallet_logdb_append_cb(void* ctx, logdb_bool load_phase, logdb_record* 
                 wallet->next_childindex = hdnode->child_num + 1;
         }
 
-        if (rec->key->len == strlen(tx_key) + SHA256_DIGEST_LENGTH && memcmp(rec->key->str, tx_key, strlen(tx_key)) == 0) {
+        if (rec->key->len == sizeof(tx_key) + SHA256_DIGEST_LENGTH && memcmp(rec->key->str, tx_key, sizeof(tx_key)) == 0) {
             btc_wtx* wtx = btc_wallet_wtx_new();
             struct const_buffer buf = {rec->value->str, rec->value->len};
 
@@ -238,7 +238,7 @@ void btc_wallet_logdb_append_cb(void* ctx, logdb_bool load_phase, logdb_record* 
             btc_wallet_wtx_deserialize(wtx, &buf);
 
             /* rip out the hash from the record key (avoid re-SHA256) */
-            cstring* wtxhash = cstr_new_buf(rec->key->str + strlen(tx_key), SHA256_DIGEST_LENGTH);
+            cstring* wtxhash = cstr_new_buf(rec->key->str + sizeof(tx_key), SHA256_DIGEST_LENGTH);
 
             /* add wtx to the rbtree */
             RBTreeInsert(wallet->wtxes_rbtree, wtxhash, wtx);
@@ -306,14 +306,14 @@ void btc_wallet_set_master_key_copy(btc_wallet* wallet, btc_hdnode* masterkey)
     btc_hdnode_serialize_private(wallet->masterkey, wallet->chain, value.str, value.alloc);
     value.len = strlen(str);
 
-    const size_t key_len = sizeof(uint8_t)  * (strlen(hdmasterkey_key) + SHA256_DIGEST_LENGTH);
-    uint8_t *key_int = (uint8_t *)alloca(key_len);
+    const size_t key_len = sizeof(uint8_t)  * (sizeof(hdmasterkey_key) + SHA256_DIGEST_LENGTH);
+    uint8_t key_int[sizeof(hdmasterkey_key) + SHA256_DIGEST_LENGTH];
     // form a stack cstring for the key
     key.alloc = key_len;
     key.len = key.alloc;
     key.str = (char*)key_int;
-    memcpy(key.str, hdmasterkey_key, strlen(hdmasterkey_key));
-    btc_hash(wallet->masterkey->public_key, BTC_ECKEY_COMPRESSED_LENGTH, (uint8_t*)key.str + strlen(hdmasterkey_key));
+    memcpy(key.str, hdmasterkey_key, sizeof(hdmasterkey_key));
+    btc_hash(wallet->masterkey->public_key, BTC_ECKEY_COMPRESSED_LENGTH, (uint8_t*)key.str + sizeof(hdmasterkey_key));
 
     logdb_append(wallet->db, NULL, &key, &value);
 }
@@ -336,19 +336,19 @@ btc_hdnode* btc_wallet_next_key_new(btc_wallet* wallet)
     btc_hdnode_serialize_public(node, wallet->chain, value.str, value.alloc);
     value.len = strlen(str);
 
-    const size_t key_len = sizeof(uint8_t) * (strlen(hdkey_key) + sizeof(uint160));
-    uint8_t *key_int = (uint8_t *)alloca(key_len);
+    const size_t key_len = sizeof(uint8_t) * (sizeof(hdkey_key) + sizeof(uint160));
+    uint8_t key_int[sizeof(hdkey_key) + sizeof(uint160)];
     key.alloc = key_len;
     key.len = key.alloc;
     key.str = (char*)key_int;
-    memcpy(key.str, hdkey_key, strlen(hdkey_key));                       //set the key prefix for the kv store
-    btc_hdnode_get_hash160(node, (uint8_t*)key.str + strlen(hdkey_key)); //append the hash160
+    memcpy(key.str, hdkey_key, sizeof(hdkey_key));                       //set the key prefix for the kv store
+    btc_hdnode_get_hash160(node, (uint8_t*)key.str + sizeof(hdkey_key)); //append the hash160
 
     logdb_append(wallet->db, NULL, &key, &value);
     logdb_flush(wallet->db);
 
     //add key to the rbtree
-    cstring* hdnodehash = cstr_new_buf(key.str + strlen(hdkey_key), sizeof(uint160));
+    cstring* hdnodehash = cstr_new_buf(key.str + sizeof(hdkey_key), sizeof(uint160));
     RBTreeInsert(wallet->hdkeys_rbtree, hdnodehash, btc_hdnode_copy(node));
 
     //increase the in-memory counter (cache)
@@ -383,7 +383,7 @@ btc_hdnode* btc_wallet_find_hdnode_byaddr(btc_wallet* wallet, const char* search
         return NULL;
 
     const size_t hashlen = sizeof(uint8_t) * strlen(search_addr);
-    uint8_t *hashdata = (uint8_t *)alloca(hashlen);
+    uint8_t *hashdata = (uint8_t *)btc_malloc(hashlen);
     memset(hashdata, 0, hashlen);
     btc_base58_decode_check(search_addr, hashdata, hashlen);
 
@@ -391,6 +391,7 @@ btc_hdnode* btc_wallet_find_hdnode_byaddr(btc_wallet* wallet, const char* search
     keyhash160.str = (char*)hashdata + 1;
     keyhash160.len = sizeof(uint160);
     rb_red_blk_node* node = RBExactQuery(wallet->hdkeys_rbtree, &keyhash160);
+    btc_free(hashdata);
     if (node && node->info)
         return (btc_hdnode*)node->info;
     else
@@ -406,13 +407,13 @@ btc_bool btc_wallet_add_wtx(btc_wallet* wallet, btc_wtx* wtx)
     btc_wallet_wtx_serialize(txser, wtx);
 
     cstring key;
-    const size_t key_len = sizeof(uint8_t) * (strlen(tx_key) + SHA256_DIGEST_LENGTH);
-    uint8_t *key_int = (uint8_t *)alloca(key_len);
+    const size_t key_len = sizeof(uint8_t) * (sizeof(tx_key) + SHA256_DIGEST_LENGTH);
+    uint8_t key_int[sizeof(tx_key) + SHA256_DIGEST_LENGTH];
     key.alloc = key_len;
     key.len = key.alloc;
     key.str = (char*)key_int;
-    memcpy(key.str, tx_key, strlen(tx_key));
-    btc_hash((const uint8_t*)txser->str, txser->len, (uint8_t*)key.str + strlen(tx_key));
+    memcpy(key.str, tx_key, sizeof(tx_key));
+    btc_hash((const uint8_t*)txser->str, txser->len, (uint8_t*)key.str + sizeof(tx_key));
 
     logdb_append(wallet->db, NULL, &key, txser);
 
