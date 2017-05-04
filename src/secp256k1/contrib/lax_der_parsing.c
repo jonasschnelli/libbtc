@@ -5,9 +5,6 @@
  **********************************************************************/
 
 #include <string.h>
-#ifdef HAVE_CONFIG_H
-#  include <secp256k1.h>
-#endif
 
 #include "lax_der_parsing.h"
 
