@@ -4,11 +4,14 @@
  * file COPYING or http://www.opensource.org/licenses/mit-license.php.*
  **********************************************************************/
 
+#ifdef HAVE_CONFIG_H
+#  include "libbtc-config.h"
+#endif
 #include <btc/base58.h>
 #include <btc/bip32.h>
 #include <btc/ecc.h>
 #include <btc/ecc_key.h>
-#ifdef HAVE_CONFIG_H
+#if WITH_NET == 1
 #  include <btc/net.h>
 #endif
 #include <btc/random.h>
