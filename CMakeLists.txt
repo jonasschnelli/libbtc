@@ -19,6 +19,12 @@ FILE(GLOB LOGDB src/logdb/*.c)
 
 FILE(GLOB SECP256K1 src/secp256k1/src/*.c)
 list(REMOVE_ITEM SECP256K1 ${CMAKE_CURRENT_SOURCE_DIR}/src/secp256k1/src/tests.c)
+list(REMOVE_ITEM SECP256K1 ${CMAKE_CURRENT_SOURCE_DIR}/src/secp256k1/src/bench_recover.c)
+list(REMOVE_ITEM SECP256K1 ${CMAKE_CURRENT_SOURCE_DIR}/src/secp256k1/src/bench_sign.c)
+list(REMOVE_ITEM SECP256K1 ${CMAKE_CURRENT_SOURCE_DIR}/src/secp256k1/src/bench_verify.c)
+list(REMOVE_ITEM SECP256K1 ${CMAKE_CURRENT_SOURCE_DIR}/src/secp256k1/src/bench_ecdh.c)
+list(REMOVE_ITEM SECP256K1 ${CMAKE_CURRENT_SOURCE_DIR}/src/secp256k1/src/bench_internal.c)
+list(REMOVE_ITEM SECP256K1 ${CMAKE_CURRENT_SOURCE_DIR}/src/secp256k1/src/bench_schnorr_verify.c)
 
 INCLUDE_DIRECTORIES( include )
 INCLUDE_DIRECTORIES( src/logdb/include )
