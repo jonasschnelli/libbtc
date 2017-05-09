@@ -27,7 +27,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+#ifndef _MSC_VER
+#  include <unistd.h>
+#endif
 
 btc_bool address_from_pubkey(const btc_chainparams* chain, const char* pubkey_hex, char* address)
 {
