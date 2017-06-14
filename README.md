@@ -1,7 +1,9 @@
 libbtc – A Simple and Effective C Library for Bitcoin Wallets
 =============================================================
 
-[![Build Status](https://travis-ci.org/libbtc/libbtc.svg?branch=master)](https://travis-ci.org/libbtc/libbtc)  [![Coverage Status](https://coveralls.io/repos/libbtc/libbtc/badge.svg?branch=master&service=github)](https://coveralls.io/github/libbtc/libbtc?branch=master)
+## You can find the latest version of libbtc in https://github.com/libbtc/libbtc
+
+
 
 
 What is libbtc?
