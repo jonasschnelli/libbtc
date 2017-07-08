@@ -22,8 +22,8 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "segwit_addr.h"
-#include "txref_code.h"
+#include <btc/segwit_addr.h>
+#include <btc/txref_code.h>
 
 /* the Bech32 human readable part for tx-ref codes */
 static const char TXREF_BECH32_HRP[] = "tx";
