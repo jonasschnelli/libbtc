@@ -1,4 +1,5 @@
 #include "secp256k1/include/secp256k1.h"
+#include "secp256k1/include/secp256k1_recovery.h"
 
 #include <assert.h>
 #include <stdint.h>
@@ -111,7 +112,7 @@ btc_bool btc_ecc_sign(const uint8_t* private_key, const uint256 hash, unsigned c
     return 1;
 }
 
-btc_bool btc_ecc_sign_compact(const uint8_t* private_key, const uint256 hash, unsigned char* sigder, size_t* outlen)
+btc_bool btc_ecc_sign_compact(const uint8_t* private_key, const uint256 hash, unsigned char* sigcomp, size_t* outlen)
 {
     assert(secp256k1_ctx);
 
@@ -120,7 +121,41 @@ btc_bool btc_ecc_sign_compact(const uint8_t* private_key, const uint256 hash, un
         return 0;
 
     *outlen = 64;
-    if (!secp256k1_ecdsa_signature_serialize_compact(secp256k1_ctx, sigder, &sig))
+    if (!secp256k1_ecdsa_signature_serialize_compact(secp256k1_ctx, sigcomp, &sig))
+        return 0;
+
+    return 1;
+}
+
+btc_bool btc_ecc_sign_compact_recoverable(const uint8_t* private_key, const uint256 hash, unsigned char* sigrec, size_t* outlen, int *recid)
+{
+    assert(secp256k1_ctx);
+
+    secp256k1_ecdsa_recoverable_signature sig;
+    if (!secp256k1_ecdsa_sign_recoverable(secp256k1_ctx, &sig, hash, private_key, secp256k1_nonce_function_rfc6979, NULL))
+        return 0;
+
+    *outlen = 65;
+    if (!secp256k1_ecdsa_recoverable_signature_serialize_compact(secp256k1_ctx, sigrec, recid, &sig))
+        return 0;
+
+    return 1;
+}
+
+btc_bool btc_ecc_recover_pubkey(const unsigned char* sigrec, const uint256 hash, const int recid, uint8_t* public_key, size_t *outlen)
+{
+    assert(secp256k1_ctx);
+
+    secp256k1_pubkey pubkey;
+    secp256k1_ecdsa_recoverable_signature sig;
+
+    if (!secp256k1_ecdsa_recoverable_signature_parse_compact(secp256k1_ctx, &sig, sigrec, recid))
+        return false;
+
+    if (!secp256k1_ecdsa_recover(secp256k1_ctx, &pubkey, &sig, hash))
+        return 0;
+
+    if (!secp256k1_ec_pubkey_serialize(secp256k1_ctx, public_key, outlen, &pubkey, SECP256K1_EC_COMPRESSED))
         return 0;
 
     return 1;

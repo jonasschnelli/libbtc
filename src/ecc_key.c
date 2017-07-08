@@ -151,6 +151,25 @@ btc_bool btc_key_sign_hash_compact(const btc_key* privkey, const uint256 hash, u
     return btc_ecc_sign_compact(privkey->privkey, hash, sigout, outlen);
 }
 
+btc_bool btc_key_sign_hash_compact_recoverable(const btc_key* privkey, const uint256 hash, unsigned char* sigout, size_t* outlen, int* recid)
+{
+    return btc_ecc_sign_compact_recoverable(privkey->privkey, hash, sigout, outlen, recid);
+}
+
+btc_bool btc_key_sign_recover_pubkey(const unsigned char* sig, const uint256 hash, int recid, btc_pubkey* pubkey)
+{
+    uint8_t pubkeybuf[128];
+    size_t outlen = 128;
+    if (!btc_ecc_recover_pubkey(sig, hash, recid, pubkeybuf, &outlen) || outlen > BTC_ECKEY_UNCOMPRESSED_LENGTH) {
+        return 0;
+    }
+    memset(pubkey->pubkey, 0, sizeof(pubkey->pubkey));
+    memcpy(pubkey->pubkey, pubkeybuf, outlen);
+    if (outlen == BTC_ECKEY_COMPRESSED_LENGTH) {
+        pubkey->compressed = true;
+    }
+    return 1;
+}
 
 btc_bool btc_pubkey_verify_sig(const btc_pubkey* pubkey, const uint256 hash, unsigned char* sigder, int len)
 {
