@@ -22,7 +22,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "segwit_addr.h"
+#include "btc/segwit_addr.h"
 
 uint32_t bech32_polymod_step(uint32_t pre) {
     uint8_t b = pre >> 25;
