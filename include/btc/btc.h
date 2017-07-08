@@ -61,17 +61,20 @@ extern "C" {
 
 #include "memory.h"
 
-#ifdef __cplusplus
-}
-#endif
-
 #define BTC_ECKEY_UNCOMPRESSED_LENGTH 65
 #define BTC_ECKEY_COMPRESSED_LENGTH 33
 #define BTC_ECKEY_PKEY_LENGTH 32
 #define BTC_ECKEY_PKEY_LENGTH 32
 #define BTC_HASH_LENGTH 32
 
+#define BTC_MIN(a,b) (((a)<(b))?(a):(b))
+#define BTC_MAX(a,b) (((a)>(b))?(a):(b))
+
 typedef uint8_t uint256[32];
 typedef uint8_t uint160[20];
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //_LIBBTC_H_

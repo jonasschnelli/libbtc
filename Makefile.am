@@ -45,6 +45,7 @@ libbtc_la_SOURCES = \
     src/bip32.c \
     src/block.c \
     src/buffer.c \
+    src/chainparams.c \
     src/commontools.c \
     src/cstr.c \
     src/ctaes.c \
@@ -127,11 +128,16 @@ endif
 
 if WITH_NET
 include_HEADERS += \
+    include/btc/headersdb.h \
+    include/btc/headersdb_file.h \
     include/btc/protocol.h \
-    include/btc/net.h
+    include/btc/net.h \
+    include/btc/netspv.h
 
 libbtc_la_SOURCES += \
+    src/headersdb_file.c \
     src/net.c \
+    src/netspv.c \
     src/protocol.c
 
 libbtc_la_LIBADD += $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
@@ -140,6 +146,7 @@ libbtc_la_CFLAGS += $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
 if USE_TESTS
 tests_SOURCES += \
     test/net_tests.c \
+    test/netspv_tests.c \
     test/protocol_tests.c
 tests_LDADD += $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
 tests_LDFLAGS += -levent
@@ -167,6 +174,14 @@ bitcoin_send_tx_SOURCES = \
 bitcoin_send_tx_CFLAGS = $(libbtc_la_CFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
 bitcoin_send_tx_CPPFLAGS = -I$(top_srcdir)/src
 bitcoin_send_tx_LDFLAGS = -static
+
+inst_PROGRAMS += bitcoin-spv
+bitcoin_spv_LDADD = libbtc.la
+bitcoin_spv_SOURCES = \
+    src/tools/bitcoin-spv.c
+bitcoin_spv_CFLAGS = $(libbtc_la_CFLAGS)
+bitcoin_spv_CPPFLAGS = -I$(top_srcdir)/src
+bitcoin_spv_LDFLAGS = -static
 
 endif
 

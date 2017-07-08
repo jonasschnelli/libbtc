@@ -426,6 +426,41 @@ out:
     return ret;
 }
 
+btc_bool btc_tx_add_data_out(btc_tx* tx, const int64_t amount, const uint8_t *data, const size_t datalen)
+{
+    if (datalen > 80)
+        return false;
+
+    btc_tx_out* tx_out = btc_tx_out_new();
+
+    tx_out->script_pubkey = cstr_new_sz(1024);
+    btc_script_append_op(tx_out->script_pubkey , OP_RETURN);
+    btc_script_append_pushdata(tx_out->script_pubkey, (unsigned char*)data, datalen);
+
+    tx_out->value = amount;
+
+    vector_add(tx->vout, tx_out);
+
+    return true;
+}
+
+btc_bool btc_tx_add_puzzle_out(btc_tx* tx, const int64_t amount, const uint8_t *puzzle, const size_t puzzlelen)
+{
+    if (puzzlelen > BTC_HASH_LENGTH)
+        return false;
+
+    btc_tx_out* tx_out = btc_tx_out_new();
+
+    tx_out->script_pubkey = cstr_new_sz(1024);
+    btc_script_append_op(tx_out->script_pubkey , OP_HASH256);
+    btc_script_append_pushdata(tx_out->script_pubkey, (unsigned char*)puzzle, puzzlelen);
+    btc_script_append_op(tx_out->script_pubkey , OP_EQUAL);
+    tx_out->value = amount;
+
+    vector_add(tx->vout, tx_out);
+
+    return true;
+}
 
 btc_bool btc_tx_add_address_out(btc_tx* tx, const btc_chainparams* chain, int64_t amount, const char* address)
 {

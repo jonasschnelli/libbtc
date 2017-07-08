@@ -5,8 +5,6 @@
 #include <btc/serialize.h>
 #include <btc/tx.h>
 
-extern void btc_net_test();
-
 static btc_bool timer_cb(btc_node *node, uint64_t *now)
 {
     if (node->time_started_con + 300 < *now)
