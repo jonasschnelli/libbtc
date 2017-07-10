@@ -52,6 +52,8 @@ typedef struct btc_chainparams_ {
     int default_port;
     btc_dns_seed dnsseeds[8];
     const char txref_code_magic;
+    const char txref_code_hrp[8];
+    btc_bool txref_code_testnet;
 } btc_chainparams;
 
 typedef struct btc_checkpoint_ {

@@ -108,12 +108,13 @@ int main(int argc, char* argv[])
         int height = (int)strtol(argv[argc - 2], (char**)NULL, 10);
         int pos = (int)strtol(argv[argc - 1], (char**)NULL, 10);
 
-        char encoded_txref[22] = { 0 };
+        char encoded_txref[22+strlen(chain->txref_code_hrp)];
+        memset(encoded_txref, 0, sizeof(encoded_txref));
 
         if (height == 0 && pos == 0) {
             fprintf(stderr, "Invalid height / pos\n");
         }
-        else if (btc_txref_encode(encoded_txref, chain->txref_code_magic, height, pos)) {
+        else if (btc_txref_encode(encoded_txref, chain->txref_code_hrp, chain->txref_code_magic, height, pos, chain->txref_code_testnet)) {
             printf("Height: %d\n", height);
             printf("Position: %d\n", pos);
             printf("Network: %s\n", chain->chainname);
@@ -127,8 +128,8 @@ int main(int argc, char* argv[])
         char magic;
         int height;
         int pos;
-
-        if (btc_txref_decode(argv[argc - 1], &magic, &height, &pos)) {
+        char hrp[strlen(argv[argc - 1])];
+        if (btc_txref_decode(argv[argc - 1], hrp, &magic, &height, &pos)) {
             printf("Height: %d\n", height);
             printf("Position: %d\n", pos);
             printf("Magic: %d\n", magic);
