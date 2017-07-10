@@ -17,6 +17,8 @@
 #include "utest.h"
 #include <btc/utils.h>
 
+#include <btc/tool.h>
+#include <btc/bip32.h>
 
 struct txtest_input {
     char hash[32 * 2 + 1];
@@ -893,6 +895,54 @@ void test_script_parse()
     cstr_free(txser, true);
 
     vector_free(pubkeys, true);
+    btc_tx_free(tx);
+
+    // op_return test
+    size_t masterkeysize = 200;
+    char masterkey[masterkeysize];
+    u_assert_int_eq(hd_gen_master(&btc_chainparams_main, masterkey, masterkeysize), true);
+
+    printf("%s\n", masterkey);
+
+    btc_hdnode node;
+    u_assert_int_eq(btc_hdnode_deserialize(masterkey, &btc_chainparams_main, &node), true);
+
+    uint256 rev_code;
+    uint256 sig_hash;
+    btc_hash(node.private_key, BTC_ECKEY_PKEY_LENGTH, rev_code);
+
+    if (1 == 1)
+        // test
+        printf("test\n");
+
+    uint8_t sigdata[38] = {0x42, 0x49, 0x50, 0x00, 0x00, 0x00, 0x00 };
+    btc_hash(rev_code, BTC_HASH_LENGTH, &sigdata[7]);
+
+    btc_hash(sigdata, sizeof(sigdata), sig_hash);
+
+    btc_key key;
+    btc_privkey_init(&key);
+
+    memcpy(key.privkey, node.private_key, BTC_ECKEY_PKEY_LENGTH);
+    unsigned char sigcmp[64];
+    size_t outlencmp = 64;
+    btc_key_sign_hash_compact(&key, sig_hash, sigcmp, &outlencmp);
+
+    btc_pubkey pubkeytx_rev;
+    btc_pubkey_init(&pubkeytx_rev);
+    btc_pubkey_from_key(&key, &pubkeytx_rev);
+
+    tx = btc_tx_new();
+    btc_tx_add_data_out(tx, 100000, sigcmp, outlencmp); //0.001 BTC
+    btc_tx_add_p2pkh_out(tx, 10000, &pubkeytx_rev);
+
+    txser = cstr_new_sz(1024);
+    btc_tx_serialize(txser, tx);
+    char hexbuf4[txser->len * 2 + 1];
+    utils_bin_to_hex((unsigned char*)txser->str, txser->len, hexbuf4);
+
+    printf("%s\n", hexbuf4);
+
     btc_tx_free(tx);
 }
 
