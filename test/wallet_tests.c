@@ -18,39 +18,40 @@ static const char *wallettmpfile = "/tmp/dummy";
 void test_wallet()
 {
     unlink(wallettmpfile);
-    btc_wallet *wallet = btc_wallet_new();
-    enum logdb_error error;
-    u_assert_int_eq(btc_wallet_load(wallet, wallettmpfile, &error), true);
+    btc_wallet *wallet = btc_wallet_new(&btc_chainparams_main);
+    int error;
+    btc_bool created;
+    u_assert_int_eq(btc_wallet_load(wallet, wallettmpfile, &error, &created), true);
 
     char *xpriv = "xprv9uHRZZhk6KAJC1avXpDAp4MDc3sQKNxDiPvvkX8Br5ngLNv1TxvUxt4cV1rGL5hj6KCesnDYUhd7oWgT11eZG7XnxHrnYeSvkzY7d2bhkJ7";
 
     btc_hdnode node;
-    btc_hdnode *node2, *node3;
+    btc_wallet_hdnode *node2, *node3;
     btc_bool suc = btc_hdnode_deserialize(xpriv, &btc_chainparams_main, &node);
     u_assert_int_eq(suc, 1);
     btc_wallet_set_master_key_copy(wallet, &node);
 
-    node2 = btc_wallet_next_key_new(wallet);
+    node2 = btc_wallet_next_key(wallet);
 
     btc_wallet_free(wallet);
 
-    wallet = btc_wallet_new();
-    u_assert_int_eq(btc_wallet_load(wallet, wallettmpfile, &error), true);
-    node3 = btc_wallet_next_key_new(wallet);
+    wallet = btc_wallet_new(&btc_chainparams_main);
+    u_assert_int_eq(btc_wallet_load(wallet, wallettmpfile, &error, &created), true);
+    node3 = btc_wallet_next_key(wallet);
 
     //should not be equal because we autoincrementing child index
-    u_assert_int_eq(memcmp(node2->private_key, node3->private_key, sizeof(node2->private_key)) != 0, 1);
-    btc_hdnode_free(node3);
+    u_assert_int_eq(memcmp(node2->hdnode->private_key, node3->hdnode->private_key, sizeof(node2->hdnode->private_key)) != 0, 1);
+    btc_wallet_hdnode_free(node3);
 
     //force to regenerate child 0
     wallet->next_childindex = 0;
-    node3 = btc_wallet_next_key_new(wallet);
-    btc_hdnode_free(node3);
+    node3 = btc_wallet_next_key(wallet);
+    btc_wallet_hdnode_free(node3);
     wallet->next_childindex = 0;
-    node3 = btc_wallet_next_key_new(wallet);
+    node3 = btc_wallet_next_key(wallet);
 
     //now it should be equal
-    u_assert_int_eq(memcmp(node2->private_key, node3->private_key, sizeof(node2->private_key)), 0);
+    u_assert_int_eq(memcmp(node2->hdnode->private_key, node3->hdnode->private_key, sizeof(node2->hdnode->private_key)), 0);
 
     uint160 hash160;
 
@@ -63,11 +64,11 @@ void test_wallet()
     vector_free(addrs, true);
     btc_wallet_flush(wallet);
     btc_wallet_free(wallet);
-    btc_hdnode_free(node2);
-    btc_hdnode_free(node3);
+    btc_wallet_hdnode_free(node2);
+    btc_wallet_hdnode_free(node3);
 
-    wallet = btc_wallet_new();
-    u_assert_int_eq(btc_wallet_load(wallet, wallettmpfile, &error), true);
+    wallet = btc_wallet_new(&btc_chainparams_main);
+    u_assert_int_eq(btc_wallet_load(wallet, wallettmpfile, &error, &created), true);
     addrs = vector_new(1, free);
     btc_wallet_get_addresses(wallet, addrs);
 
@@ -76,10 +77,10 @@ void test_wallet()
     u_assert_int_eq(strcmp(addrs->data[0],"1LZaBnH11M2yN5ZNiK67yUbaspfX6XKmRr"), 0)
 
     // get a hdnode and compare
-    btc_hdnode *checknode = btc_wallet_find_hdnode_byaddr(wallet, addrs->data[0]);
+    btc_wallet_hdnode *checknode = btc_wallet_find_hdnode_byaddr(wallet, addrs->data[0]);
 
     hash160[0] = wallet->chain->b58prefix_pubkey_address;
-    btc_hdnode_get_hash160(checknode, hash160+1);
+    btc_hdnode_get_hash160(checknode->hdnode, hash160+1);
 
     size_t addrsize = 98;
     char addr[addrsize];
@@ -101,7 +102,7 @@ void test_wallet()
 
     // add coinbase tx
     wtx->height = 0;
-    btc_wallet_add_wtx(wallet, wtx);
+    btc_wallet_add_wtx_move(wallet, wtx);
 
     uint64_t amount = btc_wallet_wtx_get_credit(wallet, wtx);
     u_assert_uint32_eq(amount, 0);
@@ -119,7 +120,7 @@ void test_wallet()
     
     // add normal tx
     wtx->height = 0;
-    btc_wallet_add_wtx(wallet, wtx);
+    btc_wallet_add_wtx_move(wallet, wtx);
 
     amount = btc_wallet_wtx_get_credit(wallet, wtx);
     btc_wallet_wtx_free(wtx);
@@ -129,8 +130,8 @@ void test_wallet()
     btc_wallet_flush(wallet);
     btc_wallet_free(wallet);
 
-    wallet = btc_wallet_new();
-    u_assert_int_eq(btc_wallet_load(wallet, wallettmpfile, &error), true);
+    wallet = btc_wallet_new(&btc_chainparams_main);
+    u_assert_int_eq(btc_wallet_load(wallet, wallettmpfile, &error, &created), true);
 
     amount = btc_wallet_get_balance(wallet);
 

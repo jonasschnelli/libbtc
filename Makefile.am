@@ -26,10 +26,12 @@ include_HEADERS = \
     include/btc/portable_endian.h \
     include/btc/random.h \
     include/btc/script.h \
+    include/btc/segwit_addr.h \
     include/btc/serialize.h \
     include/btc/sha2.h \
     include/btc/tool.h \
     include/btc/tx.h \
+    include/btc/txref_code.h \
     include/btc/utils.h \
     include/btc/vector.h
 
@@ -45,6 +47,7 @@ libbtc_la_SOURCES = \
     src/bip32.c \
     src/block.c \
     src/buffer.c \
+    src/chainparams.c \
     src/commontools.c \
     src/cstr.c \
     src/ctaes.c \
@@ -55,9 +58,11 @@ libbtc_la_SOURCES = \
     src/random.c \
     src/ripemd160.c \
     src/script.c \
+    src/segwit_addr.c \
     src/serialize.c \
     src/sha2.c \
     src/tx.c \
+    src/txref_code.c \
     src/utils.c \
     src/vector.c
 
@@ -84,6 +89,7 @@ tests_SOURCES = \
     test/utest.h \
     test/unittester.c \
     test/tx_tests.c \
+    test/txref_tests.c \
     test/utils_tests.c \
     test/vector_tests.c
 
@@ -127,11 +133,16 @@ endif
 
 if WITH_NET
 include_HEADERS += \
+    include/btc/headersdb.h \
+    include/btc/headersdb_file.h \
     include/btc/protocol.h \
-    include/btc/net.h
+    include/btc/net.h \
+    include/btc/netspv.h
 
 libbtc_la_SOURCES += \
+    src/headersdb_file.c \
     src/net.c \
+    src/netspv.c \
     src/protocol.c
 
 libbtc_la_LIBADD += $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
@@ -140,6 +151,7 @@ libbtc_la_CFLAGS += $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
 if USE_TESTS
 tests_SOURCES += \
     test/net_tests.c \
+    test/netspv_tests.c \
     test/protocol_tests.c
 tests_LDADD += $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
 tests_LDFLAGS += -levent
@@ -167,6 +179,23 @@ bitcoin_send_tx_SOURCES = \
 bitcoin_send_tx_CFLAGS = $(libbtc_la_CFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
 bitcoin_send_tx_CPPFLAGS = -I$(top_srcdir)/src
 bitcoin_send_tx_LDFLAGS = -static
+
+inst_PROGRAMS += bitcoin-spv
+bitcoin_spv_LDADD = libbtc.la
+bitcoin_spv_SOURCES = \
+    src/tools/bitcoin-spv.c
+bitcoin_spv_CFLAGS = $(libbtc_la_CFLAGS)
+bitcoin_spv_CPPFLAGS = -I$(top_srcdir)/src
+bitcoin_spv_LDFLAGS = -static
+
+inst_PROGRAMS += bitcoin-txref
+bitcoin_txref_LDADD = libbtc.la
+bitcoin_txref_SOURCES = \
+    src/tools/bitcoin-txref.c
+bitcoin_txref_CFLAGS = $(libbtc_la_CFLAGS)
+bitcoin_txref_CPPFLAGS = -I$(top_srcdir)/src
+bitcoin_txref_LDFLAGS = -static
+
 
 endif
 

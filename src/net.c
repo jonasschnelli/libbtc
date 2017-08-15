@@ -7,6 +7,7 @@
 #include <btc/buffer.h>
 #include <btc/chainparams.h>
 #include <btc/cstr.h>
+#include <btc/hash.h>
 #include <btc/protocol.h>
 #include <btc/serialize.h>
 #include <btc/utils.h>
@@ -178,9 +179,16 @@ void event_cb(struct bufferevent* ev, short type, void* ctx)
         btc_node_connection_state_changed(node);
     } else if (((type & BEV_EVENT_EOF) != 0) ||
                ((type & BEV_EVENT_ERROR) != 0)) {
-        node->nodegroup->log_write_cb("Error connecting to node %d.\n", node->nodeid);
         node->state = 0;
         node->state |= NODE_ERRORED;
+        node->state |= NODE_DISCONNECTED;
+        if ((type & BEV_EVENT_EOF) != 0) {
+            node->nodegroup->log_write_cb("Disconnected from the remote peer %d.\n", node->nodeid);
+            node->state |= NODE_DISCONNECTED_FROM_REMOTE_PEER;
+        }
+        else {
+            node->nodegroup->log_write_cb("Error connecting to node %d.\n", node->nodeid);
+        }
         btc_node_connection_state_changed(node);
     } else if (type & BEV_EVENT_CONNECTED) {
         node->nodegroup->log_write_cb("Successfull connected to node %d.\n", node->nodeid);
@@ -203,6 +211,8 @@ btc_node* btc_node_new()
     node->services = 0;
     node->lastping = 0;
     node->time_started_con = 0;
+    node->time_last_request = 0;
+    btc_hash_clear(node->last_requested_inv);
 
     node->recvBuffer = cstr_new_sz(BTC_P2P_MESSAGE_CHUNK_SIZE);
     node->hints = 0;
@@ -292,6 +302,13 @@ btc_node_group* btc_node_group_new(const btc_chainparams* chainparams)
     return node_group;
 }
 
+void btc_node_group_shutdown(btc_node_group *group) {
+    for (size_t i = 0; i < group->nodes->len; i++) {
+        btc_node* node = vector_idx(group->nodes, i);
+        btc_node_disconnect(node);
+    }
+}
+
 void btc_node_group_free(btc_node_group* group)
 {
     if (!group)
@@ -337,6 +354,7 @@ btc_bool btc_node_group_connect_next_nodes(btc_node_group* group)
     if (connect_amount <= 0)
         return true;
 
+    connect_amount = connect_amount*3;
     /* search for a potential node that has not errored and is not connected or in connecting state */
     for (size_t i = 0; i < group->nodes->len; i++) {
         btc_node* node = vector_idx(group->nodes, i);
@@ -461,6 +479,10 @@ int btc_node_parse_message(btc_node* node, btc_p2p_msg_hdr* hdr, struct const_bu
             if (!btc_p2p_msg_version_deser(&v_msg_check, buf)) {
                 return btc_node_missbehave(node);
             }
+            if ((v_msg_check.services & BTC_NODE_NETWORK) != BTC_NODE_NETWORK) {
+                btc_node_disconnect(node);
+            }
+            node->bestknownheight = v_msg_check.start_height;
             node->nodegroup->log_write_cb("Connected to node %d: %s (%d)\n", node->nodeid, v_msg_check.useragent, v_msg_check.start_height);
             /* confirm version via verack */
             cstring* verack = btc_p2p_message_new(node->nodegroup->chainparams->netmagic, BTC_MSG_VERACK, NULL, 0);
@@ -533,4 +555,49 @@ int btc_get_peers_from_dns(const char* seed, vector* ips_out, int port, int fami
     }
     evutil_freeaddrinfo(aiRes);
     return ips_out->len;
+}
+
+btc_bool btc_node_group_add_peers_by_ip_or_seed(btc_node_group *group, const char *ips) {
+    if (ips == NULL) {
+        /* === DNS QUERY === */
+        /* get a couple of peers from a seed */
+        vector* ips_dns = vector_new(10, free);
+        const btc_dns_seed seed = group->chainparams->dnsseeds[0];
+        if (strlen(seed.domain) == 0) {
+            return false;
+        }
+        /* todo: make sure we have enought peers, eventually */
+        /* call another seeder */
+        btc_get_peers_from_dns(seed.domain, ips_dns, group->chainparams->default_port, AF_INET);
+        for (unsigned int i = 0; i < ips_dns->len; i++) {
+            char* ip = (char*)vector_idx(ips_dns, i);
+
+            /* create a node */
+            btc_node* node = btc_node_new();
+            if (btc_node_set_ipport(node, ip) > 0) {
+                /* add the node to the group */
+                btc_node_group_add_node(group, node);
+            }
+        }
+        vector_free(ips_dns, true);
+    } else {
+        // add comma seperated ips (nodes)
+        char working_str[64];
+        memset(working_str, 0, sizeof(working_str));
+        size_t offset = 0;
+        for (unsigned int i = 0; i <= strlen(ips); i++) {
+            if (i == strlen(ips) || ips[i] == ',') {
+                btc_node* node = btc_node_new();
+                if (btc_node_set_ipport(node, working_str) > 0) {
+                    btc_node_group_add_node(group, node);
+                }
+                offset = 0;
+                memset(working_str, 0, sizeof(working_str));
+            } else if (ips[i] != ' ' && offset < sizeof(working_str)) {
+                working_str[offset] = ips[i];
+                offset++;
+            }
+        }
+    }
+    return true;
 }

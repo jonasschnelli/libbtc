@@ -64,7 +64,17 @@ void test_eckey()
     size_t outlencmp = 64;
     btc_key_sign_hash_compact(&key, hash, sigcmp, &outlencmp);
 
-    btc_pubkey_verify_sig(&pubkey, hash, sig, outlen);
+    unsigned char sigcmp_rec[64];
+    size_t outlencmp_rec = 64;
+    int recid;
+    btc_pubkey pubkey_rec;
+    btc_pubkey_init(&pubkey_rec);
+    btc_key_sign_hash_compact_recoverable(&key, hash, sigcmp_rec, &outlencmp_rec, &recid);
+    btc_key_sign_recover_pubkey(sigcmp_rec, hash, recid, &pubkey_rec);
+    u_assert_int_eq(btc_pubkey_verify_sig(&pubkey, hash, sig, outlen), true);
+    u_assert_int_eq(btc_pubkey_verify_sig(&pubkey, hash, sig, outlen), true);
+    int test = sizeof(pubkey.pubkey);
+    u_assert_mem_eq(pubkey.pubkey, pubkey_rec.pubkey, sizeof(pubkey.pubkey));
 
 
     size_t size = 66;

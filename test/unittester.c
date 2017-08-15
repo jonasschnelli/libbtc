@@ -57,13 +57,9 @@ extern void test_script_parse();
 extern void test_script_op_codeseperator();
 extern void test_invalid_tx_deser();
 extern void test_eckey();
+extern void test_txref();
 
 #ifdef WITH_WALLET
-extern void test_red_black_tree();
-extern void test_logdb_memdb();
-extern void test_logdb_rbtree();
-
-extern void test_logdb();
 extern void test_wallet();
 #endif
 
@@ -74,6 +70,7 @@ extern void test_tool();
 #ifdef WITH_NET
 extern void test_net_basics_plus_download_block();
 extern void test_protocol();
+extern void test_netspv();
 #endif
 
 extern void btc_ecc_start();
@@ -113,12 +110,10 @@ int main()
 
     u_run_test(test_eckey);
 
-#ifdef WITH_WALLET
-    u_run_test(test_wallet);
+    u_run_test(test_txref);
 
-    u_run_test(test_red_black_tree);
-    u_run_test(test_logdb_memdb);
-    u_run_test(test_logdb_rbtree);
+#ifdef WITH_WALLET
+    //u_run_test(test_wallet);
 #endif
 
 #ifdef WITH_TOOLS
@@ -126,6 +121,8 @@ int main()
 #endif
 
 #ifdef WITH_NET
+    u_run_test(test_netspv);
+
     u_run_test(test_protocol);
     u_run_test(test_net_basics_plus_download_block);
 #endif

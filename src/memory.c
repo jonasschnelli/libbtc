@@ -113,3 +113,17 @@ void btc_free_internal(void* ptr)
 {
     free(ptr);
 }
+
+#ifdef HAVE_MEMSET_S
+volatile void *sd_mem_zero(volatile void *dst, size_t len)
+{
+    memset_s(dst, len, 0, len);
+}
+#else
+volatile void *sd_mem_zero(volatile void *dst, size_t len)
+{
+    volatile char *buf;
+    for (buf = (volatile char *)dst;  len;  buf[--len] = 0);
+    return dst;
+}
+#endif
