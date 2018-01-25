@@ -59,6 +59,7 @@ typedef struct btc_tx_in_ {
     btc_tx_outpoint prevout;
     cstring* script_sig;
     uint32_t sequence;
+    vector* witness_stack;
 } btc_tx_in;
 
 typedef struct btc_tx_out_ {
@@ -90,14 +91,14 @@ LIBBTC_API void btc_tx_free(btc_tx* tx);
 LIBBTC_API void btc_tx_copy(btc_tx* dest, const btc_tx* src);
 
 //!deserialize/parse a p2p serialized bitcoin transaction
-LIBBTC_API int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx* tx, size_t* consumed_length);
+LIBBTC_API int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx* tx, size_t* consumed_length, btc_bool allow_witness);
 
 //!serialize a lbc bitcoin data structure into a p2p serialized buffer
-LIBBTC_API void btc_tx_serialize(cstring* s, const btc_tx* tx);
+LIBBTC_API void btc_tx_serialize(cstring* s, const btc_tx* tx, btc_bool allow_witness);
 
 LIBBTC_API void btc_tx_hash(const btc_tx* tx, uint8_t* hashout);
 
-LIBBTC_API btc_bool btc_tx_sighash(const btc_tx* tx_to, const cstring* fromPubKey, unsigned int in_num, int hashtype, uint8_t* hash);
+LIBBTC_API btc_bool btc_tx_sighash(const btc_tx* tx_to, const cstring* fromPubKey, unsigned int in_num, int hashtype, const uint64_t amount, const enum btc_sig_version sigversion, uint8_t* hash);
 
 LIBBTC_API btc_bool btc_tx_add_address_out(btc_tx* tx, const btc_chainparams* chain, int64_t amount, const char* address);
 LIBBTC_API btc_bool btc_tx_add_p2sh_hash160_out(btc_tx* tx, int64_t amount, uint160 hash160);

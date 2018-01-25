@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
     utils_hex_to_bin(data, data_bin, strlen(data), &outlen);
 
     btc_tx* tx = btc_tx_new();
-    if (btc_tx_deserialize(data_bin, outlen, tx, NULL)) {
+    if (btc_tx_deserialize(data_bin, outlen, tx, NULL, true)) {
         broadcast_tx(chain, tx, ips, maxnodes, timeout, debug);
     } else {
         showError("Transaction is invalid\n");
@@ -279,7 +279,7 @@ void broadcast_post_cmd(struct btc_node_* node, btc_p2p_msg_hdr* hdr, struct con
 
         /* send the tx */
         cstring* tx_ser = cstr_new_sz(1024);
-        btc_tx_serialize(tx_ser, ctx->tx);
+        btc_tx_serialize(tx_ser, ctx->tx, true);
         cstring* p2p_msg = btc_p2p_message_new(node->nodegroup->chainparams->netmagic, BTC_MSG_TX, tx_ser->str, tx_ser->len);
         cstr_free(tx_ser, true);
         btc_node_send(node, p2p_msg);

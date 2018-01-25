@@ -47,6 +47,11 @@ void btc_tx_in_free(btc_tx_in* tx_in)
         cstr_free(tx_in->script_sig, true);
         tx_in->script_sig = NULL;
     }
+
+    if (tx_in->witness_stack) {
+        vector_free(tx_in->witness_stack, true);
+        tx_in->witness_stack = NULL;
+    }
 }
 
 //callback for vector free function
@@ -62,6 +67,14 @@ void btc_tx_in_free_cb(void* data)
     btc_free(tx_in);
 }
 
+void btc_tx_in_witness_stack_free_cb(void* data)
+{
+    if (!data)
+        return;
+
+    cstring* stack_item = data;
+    cstr_free(stack_item, true);
+}
 
 btc_tx_in* btc_tx_in_new()
 {
@@ -69,6 +82,8 @@ btc_tx_in* btc_tx_in_new()
     tx_in = btc_calloc(1, sizeof(*tx_in));
     memset(&tx_in->prevout, 0, sizeof(tx_in->prevout));
     tx_in->sequence = UINT32_MAX;
+
+    tx_in->witness_stack = vector_new(8, btc_tx_in_witness_stack_free_cb);
     return tx_in;
 }
 
@@ -153,7 +168,7 @@ btc_bool btc_tx_out_deserialize(btc_tx_out* tx_out, struct const_buffer* buf)
     return true;
 }
 
-int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx* tx, size_t* consumed_length)
+int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx* tx, size_t* consumed_length, btc_bool allow_witness)
 {
     struct const_buffer buf = {tx_serialized, inlen};
     if (consumed_length)
@@ -161,9 +176,21 @@ int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx*
 
     //tx needs to be initialized
     deser_s32(&tx->version, &buf);
+
     uint32_t vlen;
     if (!deser_varlen(&vlen, &buf))
         return false;
+
+    uint8_t flags = 0;
+    if (vlen == 0 && allow_witness) {
+        /* We read a dummy or an empty vin. */
+        deser_bytes(&flags, &buf, 1);
+        if (flags != 0) {
+            // contains witness, deser the vin len
+            if (!deser_varlen(&vlen, &buf))
+                return false;
+        }
+    }
 
     unsigned int i;
     for (i = 0; i < vlen; i++) {
@@ -190,6 +217,28 @@ int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx*
         }
     }
 
+    if ((flags & 1) && allow_witness) {
+        /* The witness flag is present, and we support witnesses. */
+        flags ^= 1;
+        for (size_t i = 0; i < tx->vin->len; i++) {
+            btc_tx_in *tx_in = vector_idx(tx->vin, i);
+            uint32_t vlen;
+            if (!deser_varlen(&vlen, &buf)) return false;
+            for (size_t j = 0; j < vlen; j++) {
+                cstring* witness_item = cstr_new_sz(1024);
+                if (!deser_varstr(&witness_item, &buf)) {
+                    cstr_free(witness_item, true);
+                    return false;
+                }
+                vector_add(tx_in->witness_stack, witness_item); //vector is responsible for freeing the items memory
+            }
+        }
+    }
+    if (flags) {
+        /* Unknown flag in the serialization */
+        return false;
+    }
+
     if (!deser_u32(&tx->locktime, &buf))
         return false;
 
@@ -212,9 +261,34 @@ void btc_tx_out_serialize(cstring* s, const btc_tx_out* tx_out)
     ser_varstr(s, tx_out->script_pubkey);
 }
 
-void btc_tx_serialize(cstring* s, const btc_tx* tx)
+btc_bool btc_tx_has_witness(const btc_tx *tx)
+{
+    for (size_t i = 0; i < tx->vin->len; i++) {
+        btc_tx_in *tx_in = vector_idx(tx->vin, i);
+        if (tx_in->witness_stack != NULL && tx_in->witness_stack->len > 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void btc_tx_serialize(cstring* s, const btc_tx* tx, btc_bool allow_witness)
 {
     ser_s32(s, tx->version);
+    uint8_t flags = 0;
+    // Consistency check
+    if (allow_witness) {
+        /* Check whether witnesses need to be serialized. */
+        if (btc_tx_has_witness(tx)) {
+            flags |= 1;
+        }
+    }
+    if (flags) {
+        /* Use extended format in case witnesses are to be serialized. */
+        uint8_t dummy = 0;
+        ser_bytes(s, &dummy, 1);
+        ser_bytes(s, &flags, 1);
+    }
 
     ser_varlen(s, tx->vin ? tx->vin->len : 0);
 
@@ -239,13 +313,30 @@ void btc_tx_serialize(cstring* s, const btc_tx* tx)
         }
     }
 
+    if (flags & 1) {
+        // serialize the witness stack
+        if (tx->vin) {
+            for (i = 0; i < tx->vin->len; i++) {
+                btc_tx_in* tx_in;
+                tx_in = vector_idx(tx->vin, i);
+                if (tx_in->witness_stack) {
+                    ser_varlen(s, tx_in->witness_stack->len);
+                    for (unsigned int j = 0; j < tx_in->witness_stack->len; j++) {
+                        cstring *item = vector_idx(tx_in->witness_stack, j);
+                        ser_varstr(s, item);
+                    }
+                }
+            }
+        }
+    }
+
     ser_u32(s, tx->locktime);
 }
 
 void btc_tx_hash(const btc_tx* tx, uint256 hashout)
 {
     cstring* txser = cstr_new_sz(1024);
-    btc_tx_serialize(txser, tx);
+    btc_tx_serialize(txser, tx, false);
 
 
     sha256_Raw((const uint8_t*)txser->str, txser->len, hashout);
@@ -266,6 +357,17 @@ void btc_tx_in_copy(btc_tx_in* dest, const btc_tx_in* src)
         cstr_append_buf(dest->script_sig,
                         src->script_sig->str,
                         src->script_sig->len);
+    }
+
+    if (!src->witness_stack)
+        dest->witness_stack = NULL;
+    else {
+        dest->witness_stack = vector_new(src->witness_stack->len, btc_tx_in_witness_stack_free_cb);
+        for (unsigned int i = 0; i < src->witness_stack->len; i++) {
+            cstring *witness_item = vector_idx(src->witness_stack, i);
+            cstring *item_cpy = cstr_new_cstr(witness_item);
+            vector_add(dest->witness_stack, item_cpy);
+        }
     }
 }
 
@@ -332,7 +434,48 @@ void btc_tx_copy(btc_tx* dest, const btc_tx* src)
     }
 }
 
-btc_bool btc_tx_sighash(const btc_tx* tx_to, const cstring* fromPubKey, unsigned int in_num, int hashtype, uint256 hash)
+void btc_tx_prevout_hash(const btc_tx* tx, uint256 hash) {
+    cstring* s = cstr_new_sz(512);
+    unsigned int i;
+    btc_tx_in* tx_in;
+    for (i = 0; i < tx->vin->len; i++) {
+        tx_in = vector_idx(tx->vin, i);
+        ser_u256(s, tx_in->prevout.hash);
+        ser_u32(s, tx_in->prevout.n);
+    }
+
+    btc_hash((const uint8_t*)s->str, s->len, hash);
+    cstr_free(s, true);
+}
+
+
+void btc_tx_sequence_hash(const btc_tx* tx, uint256 hash) {
+    cstring* s = cstr_new_sz(512);
+    unsigned int i;
+    btc_tx_in* tx_in;
+    for (i = 0; i < tx->vin->len; i++) {
+        tx_in = vector_idx(tx->vin, i);
+        ser_u32(s, tx_in->sequence);
+    }
+
+    btc_hash((const uint8_t*)s->str, s->len, hash);
+    cstr_free(s, true);
+}
+
+void btc_tx_outputs_hash(const btc_tx* tx, uint256 hash) {
+    cstring* s = cstr_new_sz(512);
+    unsigned int i;
+    btc_tx_out* tx_out;
+    for (i = 0; i < tx->vout->len; i++) {
+        tx_out = vector_idx(tx->vout, i);
+        btc_tx_out_serialize(s, tx_out);
+    }
+
+    btc_hash((const uint8_t*)s->str, s->len, hash);
+    cstr_free(s, true);
+}
+
+btc_bool btc_tx_sighash(const btc_tx* tx_to, const cstring* fromPubKey, unsigned int in_num, int hashtype, const uint64_t amount, const enum btc_sig_version sigversion, uint256 hash)
 {
     if (in_num >= tx_to->vin->len)
         return false;
@@ -342,78 +485,135 @@ btc_bool btc_tx_sighash(const btc_tx* tx_to, const cstring* fromPubKey, unsigned
     btc_tx* tx_tmp = btc_tx_new();
     btc_tx_copy(tx_tmp, tx_to);
 
-    cstring* new_script = cstr_new_sz(fromPubKey->len);
-    btc_script_copy_without_op_codeseperator(fromPubKey, new_script);
+    cstring* s = NULL;
 
-    unsigned int i;
-    btc_tx_in* tx_in;
-    for (i = 0; i < tx_tmp->vin->len; i++) {
-        tx_in = vector_idx(tx_tmp->vin, i);
-        cstr_resize(tx_in->script_sig, 0);
+    // segwit
+    if (sigversion == SIGVERSION_WITNESS_V0) {
+        uint256 hash_prevouts;
+        btc_hash_clear(hash_prevouts);
+        uint256 hash_sequence;
+        btc_hash_clear(hash_sequence);
+        uint256 hash_outputs;
+        btc_hash_clear(hash_outputs);
 
-        if (i == in_num)
-            cstr_append_buf(tx_in->script_sig,
-                            new_script->str,
-                            new_script->len);
+        if (!(hashtype & SIGHASH_ANYONECANPAY)) {
+            btc_tx_prevout_hash(tx_to, hash_prevouts);
+        }
+        if (!(hashtype & SIGHASH_ANYONECANPAY)) {
+            btc_tx_outputs_hash(tx_to, hash_outputs);
+        }
+        if (!(hashtype & SIGHASH_ANYONECANPAY) && (hashtype & 0x1f) != SIGHASH_SINGLE && (hashtype & 0x1f) != SIGHASH_NONE) {
+            btc_tx_sequence_hash(tx_to, hash_sequence);
+        }
+
+        if ((hashtype & 0x1f) != SIGHASH_SINGLE && (hashtype & 0x1f) != SIGHASH_NONE) {
+            btc_tx_outputs_hash(tx_to, hash_outputs);
+        } else if ((hashtype & 0x1f) == SIGHASH_SINGLE && in_num < tx_to->vout->len) {
+            cstring* s1 = cstr_new_sz(512);
+            btc_tx_out* tx_out = vector_idx(tx_to->vout, in_num);
+            btc_tx_out_serialize(s1, tx_out);
+            btc_hash((const uint8_t*)s1->str, s1->len, hash);
+            cstr_free(s1, true);
+        }
+
+        s = cstr_new_sz(512);
+        ser_u32(s, tx_to->version); // Version
+
+        // Input prevouts/nSequence (none/all, depending on flags)
+        ser_u256(s, hash_prevouts);
+        ser_u256(s, hash_sequence);
+
+        // The input being signed (replacing the scriptSig with scriptCode + amount)
+        // The prevout may already be contained in hashPrevout, and the nSequence
+        // may already be contain in hashSequence.
+        btc_tx_in* tx_in = vector_idx(tx_to->vin, in_num);
+        ser_u256(s, tx_in->prevout.hash);
+        ser_u32(s, tx_in->prevout.n);
+
+        ser_varstr(s, (cstring *)fromPubKey); // script code
+
+        ser_u64(s, amount);
+        ser_u32(s, tx_in->sequence);
+        ser_u256(s, hash_outputs); // Outputs (none/one/all, depending on flags)
+        ser_u32(s, tx_to->locktime); // Locktime
+        ser_s32(s, hashtype); // Sighash type
     }
-    cstr_free(new_script, true);
-    /* Blank out some of the outputs */
-    if ((hashtype & 0x1f) == SIGHASH_NONE) {
-        /* Wildcard payee */
-        if (tx_tmp->vout)
-            vector_free(tx_tmp->vout, true);
+    else {
+        // standard (non witness) sighash (SIGVERSION_BASE)
+        cstring* new_script = cstr_new_sz(fromPubKey->len);
+        btc_script_copy_without_op_codeseperator(fromPubKey, new_script);
 
-        tx_tmp->vout = vector_new(1, btc_tx_out_free_cb);
-
-        /* Let the others update at will */
+        unsigned int i;
+        btc_tx_in* tx_in;
         for (i = 0; i < tx_tmp->vin->len; i++) {
             tx_in = vector_idx(tx_tmp->vin, i);
-            if (i != in_num)
-                tx_in->sequence = 0;
+            cstr_resize(tx_in->script_sig, 0);
+
+            if (i == in_num)
+                cstr_append_buf(tx_in->script_sig,
+                                new_script->str,
+                                new_script->len);
         }
-    }
+        cstr_free(new_script, true);
+        /* Blank out some of the outputs */
+        if ((hashtype & 0x1f) == SIGHASH_NONE) {
+            /* Wildcard payee */
+            if (tx_tmp->vout)
+                vector_free(tx_tmp->vout, true);
 
-    else if ((hashtype & 0x1f) == SIGHASH_SINGLE) {
-        /* Only lock-in the txout payee at same index as txin */
-        unsigned int n_out = in_num;
-        if (n_out >= tx_tmp->vout->len) {
-            //TODO: set error code
-            ret = false;
-            goto out;
-        }
+            tx_tmp->vout = vector_new(1, btc_tx_out_free_cb);
 
-        vector_resize(tx_tmp->vout, n_out + 1);
-
-        for (i = 0; i < n_out; i++) {
-            btc_tx_out* tx_out;
-
-            tx_out = vector_idx(tx_tmp->vout, i);
-            tx_out->value = -1;
-            if (tx_out->script_pubkey) {
-                cstr_free(tx_out->script_pubkey, true);
-                tx_out->script_pubkey = NULL;
+            /* Let the others update at will */
+            for (i = 0; i < tx_tmp->vin->len; i++) {
+                tx_in = vector_idx(tx_tmp->vin, i);
+                if (i != in_num)
+                    tx_in->sequence = 0;
             }
         }
 
-        /* Let the others update at will */
-        for (i = 0; i < tx_tmp->vin->len; i++) {
-            tx_in = vector_idx(tx_tmp->vin, i);
-            if (i != in_num)
-                tx_in->sequence = 0;
+        else if ((hashtype & 0x1f) == SIGHASH_SINGLE) {
+            /* Only lock-in the txout payee at same index as txin */
+            unsigned int n_out = in_num;
+            if (n_out >= tx_tmp->vout->len) {
+                //TODO: set error code
+                ret = false;
+                goto out;
+            }
+
+            vector_resize(tx_tmp->vout, n_out + 1);
+
+            for (i = 0; i < n_out; i++) {
+                btc_tx_out* tx_out;
+
+                tx_out = vector_idx(tx_tmp->vout, i);
+                tx_out->value = -1;
+                if (tx_out->script_pubkey) {
+                    cstr_free(tx_out->script_pubkey, true);
+                    tx_out->script_pubkey = NULL;
+                }
+            }
+
+            /* Let the others update at will */
+            for (i = 0; i < tx_tmp->vin->len; i++) {
+                tx_in = vector_idx(tx_tmp->vin, i);
+                if (i != in_num)
+                    tx_in->sequence = 0;
+            }
         }
+
+        /* Blank out other inputs completely;
+         not recommended for open transactions */
+        if (hashtype & SIGHASH_ANYONECANPAY) {
+            if (in_num > 0)
+                vector_remove_range(tx_tmp->vin, 0, in_num);
+            vector_resize(tx_tmp->vin, 1);
+        }
+
+        s = cstr_new_sz(512);
+        btc_tx_serialize(s, tx_tmp, false);
+        ser_s32(s, hashtype);
     }
 
-    /* Blank out other inputs completely;
-     not recommended for open transactions */
-    if (hashtype & SIGHASH_ANYONECANPAY) {
-        if (in_num > 0)
-            vector_remove_range(tx_tmp->vin, 0, in_num);
-        vector_resize(tx_tmp->vin, 1);
-    }
-
-    cstring* s = cstr_new_sz(512);
-    btc_tx_serialize(s, tx_tmp);
-    ser_s32(s, hashtype);
 
     sha256_Raw((const uint8_t*)s->str, s->len, hash);
     sha256_Raw(hash, BTC_HASH_LENGTH, hash);

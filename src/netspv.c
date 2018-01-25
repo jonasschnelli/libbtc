@@ -443,7 +443,7 @@ void btc_net_spv_post_cmd(btc_node *node, btc_p2p_msg_hdr *hdr, struct const_buf
             for (unsigned int i=0;i<amount_of_txs;i++)
             {
                 btc_tx* tx = btc_tx_new();
-                btc_tx_deserialize(buf->p, buf->len, tx, &consumedlength);
+                btc_tx_deserialize(buf->p, buf->len, tx, &consumedlength, true);
                 deser_skip(buf, consumedlength);
 
                 /* send info to possible callback */
