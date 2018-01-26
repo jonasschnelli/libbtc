@@ -120,7 +120,9 @@ btc_bool hd_print_node(const btc_chainparams* chain, const char* nodeser)
     char privkey_wif[privkey_wif_size];
     memcpy(&pkeybase58c[1], node.private_key, BTC_ECKEY_PKEY_LENGTH);
     assert(btc_base58_encode_check(pkeybase58c, privkey_wif_size_bin, privkey_wif, privkey_wif_size) != 0);
-    printf("privatekey WIF: %s\n", privkey_wif);
+    if (btc_hdnode_has_privkey(&node)) {
+        printf("privatekey WIF: %s\n", privkey_wif);
+    }
 
     printf("depth: %d\n", node.depth);
     printf("p2pkh address: %s\n", str);

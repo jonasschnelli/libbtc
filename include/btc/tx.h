@@ -110,6 +110,8 @@ LIBBTC_API btc_bool btc_tx_add_puzzle_out(btc_tx* tx, const int64_t amount, cons
 
 LIBBTC_API btc_bool btc_tx_outpoint_is_null(btc_tx_outpoint* tx);
 LIBBTC_API btc_bool btc_tx_is_coinbase(btc_tx* tx);
+
+LIBBTC_API btc_bool btc_tx_has_witness(const btc_tx *tx);
 #ifdef __cplusplus
 }
 #endif
