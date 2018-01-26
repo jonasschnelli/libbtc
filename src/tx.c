@@ -679,6 +679,9 @@ btc_bool btc_tx_add_address_out(btc_tx* tx, const btc_chainparams* chain, int64_
     } else if (buf[0] == chain->b58prefix_script_address) {
         btc_tx_add_p2sh_hash160_out(tx, amount, &buf[1]);
     }
+    else {
+        return false;
+    }
 
     return true;
 }
