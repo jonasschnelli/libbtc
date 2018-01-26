@@ -172,6 +172,7 @@ bitcointool_CFLAGS = $(libbtc_la_CFLAGS)
 bitcointool_CPPFLAGS = -I$(top_srcdir)/src
 bitcointool_LDFLAGS = -static
 
+if WITH_NET
 inst_PROGRAMS += bitcoin-send-tx
 bitcoin_send_tx_LDADD = libbtc.la $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
 bitcoin_send_tx_SOURCES = \
@@ -187,6 +188,7 @@ bitcoin_spv_SOURCES = \
 bitcoin_spv_CFLAGS = $(libbtc_la_CFLAGS)
 bitcoin_spv_CPPFLAGS = -I$(top_srcdir)/src
 bitcoin_spv_LDFLAGS = -static
+endif
 
 inst_PROGRAMS += bitcoin-txref
 bitcoin_txref_LDADD = libbtc.la

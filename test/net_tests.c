@@ -44,7 +44,7 @@ void postcmd(struct btc_node_ *node, btc_p2p_msg_hdr *hdr, struct const_buffer *
         for (unsigned int i = 0; i < vsize; i++)
         {
             btc_tx *tx = btc_tx_new(); //needs to be on the heep
-            btc_tx_deserialize(buf->p, buf->len, tx, NULL);
+            btc_tx_deserialize(buf->p, buf->len, tx, NULL, true);
 
             btc_tx_free(tx);
         }

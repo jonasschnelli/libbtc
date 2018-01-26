@@ -38,6 +38,13 @@ extern "C" {
 #include "ecc_key.h"
 #include "vector.h"
 
+/** Sighash version types */
+enum btc_sig_version
+{
+    SIGVERSION_BASE = 0,
+    SIGVERSION_WITNESS_V0 = 1,
+};
+
 /** Signature hash types/flags */
 enum {
     SIGHASH_ALL = 1,
