@@ -46,15 +46,11 @@ btc_bool address_from_pubkey(const btc_chainparams* chain, const char* pubkey_he
 
 btc_bool pubkey_from_privatekey(const btc_chainparams* chain, const char* privkey_wif, char* pubkey_hex, size_t* sizeout)
 {
-    uint8_t privkey_data[strlen(privkey_wif)];
-    size_t outlen = 0;
-    outlen = btc_base58_decode_check(privkey_wif, privkey_data, sizeof(privkey_data));
-    if (privkey_data[0] != chain->b58prefix_secret_address)
-        return false;
-
     btc_key key;
     btc_privkey_init(&key);
-    memcpy(key.privkey, privkey_data + 1, 32);
+    if (!btc_privkey_decode_wif(privkey_wif, chain, &key)) {
+        return false;
+    }
 
     btc_pubkey pubkey;
     btc_pubkey_init(&pubkey);
@@ -70,15 +66,10 @@ btc_bool pubkey_from_privatekey(const btc_chainparams* chain, const char* privke
 
 btc_bool gen_privatekey(const btc_chainparams* chain, char* privkey_wif, size_t strsize_wif, char* privkey_hex_or_null)
 {
-    uint8_t pkeybase58c[34];
-    pkeybase58c[0] = chain->b58prefix_secret_address;
-    pkeybase58c[33] = 1; /* always use compressed keys */
-
     btc_key key;
     btc_privkey_init(&key);
     btc_privkey_gen(&key);
-    memcpy(&pkeybase58c[1], key.privkey, BTC_ECKEY_PKEY_LENGTH);
-    assert(btc_base58_encode_check(pkeybase58c, 34, privkey_wif, strsize_wif) != 0);
+    btc_privkey_encode_wif(&key, chain, privkey_wif, &strsize_wif);
 
     // also export the hex privkey if use had passed in a valid pointer
     // will always export 32 bytes

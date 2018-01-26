@@ -31,6 +31,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <btc/base58.h>
+#include <btc/chainparams.h>
 #include <btc/ecc.h>
 #include <btc/hash.h>
 #include <btc/random.h>
@@ -83,6 +85,36 @@ btc_bool btc_privkey_verify_pubkey(btc_key* privkey, btc_pubkey* pubkey)
     return btc_pubkey_verify_sig(pubkey, hash, sig, siglen);
 }
 
+void btc_privkey_encode_wif(const btc_key* privkey, const btc_chainparams* chain, char *privkey_wif, size_t *strsize_inout) {
+    uint8_t pkeybase58c[34];
+    pkeybase58c[0] = chain->b58prefix_secret_address;
+    pkeybase58c[33] = 1; /* always use compressed keys */
+
+    memcpy(&pkeybase58c[1], privkey->privkey, BTC_ECKEY_PKEY_LENGTH);
+    assert(btc_base58_encode_check(pkeybase58c, 34, privkey_wif, *strsize_inout) != 0);
+    btc_mem_zero(&pkeybase58c, 34);
+}
+
+btc_bool btc_privkey_decode_wif(const char *privkey_wif, const btc_chainparams* chain, btc_key* privkey) {
+
+    if (!privkey_wif || strlen(privkey_wif) < 50) {
+        return false;
+    }
+    uint8_t privkey_data[strlen(privkey_wif)];
+    memset(privkey_data, 0, sizeof(privkey_data));
+    size_t outlen = 0;
+
+    outlen = btc_base58_decode_check(privkey_wif, privkey_data, sizeof(privkey_data));
+    if (!outlen) {
+        return false;
+    }
+    if (privkey_data[0] != chain->b58prefix_secret_address) {
+        return false;
+    }
+    memcpy(privkey->privkey, &privkey_data[1], BTC_ECKEY_PKEY_LENGTH);
+    btc_mem_zero(&privkey_data, strlen(privkey_wif));
+    return true;
+}
 
 void btc_pubkey_init(btc_pubkey* pubkey)
 {

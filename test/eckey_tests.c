@@ -88,4 +88,23 @@ void test_eckey()
     u_assert_int_eq(r, false);
     btc_privkey_cleanse(&key);
     btc_pubkey_cleanse(&pubkey);
+
+    btc_key key_wif;
+    btc_privkey_init(&key_wif);
+    assert(btc_privkey_is_valid(&key_wif) == 0);
+    btc_privkey_gen(&key_wif);
+    assert(btc_privkey_is_valid(&key_wif) == 1);
+    char wifstr[100];
+    size_t wiflen = 100;
+    btc_privkey_encode_wif(&key_wif, &btc_chainparams_main, wifstr, &wiflen);
+    printf("%s\n", wifstr);
+
+
+    char wif_decode_buf[100];
+    wiflen = 100;
+    btc_key key_wif_decode;
+    btc_privkey_decode_wif(wifstr, &btc_chainparams_main, &key_wif_decode);
+    printf("END\n");
+
+    u_assert_mem_eq(key_wif_decode.privkey, key_wif.privkey, sizeof(key_wif_decode.privkey));
 }
