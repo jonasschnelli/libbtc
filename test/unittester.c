@@ -58,7 +58,6 @@ extern void test_script_parse();
 extern void test_script_op_codeseperator();
 extern void test_invalid_tx_deser();
 extern void test_eckey();
-extern void test_txref();
 
 #ifdef WITH_WALLET
 extern void test_wallet();
@@ -111,8 +110,6 @@ int main()
     u_run_test(test_script_op_codeseperator);
 
     u_run_test(test_eckey);
-
-    u_run_test(test_txref);
 
 #ifdef WITH_WALLET
     //u_run_test(test_wallet);
