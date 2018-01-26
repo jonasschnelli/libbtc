@@ -497,27 +497,27 @@ btc_bool btc_tx_sighash(const btc_tx* tx_to, const cstring* fromPubKey, unsigned
         btc_hash_clear(hash_outputs);
 
         if (!(hashtype & SIGHASH_ANYONECANPAY)) {
-            btc_tx_prevout_hash(tx_to, hash_prevouts);
+            btc_tx_prevout_hash(tx_tmp, hash_prevouts);
         }
         if (!(hashtype & SIGHASH_ANYONECANPAY)) {
-            btc_tx_outputs_hash(tx_to, hash_outputs);
+            btc_tx_outputs_hash(tx_tmp, hash_outputs);
         }
         if (!(hashtype & SIGHASH_ANYONECANPAY) && (hashtype & 0x1f) != SIGHASH_SINGLE && (hashtype & 0x1f) != SIGHASH_NONE) {
-            btc_tx_sequence_hash(tx_to, hash_sequence);
+            btc_tx_sequence_hash(tx_tmp, hash_sequence);
         }
 
         if ((hashtype & 0x1f) != SIGHASH_SINGLE && (hashtype & 0x1f) != SIGHASH_NONE) {
-            btc_tx_outputs_hash(tx_to, hash_outputs);
-        } else if ((hashtype & 0x1f) == SIGHASH_SINGLE && in_num < tx_to->vout->len) {
+            btc_tx_outputs_hash(tx_tmp, hash_outputs);
+        } else if ((hashtype & 0x1f) == SIGHASH_SINGLE && in_num < tx_tmp->vout->len) {
             cstring* s1 = cstr_new_sz(512);
-            btc_tx_out* tx_out = vector_idx(tx_to->vout, in_num);
+            btc_tx_out* tx_out = vector_idx(tx_tmp->vout, in_num);
             btc_tx_out_serialize(s1, tx_out);
             btc_hash((const uint8_t*)s1->str, s1->len, hash);
             cstr_free(s1, true);
         }
 
         s = cstr_new_sz(512);
-        ser_u32(s, tx_to->version); // Version
+        ser_u32(s, tx_tmp->version); // Version
 
         // Input prevouts/nSequence (none/all, depending on flags)
         ser_u256(s, hash_prevouts);
@@ -526,7 +526,7 @@ btc_bool btc_tx_sighash(const btc_tx* tx_to, const cstring* fromPubKey, unsigned
         // The input being signed (replacing the scriptSig with scriptCode + amount)
         // The prevout may already be contained in hashPrevout, and the nSequence
         // may already be contain in hashSequence.
-        btc_tx_in* tx_in = vector_idx(tx_to->vin, in_num);
+        btc_tx_in* tx_in = vector_idx(tx_tmp->vin, in_num);
         ser_u256(s, tx_in->prevout.hash);
         ser_u32(s, tx_in->prevout.n);
 
@@ -535,7 +535,7 @@ btc_bool btc_tx_sighash(const btc_tx* tx_to, const cstring* fromPubKey, unsigned
         ser_u64(s, amount);
         ser_u32(s, tx_in->sequence);
         ser_u256(s, hash_outputs); // Outputs (none/one/all, depending on flags)
-        ser_u32(s, tx_to->locktime); // Locktime
+        ser_u32(s, tx_tmp->locktime); // Locktime
         ser_s32(s, hashtype); // Sighash type
     }
     else {
@@ -614,6 +614,11 @@ btc_bool btc_tx_sighash(const btc_tx* tx_to, const cstring* fromPubKey, unsigned
         ser_s32(s, hashtype);
     }
 
+    //char str[10000];
+    //memset(str, strlen(str), 0);
+    //utils_bin_to_hex((unsigned char *)s->str, s->len, str);
+    //printf("\n");
+    //printf("%s\n", str);
 
     sha256_Raw((const uint8_t*)s->str, s->len, hash);
     sha256_Raw(hash, BTC_HASH_LENGTH, hash);
