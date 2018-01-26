@@ -53,7 +53,7 @@ btc_bool btc_privkey_is_valid(btc_key* privkey)
 
 void btc_privkey_cleanse(btc_key* privkey)
 {
-    memset(&privkey->privkey, 0, BTC_ECKEY_PKEY_LENGTH);
+    btc_mem_zero(&privkey->privkey, BTC_ECKEY_PKEY_LENGTH);
 }
 
 
@@ -105,7 +105,7 @@ void btc_pubkey_cleanse(btc_pubkey* pubkey)
     if (pubkey == NULL)
         return;
 
-    memset(pubkey->pubkey, 0, BTC_ECKEY_UNCOMPRESSED_LENGTH);
+    btc_mem_zero(pubkey->pubkey, BTC_ECKEY_UNCOMPRESSED_LENGTH);
 }
 
 
