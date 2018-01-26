@@ -73,7 +73,7 @@ script:
     - make -j2 V=1
     - ls -la
     - if ( [ "$VALGRIND_UNIT_TESTS" == "yes" ] ); then
-          valgrind --track-origins=yes --leak-check=full --error-exitcode=1 ./tests;
+          valgrind --track-origins=yes --leak-check=full ./tests;
           ./tests;
       fi
     - if ( [ "$RUN_MAKE_CHECK" == "yes" ] ); then
