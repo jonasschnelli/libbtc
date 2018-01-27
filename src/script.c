@@ -395,3 +395,21 @@ btc_bool btc_script_build_p2sh(cstring* script_in, const uint160 hash160)
 
     return true;
 }
+
+const char * btc_tx_out_type_to_str(const enum btc_tx_out_type type) {
+    if (type == BTC_TX_PUBKEY) {
+        return "TX_PUBKEY";
+    }
+    else if (type == BTC_TX_PUBKEYHASH) {
+        return "TX_PUBKEYHASH";
+    }
+    else if (type == BTC_TX_SCRIPTHASH) {
+        return "TX_SCRIPTHASH";
+    }
+    else if (type == BTC_TX_MULTISIG) {
+        return "TX_MULTISIG";
+    }
+    else {
+        return "TX_NONSTANDARD";
+    }
+}
