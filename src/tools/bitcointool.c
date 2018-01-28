@@ -56,6 +56,7 @@ static struct option long_options[] =
         {"scripthex", no_argument, NULL, 's'},
         {"inputindex", no_argument, NULL, 'i'},
         {"sighashtype", no_argument, NULL, 'h'},
+        {"amount", no_argument, NULL, 'a'},
         {NULL, 0, NULL, 0}};
 
 static void print_version()
@@ -93,10 +94,11 @@ int main(int argc, char* argv[])
     char* scripthex = 0;
     int inputindex  = 0;
     int sighashtype = 1;
+    uint64_t amount = 0;
     const btc_chainparams* chain = &btc_chainparams_main;
 
     /* get arguments */
-    while ((opt = getopt_long_only(argc, argv, "h:i:s:x:p:k:m:c:trv", long_options, &long_index)) != -1) {
+    while ((opt = getopt_long_only(argc, argv, "h:i:s:x:p:k:a:m:c:trv", long_options, &long_index)) != -1) {
         switch (opt) {
         case 'p':
             pkey = optarg;
@@ -133,6 +135,9 @@ int main(int argc, char* argv[])
             break;
         case 'h':
             sighashtype = (int)strtol(optarg, (char**)NULL, 10);
+            break;
+        case 'a':
+            amount = (int)strtoll(optarg, (char**)NULL, 10);
             break;
         default:
             print_usage();
@@ -222,7 +227,7 @@ int main(int argc, char* argv[])
             return showError("Deriving child key failed\n");
         else
             hd_print_node(chain, newextkey);
-    } else if (strcmp(cmd, "sighash") == 0) {
+    } else if (strcmp(cmd, "sign") == 0) {
         if(!txhex || !scripthex) {
             return showError("Missing tx-hex or script-hex (use -x, -s)\n");
         }
@@ -236,12 +241,15 @@ int main(int argc, char* argv[])
         uint8_t* data_bin = btc_malloc(strlen(txhex) / 2 + 1);
         int outlen = 0;
         utils_hex_to_bin(txhex, data_bin, strlen(txhex), &outlen);
-
         if (!btc_tx_deserialize(data_bin, outlen, tx, NULL, true)) {
+            free(data_bin);
+            btc_tx_free(tx);
             return showError("Invalid tx hex");
         }
+        free(data_bin);
 
         if ((size_t)inputindex >= tx->vin->len) {
+            btc_tx_free(tx);
             return showError("Inputindex out of range");
         }
 
@@ -274,24 +282,21 @@ int main(int argc, char* argv[])
         }
         else {
             if (strlen(pkey) > 50) {
+                btc_tx_free(tx);
+                cstr_free(script, true);
                 return showError("Invalid wif privkey\n");
             }
+            printf("No private key provided, signing will not happen\n");
         }
         if (sign) {
-            uint8_t sig[100];
-            size_t siglen = 0;
-            btc_key_sign_hash_compact(&key, sighash, sig, &siglen);
-            char sigcompacthex[64*2+1];
-            memset(sigcompacthex, 0, sizeof(sigcompacthex));
-            assert(siglen == 64);
-            utils_bin_to_hex((unsigned char *)sig, siglen, sigcompacthex);
+            uint8_t sigcompact[64] = {0};
+            int sigderlen = 74+1; //&hashtype
+            uint8_t sigder_plus_hashtype[75] = {0};
+            enum btc_tx_sign_result res = btc_tx_sign_input(tx, script, amount, &key, inputindex, sighashtype, sigcompact, sigder_plus_hashtype, &sigderlen);
+            cstr_free(script, true);
 
-            unsigned char sigder_plus_hashtype[74+1];
-            size_t sigderlen = 75;
-            btc_ecc_compact_to_der_normalized(sig, sigder_plus_hashtype, &sigderlen);
-            assert(sigderlen <= 74 && sigderlen > 70);
-            sigder_plus_hashtype[sigderlen] = sighashtype;
-            sigderlen+=1; //+hashtype
+            char sigcompacthex[64*2+1] = {0};
+            utils_bin_to_hex((unsigned char *)sigcompact, 64, sigcompacthex);
 
             char sigderhex[74*2+2+1]; //74 der, 2 hashtype, 1 nullbyte
             memset(sigderhex, 0, sizeof(sigderhex));
@@ -301,23 +306,15 @@ int main(int argc, char* argv[])
             printf("signature compact: %s\n", sigcompacthex);
             printf("signature DER (+hashtype): %s\n", sigderhex);
 
-            ser_varlen(tx_in->script_sig, sigderlen);
-            ser_bytes(tx_in->script_sig, sigder_plus_hashtype, sigderlen);
-
-            btc_pubkey pubkey;
-            btc_pubkey_init(&pubkey);
-            btc_pubkey_from_key(&key, &pubkey);
-
-            ser_varlen(tx_in->script_sig, pubkey.compressed ? BTC_ECKEY_COMPRESSED_LENGTH : BTC_ECKEY_UNCOMPRESSED_LENGTH);
-            ser_bytes(tx_in->script_sig, pubkey.pubkey, pubkey.compressed ? BTC_ECKEY_COMPRESSED_LENGTH : BTC_ECKEY_UNCOMPRESSED_LENGTH);
-
             cstring* signed_tx = cstr_new_sz(1024);
             btc_tx_serialize(signed_tx, tx, true);
 
             char signed_tx_hex[signed_tx->len*2+1];
             utils_bin_to_hex((unsigned char *)signed_tx->str, signed_tx->len, signed_tx_hex);
             printf("signed TX: %s\n", signed_tx_hex);
+            cstr_free(signed_tx, true);
         }
+        btc_tx_free(tx);
     }
     else if (strcmp(cmd, "comp2der") == 0) {
         if(!scripthex || strlen(scripthex) != 128) {
@@ -368,6 +365,7 @@ int main(int argc, char* argv[])
         btc_tx_serialize(sertx, tx, true);
         char hexbuf[sertx->len * 2 + 1];
         utils_bin_to_hex((unsigned char*)sertx->str, sertx->len, hexbuf);
+        cstr_free(sertx, true);
 
         printf("New TX Hex: %s\n", hexbuf);
     }
