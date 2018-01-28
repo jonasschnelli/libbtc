@@ -205,6 +205,7 @@ enum btc_tx_out_type {
     BTC_TX_PUBKEYHASH,
     BTC_TX_SCRIPTHASH,
     BTC_TX_MULTISIG,
+    BTC_TX_WITNESS_V0_PUBKEYHASH,
 };
 
 typedef struct btc_script_op_ {
@@ -234,6 +235,8 @@ LIBBTC_API btc_bool btc_script_build_p2pkh(cstring* script, const uint160 hash16
 LIBBTC_API btc_bool btc_script_build_p2sh(cstring* script_in, const uint160 hash160);
 
 LIBBTC_API const char * btc_tx_out_type_to_str(const enum btc_tx_out_type type);
+
+LIBBTC_API btc_bool btc_script_is_witnessprogram(const cstring* script, uint8_t* version_out, uint8_t *program_out, int *programm_len_out);
 
 #ifdef __cplusplus
 }
