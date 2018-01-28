@@ -47,8 +47,11 @@ void btc_privkey_init(btc_key* privkey)
 }
 
 
-btc_bool btc_privkey_is_valid(btc_key* privkey)
+btc_bool btc_privkey_is_valid(const btc_key* privkey)
 {
+    if (!privkey) {
+        return false;
+    }
     return btc_ecc_verify_privatekey(privkey->privkey);
 }
 
@@ -126,7 +129,7 @@ void btc_pubkey_init(btc_pubkey* pubkey)
 }
 
 
-btc_bool btc_pubkey_is_valid(btc_pubkey* pubkey)
+btc_bool btc_pubkey_is_valid(const btc_pubkey* pubkey)
 {
     return btc_ecc_verify_pubkey(pubkey->pubkey, pubkey->compressed);
 }
@@ -160,7 +163,7 @@ btc_bool btc_pubkey_get_hex(const btc_pubkey* pubkey, char* str, size_t* strsize
 }
 
 
-void btc_pubkey_from_key(btc_key* privkey, btc_pubkey* pubkey_inout)
+void btc_pubkey_from_key(const btc_key* privkey, btc_pubkey* pubkey_inout)
 {
     if (pubkey_inout == NULL || privkey == NULL)
         return;

@@ -46,7 +46,7 @@ typedef struct btc_pubkey_ {
 } btc_pubkey;
 
 LIBBTC_API void btc_privkey_init(btc_key* privkey);
-LIBBTC_API btc_bool btc_privkey_is_valid(btc_key* privkey);
+LIBBTC_API btc_bool btc_privkey_is_valid(const btc_key* privkey);
 LIBBTC_API void btc_privkey_cleanse(btc_key* privkey);
 LIBBTC_API void btc_privkey_gen(btc_key* privkey);
 LIBBTC_API btc_bool btc_privkey_verify_pubkey(btc_key* privkey, btc_pubkey* pubkey);
@@ -56,9 +56,9 @@ LIBBTC_API void btc_privkey_encode_wif(const btc_key* privkey, const btc_chainpa
 LIBBTC_API btc_bool btc_privkey_decode_wif(const char *privkey_wif, const btc_chainparams* chain, btc_key* privkey);
 
 LIBBTC_API void btc_pubkey_init(btc_pubkey* pubkey);
-LIBBTC_API btc_bool btc_pubkey_is_valid(btc_pubkey* pubkey);
+LIBBTC_API btc_bool btc_pubkey_is_valid(const btc_pubkey* pubkey);
 LIBBTC_API void btc_pubkey_cleanse(btc_pubkey* pubkey);
-LIBBTC_API void btc_pubkey_from_key(btc_key* privkey, btc_pubkey* pubkey_inout);
+LIBBTC_API void btc_pubkey_from_key(const btc_key* privkey, btc_pubkey* pubkey_inout);
 
 //get the hash160 (single SHA256 + RIPEMD160)
 LIBBTC_API void btc_pubkey_get_hash160(const btc_pubkey* pubkey, uint160 hash160);
