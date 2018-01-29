@@ -22,7 +22,7 @@
 #include <string.h>
 #include <unistd.h>
 
-btc_bool address_from_pubkey(const btc_chainparams* chain, const char* pubkey_hex, char* address)
+btc_bool addresses_from_pubkey(const btc_chainparams* chain, const char* pubkey_hex, char* pkpkh_address, char* p2sh_pkwpkh_address)
 {
     if (!pubkey_hex || strlen(pubkey_hex) != 66)
         return false;
@@ -39,7 +39,19 @@ btc_bool address_from_pubkey(const btc_chainparams* chain, const char* pubkey_he
     hash160[0] = chain->b58prefix_pubkey_address;
     btc_pubkey_get_hash160(&pubkey, hash160 + 1);
 
-    btc_base58_encode_check(hash160, sizeof(hash160), address, 98);
+    btc_base58_encode_check(hash160, sizeof(hash160), pkpkh_address, 98);
+
+    // create p2sh-p2wpkh
+    cstring *p2wphk_script = cstr_new_sz(22);
+    uint160 keyhash;
+    btc_pubkey_get_hash160(&pubkey, keyhash);
+    btc_script_build_p2wpkh(p2wphk_script, keyhash);
+
+    hash160[0] = chain->b58prefix_script_address;
+    btc_script_get_scripthash(p2wphk_script, hash160+1);
+    cstr_free(p2wphk_script, true);
+
+    btc_base58_encode_check(hash160, sizeof(hash160), p2sh_pkwpkh_address, 98);
 
     return true;
 }

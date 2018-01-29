@@ -26,6 +26,7 @@
 
 #include "libbtc-config.h"
 
+#include <btc/bip32.h>
 #include <btc/chainparams.h>
 #include <btc/ecc.h>
 #include <btc/protocol.h>
@@ -173,25 +174,31 @@ int main(int argc, char* argv[])
         printf("pubkey: %s\n", pubkey_hex);
 
         /* give out p2pkh address */
-        char address[sizeout];
-        address_from_pubkey(chain, pubkey_hex, address);
-        printf("p2pkh address: %s\n", address);
+        char address_p2pkh[sizeout];
+        char address_p2sh_p2wpkh[sizeout];
+        addresses_from_pubkey(chain, pubkey_hex, address_p2pkh, address_p2sh_p2wpkh);
+        printf("p2pkh address: %s\n", address_p2pkh);
+        printf("p2sh-p2wpkh address: %s\n", address_p2sh_p2wpkh);
 
         /* clean memory */
         memset(pubkey_hex, 0, strlen(pubkey_hex));
-        memset(address, 0, strlen(address));
+        memset(address_p2pkh, 0, strlen(address_p2pkh));
+        memset(address_p2sh_p2wpkh, 0, strlen(address_p2sh_p2wpkh));
     } else if (strcmp(cmd, "addrfrompub") == 0 || strcmp(cmd, "p2pkhaddrfrompub") == 0) {
         /* get p2pkh address from pubkey */
 
         size_t sizeout = 128;
-        char address[sizeout];
+        char address_p2pkh[sizeout];
+        char address_p2sh_p2wpkh[sizeout];
         if (!pubkey)
             return showError("Missing public key (use -k)");
-        if (!address_from_pubkey(chain, pubkey, address))
+        if (!addresses_from_pubkey(chain, pubkey, address_p2pkh, address_p2sh_p2wpkh))
             return showError("Operation failed, invalid pubkey");
-        printf("p2pkh address: %s\n", address);
+        printf("p2pkh address: %s\n", address_p2pkh);
+        printf("p2sh-p2wpkh address: %s\n", address_p2sh_p2wpkh);
         memset(pubkey, 0, strlen(pubkey));
-        memset(address, 0, strlen(address));
+        memset(address_p2pkh, 0, strlen(address_p2pkh));
+        memset(address_p2sh_p2wpkh, 0, strlen(address_p2sh_p2wpkh));
     } else if (strcmp(cmd, "genkey") == 0) {
         size_t sizeout = 128;
         char newprivkey_wif[sizeout];
@@ -323,7 +330,6 @@ int main(int argc, char* argv[])
 
         int outlen = 0;
         uint8_t sig_comp[strlen(scripthex) / 2 + 1];
-        //utils_reverse_hex(scripthex, strlen(scripthex));
         printf("%s\n", scripthex);
         utils_hex_to_bin(scripthex, sig_comp, strlen(scripthex), &outlen);
 
@@ -335,50 +341,19 @@ int main(int argc, char* argv[])
         utils_bin_to_hex(sigder, sigderlen, hexbuf);
         printf("DER: %s\n", hexbuf);
     }
-    else if (strcmp(cmd, "applysig") == 0) {
-        if(!txhex || !scripthex) {
-            return showError("Missing tx-hex or sig-hex (use -x, -s)\n");
-        }
-        if (strlen(txhex) > 100000) {
-            return showError("tx too large\n");
-        }
-        btc_tx* tx = btc_tx_new();
-        uint8_t* data_bin = btc_malloc(strlen(txhex) / 2 + 1);
-        int outlen = 0;
-        utils_hex_to_bin(txhex, data_bin, strlen(txhex), &outlen);
+    else if (strcmp(cmd, "bip32maintotest") == 0) {
+        btc_hdnode node;
+        if (!btc_hdnode_deserialize(pkey, chain, &node))
+            return false;
 
-        if (!btc_tx_deserialize(data_bin, outlen, tx, NULL, true)) {
-            return showError("Invalid tx hex\n");
-        }
+        char masterkeyhex[200];
+        int strsize = 200;
+        btc_hdnode_serialize_private(&node, &btc_chainparams_test, masterkeyhex, strsize);
+        printf("%s\n", masterkeyhex);
 
-        btc_tx_in *txin = vector_idx(tx->vin, 0);
-        printf("%u\n", txin->sequence);
-        printf("%zu\n", txin->script_sig->len);
-
-        outlen = 0;
-        uint8_t script_sig[strlen(scripthex)];
-        utils_hex_to_bin(scripthex, script_sig, strlen(scripthex), &outlen);
-
-        cstr_append_buf(txin->script_sig, script_sig, outlen);
-
-        cstring* sertx = cstr_new_sz(strlen(txhex) + 74+65);
-        btc_tx_serialize(sertx, tx, true);
-        char hexbuf[sertx->len * 2 + 1];
-        utils_bin_to_hex((unsigned char*)sertx->str, sertx->len, hexbuf);
-        cstr_free(sertx, true);
-
-        printf("New TX Hex: %s\n", hexbuf);
+        //022d0e577424abfbbb5e321d3e2c700122a0c004305f57725810988cee6c4c278d
     }
-    else if (strcmp(cmd, "reverse") == 0) {
-        if(!txhex) {
-            return showError("Missing input (use -x)\n");
-        }
-        if (strlen(txhex) > 100000) {
-            return showError("tx too large\n");
-        }
-        utils_reverse_hex(txhex, strlen(txhex));
-        printf("reverse: %s\n", txhex);
-    }
+
 
     btc_ecc_stop();
 

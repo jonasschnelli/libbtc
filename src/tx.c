@@ -764,8 +764,25 @@ enum btc_tx_sign_result btc_tx_sign_input(btc_tx *tx_in_out, const cstring *scri
     btc_tx_in *tx_in = vector_idx(tx_in_out->vin, inputindex);
     vector *script_pushes = vector_new(1, free);
 
+    cstring *witness_set_scriptsig = NULL; //required in order to set the P2SH-P2WPKH scriptSig
     enum btc_tx_out_type type = btc_script_classify(script, script_pushes);
     enum btc_sig_version sig_version = SIGVERSION_BASE;
+    if (type == BTC_TX_SCRIPTHASH) {
+        // p2sh script, need the redeem script
+        // for now, pretend to be a p2sh-p2wpkh
+        type = BTC_TX_WITNESS_V0_PUBKEYHASH;
+        uint8_t *hash160 = btc_calloc(1, 20);
+        btc_pubkey_get_hash160(&pubkey, hash160);
+        vector_add(script_pushes, hash160);
+
+        // set the script sig
+        witness_set_scriptsig = cstr_new_sz(22);
+        uint8_t version = 0;
+        ser_varlen(witness_set_scriptsig, 22);
+        ser_bytes(witness_set_scriptsig, &version, 1);
+        ser_varlen(witness_set_scriptsig, 20);
+        ser_bytes(witness_set_scriptsig, hash160, 20);
+    }
     if (type == BTC_TX_PUBKEYHASH && script_pushes->len == 1) {
         // check if given private key matches the script
         uint160 hash160;
@@ -798,6 +815,8 @@ enum btc_tx_sign_result btc_tx_sign_input(btc_tx *tx_in_out, const cstring *scri
     uint256 sighash;
     memset(sighash, 0, sizeof(sighash));
     if(!btc_tx_sighash(tx_in_out, script_sign, inputindex, sighashtype, amount, sig_version, sighash)) {
+        cstr_free(witness_set_scriptsig, true);
+        cstr_free(script_sign, true);
         return BTC_SIGN_SIGHASH_FAILED;
     }
     cstr_free(script_sign, true);
@@ -837,6 +856,11 @@ enum btc_tx_sign_result btc_tx_sign_input(btc_tx *tx_in_out, const cstring *scri
     else if (type == BTC_TX_WITNESS_V0_PUBKEYHASH) {
         // signal witness by emtpying script sig (may be already empty)
         cstr_resize(tx_in->script_sig, 0);
+        if (witness_set_scriptsig) {
+            // apend the script sig in case of P2SH-P2WPKH
+            cstr_append_cstr(tx_in->script_sig, witness_set_scriptsig);
+            cstr_free(witness_set_scriptsig, true);
+        }
 
         // fill witness stack (DER sig, pubkey)
         cstring* witness_item = cstr_new_buf(sigder_plus_hashtype, sigderlen);

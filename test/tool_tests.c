@@ -15,7 +15,8 @@
 void test_tool()
 {
     char addr[100];
-    u_assert_int_eq(address_from_pubkey(&btc_chainparams_main, "02fcba7ecf41bc7e1be4ee122d9d22e3333671eb0a3a87b5cdf099d59874e1940f", addr), true);
+    char addr_p2sh_p2wpkh[100];
+    u_assert_int_eq(addresses_from_pubkey(&btc_chainparams_main, "02fcba7ecf41bc7e1be4ee122d9d22e3333671eb0a3a87b5cdf099d59874e1940f", addr, addr_p2sh_p2wpkh), true);
     u_assert_str_eq(addr, "1Nro9WkpaKm9axmcfPVp79dAJU1Gx7VmMZ");
 
     size_t pubkeylen = 100;
