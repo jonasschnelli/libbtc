@@ -54,6 +54,9 @@ void btc_tx_in_free(btc_tx_in* tx_in)
         vector_free(tx_in->witness_stack, true);
         tx_in->witness_stack = NULL;
     }
+
+    memset(tx_in, 0, sizeof(*tx_in));
+    btc_free(tx_in);
 }
 
 //callback for vector free function
@@ -64,9 +67,6 @@ void btc_tx_in_free_cb(void* data)
 
     btc_tx_in* tx_in = data;
     btc_tx_in_free(tx_in);
-
-    memset(tx_in, 0, sizeof(*tx_in));
-    btc_free(tx_in);
 }
 
 void btc_tx_in_witness_stack_free_cb(void* data)
@@ -100,6 +100,9 @@ void btc_tx_out_free(btc_tx_out* tx_out)
         cstr_free(tx_out->script_pubkey, true);
         tx_out->script_pubkey = NULL;
     }
+
+    memset(tx_out, 0, sizeof(*tx_out));
+    btc_free(tx_out);
 }
 
 
@@ -110,9 +113,6 @@ void btc_tx_out_free_cb(void* data)
 
     btc_tx_out* tx_out = data;
     btc_tx_out_free(tx_out);
-
-    memset(tx_out, 0, sizeof(*tx_out));
-    btc_free(tx_out);
 }
 
 
@@ -199,7 +199,7 @@ int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx*
         btc_tx_in* tx_in = btc_tx_in_new();
 
         if (!btc_tx_in_deserialize(tx_in, &buf)) {
-            btc_free(tx_in);
+            btc_tx_in_free(tx_in);
             return false;
         } else {
             vector_add(tx->vin, tx_in);

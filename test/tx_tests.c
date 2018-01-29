@@ -1158,8 +1158,8 @@ void test_script_parse()
     btc_tx_serialize(txser, tx, false);
     char hexbuf4[txser->len * 2 + 1];
     utils_bin_to_hex((unsigned char*)txser->str, txser->len, hexbuf4);
-
-    printf("%s\n", hexbuf4);
+    // TODO: test
+    cstr_free(txser, true);
 
     btc_tx_free(tx);
 }
@@ -1192,9 +1192,17 @@ void test_invalid_tx_deser()
     utils_hex_to_bin(txstr, tx_data, strlen(txstr), &outlen);
 
     btc_tx* tx = btc_tx_new();
-    btc_tx_deserialize(tx_data, outlen, tx, NULL, true);
-
+    u_assert_int_eq(btc_tx_deserialize(tx_data, outlen, tx, NULL, true), true);
     btc_tx_free(tx);
+
+    char failed_output[] =   "02000000000101bb3ee7f13f00b58a65f3789ff9917ae2eb2f360957ca86d4ec8068deae16f94c0000000017160014d7d7d2e56512a14b41f2b412eb33f9a2c464e407ffffffff01c0878b3b0000000017a914b1";
+    uint8_t tx_data_fo[sizeof(failed_output) / 2+1];
+    utils_hex_to_bin(failed_output, tx_data_fo, strlen(failed_output), &outlen);
+
+    btc_tx* tx_o = btc_tx_new();
+    u_assert_int_eq(btc_tx_deserialize(tx_data, outlen, tx_o, NULL, true), true);
+    btc_tx_free(tx_o);
+
 }
 
 
