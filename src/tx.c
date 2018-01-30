@@ -741,6 +741,31 @@ btc_bool btc_tx_is_coinbase(btc_tx* tx)
     return false;
 }
 
+const char* btc_tx_sign_result_to_str(const enum btc_tx_sign_result result) {
+    if (result == BTC_SIGN_OK) {
+        return "OK";
+    }
+    else if (result == BTC_SIGN_INVALID_TX_OR_SCRIPT) {
+        return "INVALID_TX_OR_SCRIPT";
+    }
+    else if (result == BTC_SIGN_INPUTINDEX_OUT_OF_RANGE) {
+        return "INPUTINDEX_OUT_OF_RANGE";
+    }
+    else if (result == BTC_SIGN_INVALID_KEY) {
+        return "INVALID_KEY";
+    }
+    else if (result == BTC_SIGN_NO_KEY_MATCH) {
+        return "NO_KEY_MATCH";
+    }
+    else if (result == BTC_SIGN_UNKNOWN_SCRIPT_TYPE) {
+        return "SIGN_UNKNOWN_SCRIPT_TYPE";
+    }
+    else if (result == BTC_SIGN_SIGHASH_FAILED) {
+        return "SIGHASH_FAILED";
+    }
+    return "UNKOWN";
+}
+
 enum btc_tx_sign_result btc_tx_sign_input(btc_tx *tx_in_out, const cstring *script, uint64_t amount, const btc_key *privkey, int inputindex, int sighashtype, uint8_t *sigcompact_out, uint8_t *sigder_out, int *sigder_len_out) {
     if (!tx_in_out || !script) {
         return BTC_SIGN_INVALID_TX_OR_SCRIPT;

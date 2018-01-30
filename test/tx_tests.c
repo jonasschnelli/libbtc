@@ -1120,18 +1120,12 @@ void test_script_parse()
     char masterkey[masterkeysize];
     u_assert_int_eq(hd_gen_master(&btc_chainparams_main, masterkey, masterkeysize), true);
 
-    printf("%s\n", masterkey);
-
     btc_hdnode node;
     u_assert_int_eq(btc_hdnode_deserialize(masterkey, &btc_chainparams_main, &node), true);
 
     uint256 rev_code;
     uint256 sig_hash;
     btc_hash(node.private_key, BTC_ECKEY_PKEY_LENGTH, rev_code);
-
-    if (1 == 1)
-        // test
-        printf("test\n");
 
     uint8_t sigdata[38] = {0x42, 0x49, 0x50, 0x00, 0x00, 0x00, 0x00 };
     btc_hash(rev_code, BTC_HASH_LENGTH, &sigdata[7]);
@@ -1192,7 +1186,7 @@ void test_invalid_tx_deser()
     utils_hex_to_bin(txstr, tx_data, strlen(txstr), &outlen);
 
     btc_tx* tx = btc_tx_new();
-    u_assert_int_eq(btc_tx_deserialize(tx_data, outlen, tx, NULL, true), true);
+    u_assert_int_eq(btc_tx_deserialize(tx_data, outlen, tx, NULL, true), false);
     btc_tx_free(tx);
 
     char failed_output[] =   "02000000000101bb3ee7f13f00b58a65f3789ff9917ae2eb2f360957ca86d4ec8068deae16f94c0000000017160014d7d7d2e56512a14b41f2b412eb33f9a2c464e407ffffffff01c0878b3b0000000017a914b1";
@@ -1200,9 +1194,164 @@ void test_invalid_tx_deser()
     utils_hex_to_bin(failed_output, tx_data_fo, strlen(failed_output), &outlen);
 
     btc_tx* tx_o = btc_tx_new();
-    u_assert_int_eq(btc_tx_deserialize(tx_data, outlen, tx_o, NULL, true), true);
+    u_assert_int_eq(btc_tx_deserialize(tx_data, outlen, tx_o, NULL, true), false);
     btc_tx_free(tx_o);
 
 }
 
+void test_tx_sign_p2sh_p2wpkh() {
+    const char *tx_hex = "0200000001bb3ee7f13f00b58a65f3789ff9917ae2eb2f360957ca86d4ec8068deae16f94c0000000000ffffffff01c0878b3b0000000017a914b1c1b08a898e07095e72a50cdf889bcdb1530a358700000000";
+    const char *script_hex = "a9148824655b15edc6291e08b814744b2dc521d6c41687";
+    const char *pkey_wif = "cRMBVuEydsdQdYCe8gFgu6HV8rFywrY6thdpumxzrrHC56BgBpEp";
+    const char *expected_sigder = "30440220685849941f583fe4a54b77fbe7963a2f7fdb9fefc661f9e43d9c6c213f6a4c9c02207da98e43af69d2c616c489eb22657e62a1360eeb5a86d8a31bd8a33dd9de21f101";
+    const char *expected_sigcomp = "685849941f583fe4a54b77fbe7963a2f7fdb9fefc661f9e43d9c6c213f6a4c9c7da98e43af69d2c616c489eb22657e62a1360eeb5a86d8a31bd8a33dd9de21f1";
+    const char *expected_tx_signed = "02000000000101bb3ee7f13f00b58a65f3789ff9917ae2eb2f360957ca86d4ec8068deae16f94c0000000017160014d7d7d2e56512a14b41f2b412eb33f9a2c464e407ffffffff01c0878b3b0000000017a914b1c1b08a898e07095e72a50cdf889bcdb1530a3587024730440220685849941f583fe4a54b77fbe7963a2f7fdb9fefc661f9e43d9c6c213f6a4c9c02207da98e43af69d2c616c489eb22657e62a1360eeb5a86d8a31bd8a33dd9de21f10121022d0e577424abfbbb5e321d3e2c700122a0c004305f57725810988cee6c4c278d00000000";
+    uint64_t amount = 1000000000;
+    int sighashtype = SIGHASH_ALL;
+    int inputindex = 0;
+
+    int outlen;
+    uint8_t tx_data[strlen(tx_hex) / 2];
+    utils_hex_to_bin(tx_hex, tx_data, strlen(tx_hex), &outlen);
+    uint8_t script_data[strlen(script_hex) / 2];
+    utils_hex_to_bin(script_hex, script_data, strlen(script_hex), &outlen);
+    cstring *script = cstr_new_buf(script_data, outlen);
+    uint8_t expected_sigder_data[strlen(expected_sigder) / 2];
+    utils_hex_to_bin(expected_sigder, expected_sigder_data, strlen(expected_sigder), &outlen);
+    uint8_t expected_sigcomp_data[strlen(expected_sigcomp) / 2];
+    utils_hex_to_bin(expected_sigcomp, expected_sigcomp_data, strlen(expected_sigcomp), &outlen);
+    uint8_t expected_tx_signed_data[strlen(expected_tx_signed) / 2];
+    utils_hex_to_bin(expected_tx_signed, expected_tx_signed_data, strlen(expected_tx_signed), &outlen);
+
+    btc_key pkey;
+    btc_privkey_init(&pkey);
+    btc_privkey_decode_wif(pkey_wif, &btc_chainparams_regtest, &pkey);
+
+    btc_tx* tx = btc_tx_new();
+    btc_tx_deserialize(tx_data, outlen, tx, NULL, true);
+
+
+    uint8_t sigcomp[64] = {0};
+    uint8_t sigder[76] = {0};
+    int sigder_len = 0;
+    enum btc_tx_sign_result res = btc_tx_sign_input(tx, script, amount, &pkey, inputindex, sighashtype, sigcomp, sigder, &sigder_len);
+    u_assert_mem_eq(sigcomp, expected_sigcomp_data, 64);
+    u_assert_mem_eq(sigder, expected_sigder_data, sigder_len);
+
+    cstring* tx_ser = cstr_new_sz(1024);
+    btc_tx_serialize(tx_ser, tx, true);
+
+    char hexbuf[tx_ser->len*2+1];
+    utils_bin_to_hex((unsigned char*)tx_ser->str, tx_ser->len, hexbuf);
+    u_assert_str_eq(hexbuf, expected_tx_signed);
+
+    btc_tx_free(tx);
+    cstr_free(tx_ser, true);
+    cstr_free(script, true);
+}
+
+void test_tx_sign_p2pkh(btc_tx *tx) {
+    const char *tx_hex = "02000000027409797c31feecc4e69b51c58b477b72c53355743a6f6124f9d78221672df3700100000000ffffffff6e1709c1e2bdd85aed24dccfd48293993617f249d4d4381296a9c914be3e85e60100000000ffffffff01c07fdc0b0000000017a914ba277fd56b69177464fcb6a27a530f03740345ed8700000000";
+    const char *script_hex = "76a9149b47fd7adc7a671ed059c9dcbf2eee2e882ea56b88ac";
+    const char *pkey_wif = "cRpSdivawavdAPgEYGXusWt64cJG9zLcgDPsEvnhHWtizVtmGk5b";
+    const char *expected_sigder = "304402205d44c682a69da1ca10e1149548bf7e7b53f0ce8f2d2bd2ea74026cba57cd4fe702200e0f9d87aafa1c88697238aaf1059b7718a97ff681efe474097221d456eb7ea201";
+    const char *expected_sigcomp = "685849941f583fe4a54b77fbe7963a2f7fdb9fefc661f9e43d9c6c213f6a4c9c7da98e43af69d2c616c489eb22657e62a1360eeb5a86d8a31bd8a33dd9de21f1";
+    const char *expected_tx_signed = "02000000027409797c31feecc4e69b51c58b477b72c53355743a6f6124f9d78221672df370010000006a47304402205d44c682a69da1ca10e1149548bf7e7b53f0ce8f2d2bd2ea74026cba57cd4fe702200e0f9d87aafa1c88697238aaf1059b7718a97ff681efe474097221d456eb7ea2012102c5b9d2d528f13b7b745736f6fd198614a09200c3c5cb0554327e110b4a8efcf1ffffffff6e1709c1e2bdd85aed24dccfd48293993617f249d4d4381296a9c914be3e85e60100000000ffffffff01c07fdc0b0000000017a914ba277fd56b69177464fcb6a27a530f03740345ed8700000000";
+    uint64_t amount = 100000000;
+    int sighashtype = SIGHASH_ALL;
+    int inputindex = 0;
+
+    int outlen;
+    uint8_t tx_data[strlen(tx_hex) / 2];
+    utils_hex_to_bin(tx_hex, tx_data, strlen(tx_hex), &outlen);
+    uint8_t script_data[strlen(script_hex) / 2];
+    utils_hex_to_bin(script_hex, script_data, strlen(script_hex), &outlen);
+    cstring *script = cstr_new_buf(script_data, outlen);
+    uint8_t expected_sigder_data[strlen(expected_sigder) / 2];
+    utils_hex_to_bin(expected_sigder, expected_sigder_data, strlen(expected_sigder), &outlen);
+    uint8_t expected_tx_signed_data[strlen(expected_tx_signed) / 2];
+    utils_hex_to_bin(expected_tx_signed, expected_tx_signed_data, strlen(expected_tx_signed), &outlen);
+
+    btc_key pkey;
+    btc_privkey_init(&pkey);
+    btc_privkey_decode_wif(pkey_wif, &btc_chainparams_regtest, &pkey);
+
+    btc_tx_deserialize(tx_data, outlen, tx, NULL, true);
+
+
+    uint8_t sigcomp[64] = {0};
+    uint8_t sigder[76] = {0};
+    int sigder_len = 0;
+    enum btc_tx_sign_result res = btc_tx_sign_input(tx, script, amount, &pkey, inputindex, sighashtype, sigcomp, sigder, &sigder_len);
+    u_assert_mem_eq(sigder, expected_sigder_data, sigder_len);
+
+    cstring* tx_ser = cstr_new_sz(1024);
+    btc_tx_serialize(tx_ser, tx, true);
+
+    char hexbuf[tx_ser->len*2+1];
+    utils_bin_to_hex((unsigned char*)tx_ser->str, tx_ser->len, hexbuf);
+    u_assert_str_eq(hexbuf, expected_tx_signed);
+
+    cstr_free(tx_ser, true);
+    cstr_free(script, true);
+}
+void test_tx_sign_p2pkh_i2(btc_tx *tx) {
+    const char *tx_hex = "02000000027409797c31feecc4e69b51c58b477b72c53355743a6f6124f9d78221672df3700100000000ffffffff6e1709c1e2bdd85aed24dccfd48293993617f249d4d4381296a9c914be3e85e60100000000ffffffff01c07fdc0b0000000017a914ba277fd56b69177464fcb6a27a530f03740345ed8700000000";
+    const char *script_hex_wrong = "76a9149b47fd7adc7a671ed059c9dcbf2eee2e882ea56b88ac";
+    const char *script_hex_correct = "76a91481edb497b5ba6eb9e67b7ed50fb220395f76f95088ac";
+    const char *pkey_wif = "cS8Xxe3MNoeWp5SckUfVw3WuaCNZ9eeQ4awjwkkARQ4xmXS5B1VW";
+    const char *expected_sigder = "304502210084181199e59f30ab947fa751662b20899a3c89a45f13b5aff8096eae56a68aa502204ea5d1b96c15099315be0a3583628a09d18530a9f937a88e74fa8c24a49449a401";
+    const char *expected_tx_signed = "02000000027409797c31feecc4e69b51c58b477b72c53355743a6f6124f9d78221672df370010000006a47304402205d44c682a69da1ca10e1149548bf7e7b53f0ce8f2d2bd2ea74026cba57cd4fe702200e0f9d87aafa1c88697238aaf1059b7718a97ff681efe474097221d456eb7ea2012102c5b9d2d528f13b7b745736f6fd198614a09200c3c5cb0554327e110b4a8efcf1ffffffff6e1709c1e2bdd85aed24dccfd48293993617f249d4d4381296a9c914be3e85e6010000006b48304502210084181199e59f30ab947fa751662b20899a3c89a45f13b5aff8096eae56a68aa502204ea5d1b96c15099315be0a3583628a09d18530a9f937a88e74fa8c24a49449a401210228f47e13841624ec8669f71176558927105207c138a65772331b7fc19c117b64ffffffff01c07fdc0b0000000017a914ba277fd56b69177464fcb6a27a530f03740345ed8700000000";
+    uint64_t amount = 100000000;
+    int sighashtype = SIGHASH_ALL;
+    int inputindex = 1;
+
+    int outlen;
+    uint8_t tx_data[strlen(tx_hex) / 2];
+    utils_hex_to_bin(tx_hex, tx_data, strlen(tx_hex), &outlen);
+    uint8_t script_data[strlen(script_hex_correct) / 2];
+    utils_hex_to_bin(script_hex_correct, script_data, strlen(script_hex_correct), &outlen);
+    cstring *script = cstr_new_buf(script_data, outlen);
+    uint8_t script_data_wrong[strlen(script_hex_wrong) / 2];
+    utils_hex_to_bin(script_hex_wrong, script_data_wrong, strlen(script_hex_wrong), &outlen);
+    cstring *script_wrong = cstr_new_buf(script_data_wrong, outlen);
+    uint8_t expected_sigder_data[strlen(expected_sigder) / 2];
+    utils_hex_to_bin(expected_sigder, expected_sigder_data, strlen(expected_sigder), &outlen);
+    uint8_t expected_tx_signed_data[strlen(expected_tx_signed) / 2];
+    utils_hex_to_bin(expected_tx_signed, expected_tx_signed_data, strlen(expected_tx_signed), &outlen);
+
+    btc_key pkey;
+    btc_privkey_init(&pkey);
+    btc_privkey_decode_wif(pkey_wif, &btc_chainparams_regtest, &pkey);
+
+    uint8_t sigcomp[64] = {0};
+    uint8_t sigder[76] = {0};
+    int sigder_len = 0;
+    enum btc_tx_sign_result res = btc_tx_sign_input(tx, script_wrong, amount, &pkey, inputindex, sighashtype, sigcomp, sigder, &sigder_len);
+    u_assert_int_eq(res, BTC_SIGN_NO_KEY_MATCH);
+    btc_tx_in *in = vector_idx(tx->vin, 1);
+    cstr_resize(in->script_sig, 0);
+    res = btc_tx_sign_input(tx, script, amount, &pkey, inputindex, sighashtype, sigcomp, sigder, &sigder_len);
+    u_assert_int_eq(res, BTC_SIGN_OK);
+    //u_assert_mem_eq(sigcomp, expected_sigcomp_data, 64);
+    u_assert_mem_eq(sigder, expected_sigder_data, sigder_len);
+
+    cstring* tx_ser = cstr_new_sz(1024);
+    btc_tx_serialize(tx_ser, tx, true);
+
+    char hexbuf[tx_ser->len*2+1];
+    utils_bin_to_hex((unsigned char*)tx_ser->str, tx_ser->len, hexbuf);
+    u_assert_str_eq(hexbuf, expected_tx_signed);
+
+    cstr_free(tx_ser, true);
+    cstr_free(script, true);
+}
+
+void test_tx_sign() {
+    test_tx_sign_p2sh_p2wpkh();
+    btc_tx* tx = btc_tx_new();
+    test_tx_sign_p2pkh(tx);
+    test_tx_sign_p2pkh_i2(tx);
+    btc_tx_free(tx);
+}
 

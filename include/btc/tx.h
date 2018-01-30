@@ -123,6 +123,7 @@ enum btc_tx_sign_result {
     BTC_SIGN_INPUTINDEX_OUT_OF_RANGE = -7,
     BTC_SIGN_OK = 1,
 };
+const char* btc_tx_sign_result_to_str(const enum btc_tx_sign_result result);
 enum btc_tx_sign_result btc_tx_sign_input(btc_tx *tx_in_out, const cstring *script, uint64_t amount, const btc_key *privkey, int inputindex, int sighashtype, uint8_t *sigcompact_out, uint8_t *sigder_out, int *sigder_len);
 
 #ifdef __cplusplus

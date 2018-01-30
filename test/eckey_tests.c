@@ -97,14 +97,11 @@ void test_eckey()
     char wifstr[100];
     size_t wiflen = 100;
     btc_privkey_encode_wif(&key_wif, &btc_chainparams_main, wifstr, &wiflen);
-    printf("%s\n", wifstr);
-
 
     char wif_decode_buf[100];
     wiflen = 100;
     btc_key key_wif_decode;
     btc_privkey_decode_wif(wifstr, &btc_chainparams_main, &key_wif_decode);
-    printf("END\n");
 
     u_assert_mem_eq(key_wif_decode.privkey, key_wif.privkey, sizeof(key_wif_decode.privkey));
 }

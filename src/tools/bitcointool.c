@@ -302,6 +302,10 @@ int main(int argc, char* argv[])
             enum btc_tx_sign_result res = btc_tx_sign_input(tx, script, amount, &key, inputindex, sighashtype, sigcompact, sigder_plus_hashtype, &sigderlen);
             cstr_free(script, true);
 
+            if (res != BTC_SIGN_OK) {
+                printf("!!!Sign error:%s\n", btc_tx_sign_result_to_str(res));
+            }
+
             char sigcompacthex[64*2+1] = {0};
             utils_bin_to_hex((unsigned char *)sigcompact, 64, sigcompacthex);
 
