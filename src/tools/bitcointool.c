@@ -176,7 +176,8 @@ int main(int argc, char* argv[])
         /* give out p2pkh address */
         char address_p2pkh[sizeout];
         char address_p2sh_p2wpkh[sizeout];
-        addresses_from_pubkey(chain, pubkey_hex, address_p2pkh, address_p2sh_p2wpkh);
+        char address_p2wpkh[sizeout];
+        addresses_from_pubkey(chain, pubkey_hex, address_p2pkh, address_p2sh_p2wpkh, address_p2wpkh);
         printf("p2pkh address: %s\n", address_p2pkh);
         printf("p2sh-p2wpkh address: %s\n", address_p2sh_p2wpkh);
 
@@ -190,12 +191,15 @@ int main(int argc, char* argv[])
         size_t sizeout = 128;
         char address_p2pkh[sizeout];
         char address_p2sh_p2wpkh[sizeout];
+        char address_p2wpkh[sizeout];
         if (!pubkey)
             return showError("Missing public key (use -k)");
-        if (!addresses_from_pubkey(chain, pubkey, address_p2pkh, address_p2sh_p2wpkh))
+        if (!addresses_from_pubkey(chain, pubkey, address_p2pkh, address_p2sh_p2wpkh, address_p2wpkh))
             return showError("Operation failed, invalid pubkey");
         printf("p2pkh address: %s\n", address_p2pkh);
         printf("p2sh-p2wpkh address: %s\n", address_p2sh_p2wpkh);
+        printf("p2wpkh (bc1 / bech32) address: %s\n", address_p2wpkh);
+
         memset(pubkey, 0, strlen(pubkey));
         memset(address_p2pkh, 0, strlen(address_p2pkh));
         memset(address_p2sh_p2wpkh, 0, strlen(address_p2sh_p2wpkh));

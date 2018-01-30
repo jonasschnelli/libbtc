@@ -37,6 +37,7 @@
 #include <btc/hash.h>
 #include <btc/random.h>
 #include <btc/script.h>
+#include <btc/segwit_addr.h>
 #include <btc/utils.h>
 
 #include "ripemd160.h"
@@ -232,5 +233,12 @@ btc_bool btc_pubkey_getaddr_p2pkh(const btc_pubkey* pubkey, const btc_chainparam
     hash160[0] = chain->b58prefix_script_address;
     btc_pubkey_get_hash160(pubkey, hash160 + 1);
     btc_base58_encode_check(hash160, sizeof(hash160), addrout, 100);
+    return true;
+}
+
+btc_bool btc_pubkey_getaddr_p2wpkh(const btc_pubkey* pubkey, const btc_chainparams* chain, char *addrout) {
+    uint160 hash160;
+    btc_pubkey_get_hash160(pubkey, hash160);
+    segwit_addr_encode(addrout, chain->bech32_hrp, 0, hash160, sizeof(hash160));
     return true;
 }

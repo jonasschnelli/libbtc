@@ -22,7 +22,7 @@
 #include <string.h>
 #include <unistd.h>
 
-btc_bool addresses_from_pubkey(const btc_chainparams* chain, const char* pubkey_hex, char* pkpkh_address, char* p2sh_pkwpkh_address)
+btc_bool addresses_from_pubkey(const btc_chainparams* chain, const char* pubkey_hex, char* p2pkh_address, char* p2sh_p2wpkh_address, char *p2wpkh_address)
 {
     if (!pubkey_hex || strlen(pubkey_hex) != 66)
         return false;
@@ -38,8 +38,9 @@ btc_bool addresses_from_pubkey(const btc_chainparams* chain, const char* pubkey_
     }
     assert(btc_pubkey_is_valid(&pubkey) == 1);
 
-    btc_pubkey_getaddr_p2pkh(&pubkey, chain, pkpkh_address);
-    btc_pubkey_getaddr_p2sh_p2wpkh(&pubkey, chain, p2sh_pkwpkh_address);
+    btc_pubkey_getaddr_p2pkh(&pubkey, chain, p2pkh_address);
+    btc_pubkey_getaddr_p2sh_p2wpkh(&pubkey, chain, p2sh_p2wpkh_address);
+    btc_pubkey_getaddr_p2wpkh(&pubkey, chain, p2wpkh_address);
     return true;
 }
 

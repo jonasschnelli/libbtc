@@ -44,6 +44,7 @@ typedef struct btc_chainparams_ {
     char chainname[32];
     uint8_t b58prefix_pubkey_address;
     uint8_t b58prefix_script_address;
+    const char bech32_hrp[5];
     uint8_t b58prefix_secret_address; //!private key
     uint32_t b58prefix_bip32_privkey;
     uint32_t b58prefix_bip32_pubkey;
