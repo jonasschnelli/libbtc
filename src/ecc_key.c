@@ -36,6 +36,7 @@
 #include <btc/ecc.h>
 #include <btc/hash.h>
 #include <btc/random.h>
+#include <btc/script.h>
 #include <btc/utils.h>
 
 #include "ripemd160.h"
@@ -209,4 +210,27 @@ btc_bool btc_key_sign_recover_pubkey(const unsigned char* sig, const uint256 has
 btc_bool btc_pubkey_verify_sig(const btc_pubkey* pubkey, const uint256 hash, unsigned char* sigder, int len)
 {
     return btc_ecc_verify_sig(pubkey->pubkey, pubkey->compressed, hash, sigder, len);
+}
+
+btc_bool btc_pubkey_getaddr_p2sh_p2wpkh(const btc_pubkey* pubkey, const btc_chainparams* chain, char *addrout) {
+    cstring *p2wphk_script = cstr_new_sz(22);
+    uint160 keyhash;
+    btc_pubkey_get_hash160(pubkey, keyhash);
+    btc_script_build_p2wpkh(p2wphk_script, keyhash);
+
+    uint8_t hash160[sizeof(uint160)+1];
+    hash160[0] = chain->b58prefix_script_address;
+    btc_script_get_scripthash(p2wphk_script, hash160+1);
+    cstr_free(p2wphk_script, true);
+
+    btc_base58_encode_check(hash160, sizeof(hash160), addrout, 100);
+    return true;
+}
+
+btc_bool btc_pubkey_getaddr_p2pkh(const btc_pubkey* pubkey, const btc_chainparams* chain, char *addrout) {
+    uint8_t hash160[sizeof(uint160)+1];
+    hash160[0] = chain->b58prefix_script_address;
+    btc_pubkey_get_hash160(pubkey, hash160 + 1);
+    btc_base58_encode_check(hash160, sizeof(hash160), addrout, 100);
+    return true;
 }

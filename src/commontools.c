@@ -33,26 +33,13 @@ btc_bool addresses_from_pubkey(const btc_chainparams* chain, const char* pubkey_
 
     size_t outlen = 0;
     utils_hex_to_bin(pubkey_hex, pubkey.pubkey, strlen(pubkey_hex), (int*)&outlen);
+    if (outlen != BTC_ECKEY_COMPRESSED_LENGTH) {
+        return false;
+    }
     assert(btc_pubkey_is_valid(&pubkey) == 1);
 
-    uint8_t hash160[sizeof(uint160)+1];
-    hash160[0] = chain->b58prefix_pubkey_address;
-    btc_pubkey_get_hash160(&pubkey, hash160 + 1);
-
-    btc_base58_encode_check(hash160, sizeof(hash160), pkpkh_address, 98);
-
-    // create p2sh-p2wpkh
-    cstring *p2wphk_script = cstr_new_sz(22);
-    uint160 keyhash;
-    btc_pubkey_get_hash160(&pubkey, keyhash);
-    btc_script_build_p2wpkh(p2wphk_script, keyhash);
-
-    hash160[0] = chain->b58prefix_script_address;
-    btc_script_get_scripthash(p2wphk_script, hash160+1);
-    cstr_free(p2wphk_script, true);
-
-    btc_base58_encode_check(hash160, sizeof(hash160), p2sh_pkwpkh_address, 98);
-
+    btc_pubkey_getaddr_p2pkh(&pubkey, chain, pkpkh_address);
+    btc_pubkey_getaddr_p2sh_p2wpkh(&pubkey, chain, p2sh_pkwpkh_address);
     return true;
 }
 

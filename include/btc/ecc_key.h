@@ -80,6 +80,10 @@ LIBBTC_API btc_bool btc_key_sign_recover_pubkey(const unsigned char* sig, const 
 //verifies a DER encoded signature with given pubkey and return true if valid
 LIBBTC_API btc_bool btc_pubkey_verify_sig(const btc_pubkey* pubkey, const uint256 hash, unsigned char* sigder, int len);
 
+LIBBTC_API btc_bool btc_pubkey_getaddr_p2sh_p2wpkh(const btc_pubkey* pubkey, const btc_chainparams* chain, char *addrout);
+
+LIBBTC_API btc_bool btc_pubkey_getaddr_p2pkh(const btc_pubkey* pubkey, const btc_chainparams* chain, char *addrout);
+
 #ifdef __cplusplus
 }
 #endif
