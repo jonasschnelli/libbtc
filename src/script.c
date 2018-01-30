@@ -31,6 +31,8 @@
 #include <string.h>
 
 #include <btc/buffer.h>
+#include <btc/hash.h>
+#include <ripemd160.h>
 #include <btc/serialize.h>
 
 btc_bool btc_script_copy_without_op_codeseperator(const cstring* script_in, cstring* script_out)
@@ -291,7 +293,27 @@ enum btc_tx_out_type btc_script_classify(const cstring* script, vector* data_out
         tx_out_type = BTC_TX_PUBKEY;
     if (btc_script_is_multisig(ops))
         tx_out_type = BTC_TX_MULTISIG;
-
+    uint8_t version = 0;
+    uint8_t witness_program[40] = {0};
+    int witness_program_len = 0;
+    if (btc_script_is_witnessprogram(script, &version, witness_program, &witness_program_len)) {
+        if (version == 0 && witness_program_len == 20) {
+            tx_out_type = BTC_TX_WITNESS_V0_PUBKEYHASH;
+            if (data_out) {
+                uint8_t *witness_program_cpy = btc_calloc(1, witness_program_len);
+                memcpy(witness_program_cpy, witness_program, witness_program_len);
+                vector_add(data_out, witness_program_cpy);
+            }
+        }
+        if (version == 0 && witness_program_len == 32) {
+            tx_out_type = BTC_TX_WITNESS_V0_SCRIPTHASH;
+            if (data_out) {
+                uint8_t *witness_program_cpy = btc_calloc(1, witness_program_len);
+                memcpy(witness_program_cpy, witness_program, witness_program_len);
+                vector_add(data_out, witness_program_cpy);
+            }
+        }
+    }
     vector_free(ops, true);
     return tx_out_type;
 }
@@ -386,6 +408,16 @@ btc_bool btc_script_build_p2pkh(cstring* script_in, const uint160 hash160)
     return true;
 }
 
+btc_bool btc_script_build_p2wpkh(cstring* script_in, const uint160 hash160)
+{
+    cstr_resize(script_in, 0); //clear script
+
+    btc_script_append_op(script_in, OP_0);
+    btc_script_append_pushdata(script_in, (unsigned char*)hash160, sizeof(uint160));
+
+    return true;
+}
+
 btc_bool btc_script_build_p2sh(cstring* script_in, const uint160 hash160)
 {
     cstr_resize(script_in, 0); //clear script
@@ -394,4 +426,68 @@ btc_bool btc_script_build_p2sh(cstring* script_in, const uint160 hash160)
     btc_script_append_op(script_in, OP_EQUAL);
 
     return true;
+}
+
+btc_bool btc_script_get_scripthash(const cstring* script_in, uint160 scripthash)
+{
+    if (!script_in) {
+        return false;
+    }
+    uint256 hash;
+    btc_hash_sngl_sha256((const unsigned char *)script_in->str, script_in->len, hash);
+    ripemd160(hash, sizeof(hash), scripthash);
+
+    return true;
+}
+
+const char * btc_tx_out_type_to_str(const enum btc_tx_out_type type) {
+    if (type == BTC_TX_PUBKEY) {
+        return "TX_PUBKEY";
+    }
+    else if (type == BTC_TX_PUBKEYHASH) {
+        return "TX_PUBKEYHASH";
+    }
+    else if (type == BTC_TX_SCRIPTHASH) {
+        return "TX_SCRIPTHASH";
+    }
+    else if (type == BTC_TX_MULTISIG) {
+        return "TX_MULTISIG";
+    }
+    else {
+        return "TX_NONSTANDARD";
+    }
+}
+
+static uint8_t btc_decode_op_n(enum opcodetype op)
+{
+    if (op == OP_0) {
+        return 0;
+    }
+    assert(op >= OP_1 && op <= OP_16);
+    return (uint8_t)op - (uint8_t)(OP_1 - 1);
+}
+
+// A witness program is any valid script that consists of a 1-byte push opcode
+// followed by a data push between 2 and 40 bytes.
+btc_bool btc_script_is_witnessprogram(const cstring* script, uint8_t* version_out, uint8_t *program_out, int *programm_len_out)
+{
+    if (!version_out || !program_out) {
+        return false;
+    }
+    if (script->len < 4 || script->len > 42) {
+        return false;
+    }
+    if (script->str[0] != OP_0 && (script->str[0] < OP_1 || script->str[0] > OP_16)) {
+        return false;
+    }
+    if ((size_t)(script->str[1] + 2) == script->len) {
+        *version_out = btc_decode_op_n((enum opcodetype)script->str[0]);
+        if (program_out) {
+            assert(script->len - 2 <= 40);
+            memcpy(program_out, script->str + 2, script->len - 2);
+            *programm_len_out = script->len - 2;
+        }
+        return true;
+    }
+    return false;
 }

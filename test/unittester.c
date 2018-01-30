@@ -57,6 +57,7 @@ extern void test_tx_negative_version();
 extern void test_script_parse();
 extern void test_script_op_codeseperator();
 extern void test_invalid_tx_deser();
+extern void test_tx_sign();
 extern void test_eckey();
 
 #ifdef WITH_WALLET
@@ -102,6 +103,7 @@ int main()
     u_run_test(test_vector);
     u_run_test(test_tx_serialization);
     u_run_test(test_invalid_tx_deser);
+    u_run_test(test_tx_sign);
     u_run_test(test_tx_sighash);
     u_run_test(test_tx_sighash_ext);
     u_run_test(test_tx_negative_version);

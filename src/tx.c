@@ -24,12 +24,14 @@
 
 */
 
+#include <assert.h>
 #include <inttypes.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
 
 #include <btc/base58.h>
+#include <btc/ecc.h>
 #include <btc/serialize.h>
 #include <btc/sha2.h>
 #include <btc/tx.h>
@@ -52,6 +54,9 @@ void btc_tx_in_free(btc_tx_in* tx_in)
         vector_free(tx_in->witness_stack, true);
         tx_in->witness_stack = NULL;
     }
+
+    memset(tx_in, 0, sizeof(*tx_in));
+    btc_free(tx_in);
 }
 
 //callback for vector free function
@@ -62,9 +67,6 @@ void btc_tx_in_free_cb(void* data)
 
     btc_tx_in* tx_in = data;
     btc_tx_in_free(tx_in);
-
-    memset(tx_in, 0, sizeof(*tx_in));
-    btc_free(tx_in);
 }
 
 void btc_tx_in_witness_stack_free_cb(void* data)
@@ -98,6 +100,9 @@ void btc_tx_out_free(btc_tx_out* tx_out)
         cstr_free(tx_out->script_pubkey, true);
         tx_out->script_pubkey = NULL;
     }
+
+    memset(tx_out, 0, sizeof(*tx_out));
+    btc_free(tx_out);
 }
 
 
@@ -108,9 +113,6 @@ void btc_tx_out_free_cb(void* data)
 
     btc_tx_out* tx_out = data;
     btc_tx_out_free(tx_out);
-
-    memset(tx_out, 0, sizeof(*tx_out));
-    btc_free(tx_out);
 }
 
 
@@ -197,7 +199,7 @@ int btc_tx_deserialize(const unsigned char* tx_serialized, size_t inlen, btc_tx*
         btc_tx_in* tx_in = btc_tx_in_new();
 
         if (!btc_tx_in_deserialize(tx_in, &buf)) {
-            btc_free(tx_in);
+            btc_tx_in_free(tx_in);
             return false;
         } else {
             vector_add(tx->vin, tx_in);
@@ -497,27 +499,27 @@ btc_bool btc_tx_sighash(const btc_tx* tx_to, const cstring* fromPubKey, unsigned
         btc_hash_clear(hash_outputs);
 
         if (!(hashtype & SIGHASH_ANYONECANPAY)) {
-            btc_tx_prevout_hash(tx_to, hash_prevouts);
+            btc_tx_prevout_hash(tx_tmp, hash_prevouts);
         }
         if (!(hashtype & SIGHASH_ANYONECANPAY)) {
-            btc_tx_outputs_hash(tx_to, hash_outputs);
+            btc_tx_outputs_hash(tx_tmp, hash_outputs);
         }
         if (!(hashtype & SIGHASH_ANYONECANPAY) && (hashtype & 0x1f) != SIGHASH_SINGLE && (hashtype & 0x1f) != SIGHASH_NONE) {
-            btc_tx_sequence_hash(tx_to, hash_sequence);
+            btc_tx_sequence_hash(tx_tmp, hash_sequence);
         }
 
         if ((hashtype & 0x1f) != SIGHASH_SINGLE && (hashtype & 0x1f) != SIGHASH_NONE) {
-            btc_tx_outputs_hash(tx_to, hash_outputs);
-        } else if ((hashtype & 0x1f) == SIGHASH_SINGLE && in_num < tx_to->vout->len) {
+            btc_tx_outputs_hash(tx_tmp, hash_outputs);
+        } else if ((hashtype & 0x1f) == SIGHASH_SINGLE && in_num < tx_tmp->vout->len) {
             cstring* s1 = cstr_new_sz(512);
-            btc_tx_out* tx_out = vector_idx(tx_to->vout, in_num);
+            btc_tx_out* tx_out = vector_idx(tx_tmp->vout, in_num);
             btc_tx_out_serialize(s1, tx_out);
             btc_hash((const uint8_t*)s1->str, s1->len, hash);
             cstr_free(s1, true);
         }
 
         s = cstr_new_sz(512);
-        ser_u32(s, tx_to->version); // Version
+        ser_u32(s, tx_tmp->version); // Version
 
         // Input prevouts/nSequence (none/all, depending on flags)
         ser_u256(s, hash_prevouts);
@@ -526,7 +528,7 @@ btc_bool btc_tx_sighash(const btc_tx* tx_to, const cstring* fromPubKey, unsigned
         // The input being signed (replacing the scriptSig with scriptCode + amount)
         // The prevout may already be contained in hashPrevout, and the nSequence
         // may already be contain in hashSequence.
-        btc_tx_in* tx_in = vector_idx(tx_to->vin, in_num);
+        btc_tx_in* tx_in = vector_idx(tx_tmp->vin, in_num);
         ser_u256(s, tx_in->prevout.hash);
         ser_u32(s, tx_in->prevout.n);
 
@@ -535,7 +537,7 @@ btc_bool btc_tx_sighash(const btc_tx* tx_to, const cstring* fromPubKey, unsigned
         ser_u64(s, amount);
         ser_u32(s, tx_in->sequence);
         ser_u256(s, hash_outputs); // Outputs (none/one/all, depending on flags)
-        ser_u32(s, tx_to->locktime); // Locktime
+        ser_u32(s, tx_tmp->locktime); // Locktime
         ser_s32(s, hashtype); // Sighash type
     }
     else {
@@ -614,6 +616,11 @@ btc_bool btc_tx_sighash(const btc_tx* tx_to, const cstring* fromPubKey, unsigned
         ser_s32(s, hashtype);
     }
 
+    //char str[10000];
+    //memset(str, strlen(str), 0);
+    //utils_bin_to_hex((unsigned char *)s->str, s->len, str);
+    //printf("\n");
+    //printf("%s\n", str);
 
     sha256_Raw((const uint8_t*)s->str, s->len, hash);
     sha256_Raw(hash, BTC_HASH_LENGTH, hash);
@@ -674,6 +681,9 @@ btc_bool btc_tx_add_address_out(btc_tx* tx, const btc_chainparams* chain, int64_
     } else if (buf[0] == chain->b58prefix_script_address) {
         btc_tx_add_p2sh_hash160_out(tx, amount, &buf[1]);
     }
+    else {
+        return false;
+    }
 
     return true;
 }
@@ -729,4 +739,165 @@ btc_bool btc_tx_is_coinbase(btc_tx* tx)
             return true;
     }
     return false;
+}
+
+const char* btc_tx_sign_result_to_str(const enum btc_tx_sign_result result) {
+    if (result == BTC_SIGN_OK) {
+        return "OK";
+    }
+    else if (result == BTC_SIGN_INVALID_TX_OR_SCRIPT) {
+        return "INVALID_TX_OR_SCRIPT";
+    }
+    else if (result == BTC_SIGN_INPUTINDEX_OUT_OF_RANGE) {
+        return "INPUTINDEX_OUT_OF_RANGE";
+    }
+    else if (result == BTC_SIGN_INVALID_KEY) {
+        return "INVALID_KEY";
+    }
+    else if (result == BTC_SIGN_NO_KEY_MATCH) {
+        return "NO_KEY_MATCH";
+    }
+    else if (result == BTC_SIGN_UNKNOWN_SCRIPT_TYPE) {
+        return "SIGN_UNKNOWN_SCRIPT_TYPE";
+    }
+    else if (result == BTC_SIGN_SIGHASH_FAILED) {
+        return "SIGHASH_FAILED";
+    }
+    return "UNKOWN";
+}
+
+enum btc_tx_sign_result btc_tx_sign_input(btc_tx *tx_in_out, const cstring *script, uint64_t amount, const btc_key *privkey, int inputindex, int sighashtype, uint8_t *sigcompact_out, uint8_t *sigder_out, int *sigder_len_out) {
+    if (!tx_in_out || !script) {
+        return BTC_SIGN_INVALID_TX_OR_SCRIPT;
+    }
+    if ((size_t)inputindex >= tx_in_out->vin->len) {
+        return BTC_SIGN_INPUTINDEX_OUT_OF_RANGE;
+    }
+    if (!btc_privkey_is_valid(privkey)) {
+        return BTC_SIGN_INVALID_KEY;
+    }
+    // calculate pubkey
+    btc_pubkey pubkey;
+    btc_pubkey_init(&pubkey);
+    btc_pubkey_from_key(privkey, &pubkey);
+    if (!btc_pubkey_is_valid(&pubkey)) {
+        return BTC_SIGN_INVALID_KEY;
+    }
+    enum btc_tx_sign_result res = BTC_SIGN_OK;
+
+    cstring *script_sign = cstr_new_cstr(script); //copy the script because we may modify it
+    btc_tx_in *tx_in = vector_idx(tx_in_out->vin, inputindex);
+    vector *script_pushes = vector_new(1, free);
+
+    cstring *witness_set_scriptsig = NULL; //required in order to set the P2SH-P2WPKH scriptSig
+    enum btc_tx_out_type type = btc_script_classify(script, script_pushes);
+    enum btc_sig_version sig_version = SIGVERSION_BASE;
+    if (type == BTC_TX_SCRIPTHASH) {
+        // p2sh script, need the redeem script
+        // for now, pretend to be a p2sh-p2wpkh
+        type = BTC_TX_WITNESS_V0_PUBKEYHASH;
+        uint8_t *hash160 = btc_calloc(1, 20);
+        btc_pubkey_get_hash160(&pubkey, hash160);
+        vector_add(script_pushes, hash160);
+
+        // set the script sig
+        witness_set_scriptsig = cstr_new_sz(22);
+        uint8_t version = 0;
+        ser_varlen(witness_set_scriptsig, 22);
+        ser_bytes(witness_set_scriptsig, &version, 1);
+        ser_varlen(witness_set_scriptsig, 20);
+        ser_bytes(witness_set_scriptsig, hash160, 20);
+    }
+    if (type == BTC_TX_PUBKEYHASH && script_pushes->len == 1) {
+        // check if given private key matches the script
+        uint160 hash160;
+        btc_pubkey_get_hash160(&pubkey, hash160);
+        uint160 *hash160_in_script = vector_idx(script_pushes, 0);
+        if (memcmp(hash160_in_script, hash160, sizeof(hash160)) != 0) {
+            res = BTC_SIGN_NO_KEY_MATCH; //sign anyways
+        }
+    }
+    else if (type == BTC_TX_WITNESS_V0_PUBKEYHASH && script_pushes->len == 1) {
+        uint160 *hash160_in_script = vector_idx(script_pushes, 0);
+        sig_version = SIGVERSION_WITNESS_V0;
+
+        // check if given private key matches the script
+        uint160 hash160;
+        btc_pubkey_get_hash160(&pubkey, hash160);
+        if (memcmp(hash160_in_script, hash160, sizeof(hash160)) != 0) {
+            res = BTC_SIGN_NO_KEY_MATCH; //sign anyways
+        }
+
+        cstr_resize(script_sign, 0);
+        btc_script_build_p2pkh(script_sign, *hash160_in_script);
+    }
+    else {
+        // unknown script, however, still try to create a signature (don't apply though)
+        res = BTC_SIGN_UNKNOWN_SCRIPT_TYPE;
+    }
+    vector_free(script_pushes, true);
+
+    uint256 sighash;
+    memset(sighash, 0, sizeof(sighash));
+    if(!btc_tx_sighash(tx_in_out, script_sign, inputindex, sighashtype, amount, sig_version, sighash)) {
+        cstr_free(witness_set_scriptsig, true);
+        cstr_free(script_sign, true);
+        return BTC_SIGN_SIGHASH_FAILED;
+    }
+    cstr_free(script_sign, true);
+    // sign compact
+    uint8_t sig[64];
+    size_t siglen = 0;
+    btc_key_sign_hash_compact(privkey, sighash, sig, &siglen);
+    assert(siglen == sizeof(sig));
+    if (sigcompact_out) {
+        memcpy(sigcompact_out, sig, siglen);
+    }
+
+    // form normalized DER signature & hashtype
+    unsigned char sigder_plus_hashtype[74+1];
+    size_t sigderlen = 75;
+    btc_ecc_compact_to_der_normalized(sig, sigder_plus_hashtype, &sigderlen);
+    assert(sigderlen <= 74 && sigderlen >= 70);
+    sigder_plus_hashtype[sigderlen] = sighashtype;
+    sigderlen+=1; //+hashtype
+    if (sigcompact_out) {
+        memcpy(sigder_out, sigder_plus_hashtype, sigderlen);
+    }
+    if (sigder_len_out) {
+        *sigder_len_out = sigderlen;
+    }
+
+    // apply signature depending on script type
+    if (type == BTC_TX_PUBKEYHASH) {
+        // apply DER sig
+        ser_varlen(tx_in->script_sig, sigderlen);
+        ser_bytes(tx_in->script_sig, sigder_plus_hashtype, sigderlen);
+
+        // apply pubkey
+        ser_varlen(tx_in->script_sig, pubkey.compressed ? BTC_ECKEY_COMPRESSED_LENGTH : BTC_ECKEY_UNCOMPRESSED_LENGTH);
+        ser_bytes(tx_in->script_sig, pubkey.pubkey, pubkey.compressed ? BTC_ECKEY_COMPRESSED_LENGTH : BTC_ECKEY_UNCOMPRESSED_LENGTH);
+    }
+    else if (type == BTC_TX_WITNESS_V0_PUBKEYHASH) {
+        // signal witness by emtpying script sig (may be already empty)
+        cstr_resize(tx_in->script_sig, 0);
+        if (witness_set_scriptsig) {
+            // apend the script sig in case of P2SH-P2WPKH
+            cstr_append_cstr(tx_in->script_sig, witness_set_scriptsig);
+            cstr_free(witness_set_scriptsig, true);
+        }
+
+        // fill witness stack (DER sig, pubkey)
+        cstring* witness_item = cstr_new_buf(sigder_plus_hashtype, sigderlen);
+        vector_add(tx_in->witness_stack, witness_item);
+
+        witness_item = cstr_new_buf(pubkey.pubkey, pubkey.compressed ? BTC_ECKEY_COMPRESSED_LENGTH : BTC_ECKEY_UNCOMPRESSED_LENGTH);
+        vector_add(tx_in->witness_stack, witness_item);
+    }
+    else {
+        // append nothing
+        res = BTC_SIGN_UNKNOWN_SCRIPT_TYPE;
+    }
+
+    return res;
 }

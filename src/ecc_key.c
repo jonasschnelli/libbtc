@@ -31,9 +31,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <btc/base58.h>
+#include <btc/chainparams.h>
 #include <btc/ecc.h>
 #include <btc/hash.h>
 #include <btc/random.h>
+#include <btc/script.h>
 #include <btc/utils.h>
 
 #include "ripemd160.h"
@@ -45,15 +48,18 @@ void btc_privkey_init(btc_key* privkey)
 }
 
 
-btc_bool btc_privkey_is_valid(btc_key* privkey)
+btc_bool btc_privkey_is_valid(const btc_key* privkey)
 {
+    if (!privkey) {
+        return false;
+    }
     return btc_ecc_verify_privatekey(privkey->privkey);
 }
 
 
 void btc_privkey_cleanse(btc_key* privkey)
 {
-    memset(&privkey->privkey, 0, BTC_ECKEY_PKEY_LENGTH);
+    btc_mem_zero(&privkey->privkey, BTC_ECKEY_PKEY_LENGTH);
 }
 
 
@@ -83,6 +89,36 @@ btc_bool btc_privkey_verify_pubkey(btc_key* privkey, btc_pubkey* pubkey)
     return btc_pubkey_verify_sig(pubkey, hash, sig, siglen);
 }
 
+void btc_privkey_encode_wif(const btc_key* privkey, const btc_chainparams* chain, char *privkey_wif, size_t *strsize_inout) {
+    uint8_t pkeybase58c[34];
+    pkeybase58c[0] = chain->b58prefix_secret_address;
+    pkeybase58c[33] = 1; /* always use compressed keys */
+
+    memcpy(&pkeybase58c[1], privkey->privkey, BTC_ECKEY_PKEY_LENGTH);
+    assert(btc_base58_encode_check(pkeybase58c, 34, privkey_wif, *strsize_inout) != 0);
+    btc_mem_zero(&pkeybase58c, 34);
+}
+
+btc_bool btc_privkey_decode_wif(const char *privkey_wif, const btc_chainparams* chain, btc_key* privkey) {
+
+    if (!privkey_wif || strlen(privkey_wif) < 50) {
+        return false;
+    }
+    uint8_t privkey_data[strlen(privkey_wif)];
+    memset(privkey_data, 0, sizeof(privkey_data));
+    size_t outlen = 0;
+
+    outlen = btc_base58_decode_check(privkey_wif, privkey_data, sizeof(privkey_data));
+    if (!outlen) {
+        return false;
+    }
+    if (privkey_data[0] != chain->b58prefix_secret_address) {
+        return false;
+    }
+    memcpy(privkey->privkey, &privkey_data[1], BTC_ECKEY_PKEY_LENGTH);
+    btc_mem_zero(&privkey_data, sizeof(privkey_data));
+    return true;
+}
 
 void btc_pubkey_init(btc_pubkey* pubkey)
 {
@@ -94,7 +130,7 @@ void btc_pubkey_init(btc_pubkey* pubkey)
 }
 
 
-btc_bool btc_pubkey_is_valid(btc_pubkey* pubkey)
+btc_bool btc_pubkey_is_valid(const btc_pubkey* pubkey)
 {
     return btc_ecc_verify_pubkey(pubkey->pubkey, pubkey->compressed);
 }
@@ -105,7 +141,7 @@ void btc_pubkey_cleanse(btc_pubkey* pubkey)
     if (pubkey == NULL)
         return;
 
-    memset(pubkey->pubkey, 0, BTC_ECKEY_UNCOMPRESSED_LENGTH);
+    btc_mem_zero(pubkey->pubkey, BTC_ECKEY_UNCOMPRESSED_LENGTH);
 }
 
 
@@ -128,7 +164,7 @@ btc_bool btc_pubkey_get_hex(const btc_pubkey* pubkey, char* str, size_t* strsize
 }
 
 
-void btc_pubkey_from_key(btc_key* privkey, btc_pubkey* pubkey_inout)
+void btc_pubkey_from_key(const btc_key* privkey, btc_pubkey* pubkey_inout)
 {
     if (pubkey_inout == NULL || privkey == NULL)
         return;
@@ -174,4 +210,27 @@ btc_bool btc_key_sign_recover_pubkey(const unsigned char* sig, const uint256 has
 btc_bool btc_pubkey_verify_sig(const btc_pubkey* pubkey, const uint256 hash, unsigned char* sigder, int len)
 {
     return btc_ecc_verify_sig(pubkey->pubkey, pubkey->compressed, hash, sigder, len);
+}
+
+btc_bool btc_pubkey_getaddr_p2sh_p2wpkh(const btc_pubkey* pubkey, const btc_chainparams* chain, char *addrout) {
+    cstring *p2wphk_script = cstr_new_sz(22);
+    uint160 keyhash;
+    btc_pubkey_get_hash160(pubkey, keyhash);
+    btc_script_build_p2wpkh(p2wphk_script, keyhash);
+
+    uint8_t hash160[sizeof(uint160)+1];
+    hash160[0] = chain->b58prefix_script_address;
+    btc_script_get_scripthash(p2wphk_script, hash160+1);
+    cstr_free(p2wphk_script, true);
+
+    btc_base58_encode_check(hash160, sizeof(hash160), addrout, 100);
+    return true;
+}
+
+btc_bool btc_pubkey_getaddr_p2pkh(const btc_pubkey* pubkey, const btc_chainparams* chain, char *addrout) {
+    uint8_t hash160[sizeof(uint160)+1];
+    hash160[0] = chain->b58prefix_script_address;
+    btc_pubkey_get_hash160(pubkey, hash160 + 1);
+    btc_base58_encode_check(hash160, sizeof(hash160), addrout, 100);
+    return true;
 }
