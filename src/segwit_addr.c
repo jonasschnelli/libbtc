@@ -22,7 +22,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "btc/segwit_addr.h"
+#include <btc/segwit_addr.h>
 
 uint32_t bech32_polymod_step(uint32_t pre) {
     uint8_t b = pre >> 25;
@@ -51,8 +51,13 @@ int bech32_encode(char *output, const char *hrp, const uint8_t *data, size_t dat
     uint32_t chk = 1;
     size_t i = 0;
     while (hrp[i] != 0) {
-        if (!(hrp[i] >> 5)) return 0;
-        chk = bech32_polymod_step(chk) ^ (hrp[i] >> 5);
+        int ch = hrp[i];
+        if (ch < 33 || ch > 126) {
+            return 0;
+        }
+
+        if (ch >= 'A' && ch <= 'Z') return 0;
+        chk = bech32_polymod_step(chk) ^ (ch >> 5);
         ++i;
     }
     if (i + 7 + data_len > 90) return 0;
