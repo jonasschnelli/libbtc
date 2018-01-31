@@ -230,7 +230,7 @@ btc_bool btc_pubkey_getaddr_p2sh_p2wpkh(const btc_pubkey* pubkey, const btc_chai
 
 btc_bool btc_pubkey_getaddr_p2pkh(const btc_pubkey* pubkey, const btc_chainparams* chain, char *addrout) {
     uint8_t hash160[sizeof(uint160)+1];
-    hash160[0] = chain->b58prefix_script_address;
+    hash160[0] = chain->b58prefix_pubkey_address;
     btc_pubkey_get_hash160(pubkey, hash160 + 1);
     btc_base58_encode_check(hash160, sizeof(hash160), addrout, 100);
     return true;
