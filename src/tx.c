@@ -32,6 +32,7 @@
 
 #include <btc/base58.h>
 #include <btc/ecc.h>
+#include <btc/segwit_addr.h>
 #include <btc/serialize.h>
 #include <btc/sha2.h>
 #include <btc/tx.h>
@@ -673,15 +674,27 @@ btc_bool btc_tx_add_address_out(btc_tx* tx, const btc_chainparams* chain, int64_
 {
     uint8_t buf[strlen(address) * 2];
     int r = btc_base58_decode_check(address, buf, sizeof(buf));
-    if (r <= 0)
-        return false;
-
-    if (buf[0] == chain->b58prefix_pubkey_address) {
+    if (r > 0 && buf[0] == chain->b58prefix_pubkey_address) {
         btc_tx_add_p2pkh_hash160_out(tx, amount, &buf[1]);
-    } else if (buf[0] == chain->b58prefix_script_address) {
+    } else if (r > 0 && buf[0] == chain->b58prefix_script_address) {
         btc_tx_add_p2sh_hash160_out(tx, amount, &buf[1]);
     }
     else {
+        // check for bech32
+        int version = 0;
+        unsigned char programm[40] = {0};
+        size_t programmlen = 0;
+        if(segwit_addr_decode(&version, programm, &programmlen, chain->bech32_hrp, address) == 1) {
+            if (programmlen == 20) {
+                btc_tx_out* tx_out = btc_tx_out_new();
+                tx_out->script_pubkey = cstr_new_sz(1024);
+
+                btc_script_build_p2wpkh(tx_out->script_pubkey, (const uint8_t *)programm);
+
+                tx_out->value = amount;
+                vector_add(tx->vout, tx_out);
+            }
+        }
         return false;
     }
 
