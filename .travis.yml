@@ -18,7 +18,6 @@ addons:
         - libevent-dev
 
 before_install:
-  - if [ ${CC} = gcc ] && [ "${TRAVIS_OS_NAME}" = "linux" ]; then pip install --user git+git://github.com/eddyxu/cpp-coveralls.git; fi
   - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew install valgrind gnu-sed --default-names; fi
 
 matrix:
@@ -73,7 +72,7 @@ script:
     - make -j2 V=1
     - ls -la
     - if ( [ "$VALGRIND_UNIT_TESTS" == "yes" ] ); then
-          valgrind --track-origins=yes --leak-check=full ./tests;
+          valgrind --track-origins=yes --leak-check=full --error-exitcode=1 ./tests;
           ./tests;
       fi
     - if ( [ "$RUN_MAKE_CHECK" == "yes" ] ); then
@@ -90,4 +89,7 @@ script:
       fi
 
 after_success:
-  - if [ "$SUBMIT_COVERALLS" == "yes" ]; then coveralls --verbose -i src -x c -e src/logdb -e src/secp256k1 -r $TRAVIS_BUILD_DIR -b $TRAVIS_BUILD_DIR --gcov-options '\-lp'; fi;
+  - if [ "$SUBMIT_COVERALLS" == "yes" ]; then
+      sudo pip install -U "cpp-coveralls";
+      coveralls --verbose -i src -x c -e src/logdb -e src/secp256k1 -r $TRAVIS_BUILD_DIR -b $TRAVIS_BUILD_DIR --gcov-options '\-lp';
+    fi

@@ -1085,7 +1085,7 @@ void test_script_parse()
     u_assert_str_eq(txhashhex, "41a86af25423391b1d9d78df1143e3a237f20db27511d8b72e25f2dec7a81d80");
 
 
-    btc_tx_add_address_out(tx, &btc_chainparams_test, 12345678, "n1e4M744gKSL269jozPwc8edjxxdwn6THc");
+    btc_tx_add_address_out(tx, &btc_chainparams_regtest, 12345678, "n1e4M744gKSL269jozPwc8edjxxdwn6THc");
 
 
     txser = cstr_new_sz(1024);
@@ -1103,13 +1103,21 @@ void test_script_parse()
     cstr_free(txser, true);
 
 
-    btc_tx_add_address_out(tx, &btc_chainparams_test, 876543210, "2NFoJeWNrABZQ3YCWdbX9wGEnRge7kDeGzQ");
+    btc_tx_add_address_out(tx, &btc_chainparams_regtest, 876543210, "2NFoJeWNrABZQ3YCWdbX9wGEnRge7kDeGzQ");
     txser = cstr_new_sz(1024);
     btc_tx_serialize(txser, tx, false);
     char hexbuf3[txser->len * 2 + 1];
     utils_bin_to_hex((unsigned char*)txser->str, txser->len, hexbuf3);
     u_assert_str_eq(hexbuf3, "01000000000300ca9a3b000000001976a91457b78cc8347175aee968eaa91846e840ef36ff9288ac4e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088aceafc3e340000000017a914f763f798ede75a6ebf4e061b9e68ddb6df0442928700000000");
 
+    cstr_free(txser, true);
+
+    btc_tx_add_address_out(tx, &btc_chainparams_regtest, 100000000, "bcrt1qfupfj4yx83dz8vhcpcahhxyg4sfqr8pvx8l6l2");
+    txser = cstr_new_sz(1024);
+    btc_tx_serialize(txser, tx, false);
+    char hexbuf4[txser->len * 2 + 1];
+    utils_bin_to_hex((unsigned char*)txser->str, txser->len, hexbuf4);
+    u_assert_str_eq(hexbuf4, "01000000000400ca9a3b000000001976a91457b78cc8347175aee968eaa91846e840ef36ff9288ac4e61bc00000000001976a914dcba7ad8b58f35ea9a7ffa2102dcfb2612b6ba9088aceafc3e340000000017a914f763f798ede75a6ebf4e061b9e68ddb6df0442928700e1f505000000001600144f029954863c5a23b2f80e3b7b9888ac12019c2c00000000");
     cstr_free(txser, true);
 
     vector_free(pubkeys, true);
@@ -1150,8 +1158,8 @@ void test_script_parse()
 
     txser = cstr_new_sz(1024);
     btc_tx_serialize(txser, tx, false);
-    char hexbuf4[txser->len * 2 + 1];
-    utils_bin_to_hex((unsigned char*)txser->str, txser->len, hexbuf4);
+    char hexbuf5[txser->len * 2 + 1];
+    utils_bin_to_hex((unsigned char*)txser->str, txser->len, hexbuf5);
     // TODO: test
     cstr_free(txser, true);
 

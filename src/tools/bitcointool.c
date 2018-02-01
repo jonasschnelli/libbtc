@@ -176,7 +176,8 @@ int main(int argc, char* argv[])
         /* give out p2pkh address */
         char address_p2pkh[sizeout];
         char address_p2sh_p2wpkh[sizeout];
-        addresses_from_pubkey(chain, pubkey_hex, address_p2pkh, address_p2sh_p2wpkh);
+        char address_p2wpkh[sizeout];
+        addresses_from_pubkey(chain, pubkey_hex, address_p2pkh, address_p2sh_p2wpkh, address_p2wpkh);
         printf("p2pkh address: %s\n", address_p2pkh);
         printf("p2sh-p2wpkh address: %s\n", address_p2sh_p2wpkh);
 
@@ -190,12 +191,15 @@ int main(int argc, char* argv[])
         size_t sizeout = 128;
         char address_p2pkh[sizeout];
         char address_p2sh_p2wpkh[sizeout];
+        char address_p2wpkh[sizeout];
         if (!pubkey)
             return showError("Missing public key (use -k)");
-        if (!addresses_from_pubkey(chain, pubkey, address_p2pkh, address_p2sh_p2wpkh))
+        if (!addresses_from_pubkey(chain, pubkey, address_p2pkh, address_p2sh_p2wpkh, address_p2wpkh))
             return showError("Operation failed, invalid pubkey");
         printf("p2pkh address: %s\n", address_p2pkh);
         printf("p2sh-p2wpkh address: %s\n", address_p2sh_p2wpkh);
+        printf("p2wpkh (bc1 / bech32) address: %s\n", address_p2wpkh);
+
         memset(pubkey, 0, strlen(pubkey));
         memset(address_p2pkh, 0, strlen(address_p2pkh));
         memset(address_p2sh_p2wpkh, 0, strlen(address_p2sh_p2wpkh));
@@ -230,10 +234,79 @@ int main(int argc, char* argv[])
             return showError("Missing keypath (use -m)");
         size_t sizeout = 128;
         char newextkey[sizeout];
-        if (!hd_derive(chain, pkey, keypath, newextkey, sizeout))
-            return showError("Deriving child key failed\n");
-        else
-            hd_print_node(chain, newextkey);
+
+        //check if we derive a range of keys
+        unsigned int maxlen = 1024;
+        int posanum = -1;
+        int posbnum = -1;
+        int end = -1;
+        uint64_t from;
+        uint64_t to;
+
+        static char digits[] = "0123456789";
+        for (unsigned int i = 0; i<strlen(keypath); i++) {
+            if (i > maxlen) {
+                break;
+            }
+            if (posanum > -1 && posbnum == -1) {
+                if (keypath[i] == '-') {
+                    if (i-posanum >= 9) {
+                        break;
+                    }
+                    posbnum = i+1;
+                    char buf[9] = {0};
+                    memcpy (buf, &keypath[posanum], i-posanum);
+                    from = strtoull(buf, NULL, 10);
+                }
+                else if (!strchr(digits, keypath[i])) {
+                    posanum = -1;
+                    break;
+                }
+            }
+            else if (posanum > -1 && posbnum > -1) {
+                if (keypath[i] == ']' || keypath[i] == ')') {
+                    if (i-posbnum >= 9) {
+                        break;
+                    }
+                    char buf[9] = {0};
+                    memcpy (buf, &keypath[posbnum], i-posbnum);
+                    to = strtoull(buf, NULL, 10);
+                    end = i+1;
+                    break;
+                }
+                else if (!strchr(digits, keypath[i])) {
+                    posbnum = -1;
+                    posanum = -1;
+                    break;
+                }
+            }
+            if (keypath[i] == '[' || keypath[i] == '(') {
+                posanum = i+1;
+            }
+        }
+
+        if (end > -1 && from <= to) {
+            for (uint64_t i = from; i <= to; i++) {
+                char keypathnew[strlen(keypath)+16];
+                memcpy(keypathnew, keypath, posanum-1);
+                char index[9] = {0};
+                sprintf(index, "%lld", i);
+                memcpy(keypathnew+posanum-1, index, strlen(index));
+                memcpy(keypathnew+posanum-1+strlen(index), &keypath[end], strlen(keypath)-end);
+
+
+                if (!hd_derive(chain, pkey, keypathnew, newextkey, sizeout))
+                    return showError("Deriving child key failed\n");
+                else
+                    hd_print_node(chain, newextkey);
+            }
+        }
+        else {
+            if (!hd_derive(chain, pkey, keypath, newextkey, sizeout))
+                return showError("Deriving child key failed\n");
+            else
+                hd_print_node(chain, newextkey);
+        }
     } else if (strcmp(cmd, "sign") == 0) {
         if(!txhex || !scripthex) {
             return showError("Missing tx-hex or script-hex (use -x, -s)\n");
