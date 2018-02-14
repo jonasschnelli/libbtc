@@ -24,39 +24,76 @@
 
 */
 
-#include "random.h"
+#include <btc/random.h>
+
+#include "libbtc-config.h"
 
 #include <assert.h>
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 
-#include "btc/btc.h"
+#ifdef WIN32
+#include <windows.h>
+#include <wincrypt.h>
+#endif
+
+void btc_random_init_internal(void);
+btc_bool btc_random_bytes_internal(uint8_t* buf, uint32_t len, const uint8_t update_seed);
+
+static const btc_rnd_mapper default_rnd_mapper = {btc_random_init_internal, btc_random_bytes_internal};
+static btc_rnd_mapper current_rnd_mapper = {btc_random_init_internal, btc_random_bytes_internal};
+
+void btc_rnd_set_mapper_default()
+{
+    current_rnd_mapper = default_rnd_mapper;
+}
+
+void btc_rnd_set_mapper(const btc_rnd_mapper mapper)
+{
+    current_rnd_mapper = mapper;
+}
+
+void btc_random_init(void)
+{
+    current_rnd_mapper.btc_random_init();
+}
+
+btc_bool btc_random_bytes(uint8_t* buf, uint32_t len, const uint8_t update_seed)
+{
+    return current_rnd_mapper.btc_random_bytes(buf, len, update_seed);
+}
 
 #ifdef TESTING
-void random_init(void)
+void btc_random_init_internal(void)
 {
     srand(time(NULL));
 }
 
 
-int random_bytes(uint8_t *buf, uint32_t len, uint8_t update_seed)
+btc_bool btc_random_bytes_internal(uint8_t* buf, uint32_t len, uint8_t update_seed)
 {
-    (void) update_seed;
+    (void)update_seed;
     for (uint32_t i = 0; i < len; i++) {
         buf[i] = rand();
     }
 
     return true;
 }
-#elif FILE_RANDOM
-void random_init(void) { }
-
-
-int random_bytes(uint8_t *buf, uint32_t len, const uint8_t update_seed)
+#else
+void btc_random_init_internal(void) {}
+btc_bool btc_random_bytes_internal(uint8_t* buf, uint32_t len, const uint8_t update_seed)
 {
-    (void)update_seed;//unused
-    FILE *frand = fopen(RANDOM_DEVICE, "r");
+#ifdef WIN32
+    HCRYPTPROV hProvider;
+    int ret = CryptAcquireContextW(&hProvider, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
+    assert(ret);
+    ret = CryptGenRandom(hProvider, len, buf);
+    assert(ret);
+    CryptReleaseContext(hProvider, 0);
+#else
+    (void)update_seed; //unused
+    FILE* frand = fopen(RANDOM_DEVICE, "r");
     if (!frand) {
         return false;
     }
@@ -65,7 +102,6 @@ int random_bytes(uint8_t *buf, uint32_t len, const uint8_t update_seed)
     assert(len_read == len);
     fclose(frand);
     return true;
+#endif
 }
-#else
-//provide extern interface
 #endif

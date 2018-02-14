@@ -5,6 +5,8 @@ test-suite.log
 *.so
 *.a
 !.gitignore
+bitcointool
+bitcoin-send-tx
 
 Makefile
 configure

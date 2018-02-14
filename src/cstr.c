@@ -3,144 +3,211 @@
  * file COPYING or http://www.opensource.org/licenses/mit-license.php.
  */
 
-#include "cstr.h"
+#include <btc/cstr.h>
 
+#include <stdlib.h>
 #include <string.h>
 
-static bool cstr_alloc_min_sz(cstring *s, size_t sz)
+static int cstr_alloc_min_sz(cstring* s, size_t sz)
 {
-	sz++;		// NUL overhead
+    unsigned int shift;
+    unsigned int al_sz;
+    char* new_s;
 
-	if (s->alloc && (s->alloc >= sz))
-		return true;
+    sz++; /* NULL overhead */
 
-	unsigned int shift = 3;
-	unsigned int al_sz;
-	while ((al_sz = (1 << shift)) < sz)
-		shift++;
+    if (s->alloc && (s->alloc >= sz))
+        return 1;
 
-	char *new_s = realloc(s->str, al_sz);
-	if (!new_s)
-		return false;
+    shift = 3;
+    while ((al_sz = (1 << shift)) < sz)
+        shift++;
 
-	s->str = new_s;
-	s->alloc = al_sz;
-	s->str[s->len] = 0;
+    new_s = btc_realloc(s->str, al_sz);
+    if (!new_s)
+        return 0;
 
-	return true;
+    s->str = new_s;
+    s->alloc = al_sz;
+    s->str[s->len] = 0;
+
+    return 1;
 }
 
-cstring *cstr_new_sz(size_t sz)
+int cstr_alloc_minsize(cstring* s, size_t new_sz)
 {
-	cstring *s = calloc(1, sizeof(cstring));
-	if (!s)
-		return NULL;
+    /* no change */
+    if (new_sz == s->len)
+        return 1;
 
-	if (!cstr_alloc_min_sz(s, sz)) {
-		free(s);
-		return NULL;
-	}
+    /* truncate string */
+    if (new_sz <= s->len) {
+        return 0;
+    }
 
-	return s;
+    /* increase string size */
+    if (!cstr_alloc_min_sz(s, new_sz))
+        return 0;
+
+    /* contents of string tail undefined */
+    //s->len = new_sz;
+    s->str[s->len] = 0;
+
+    return 1;
 }
 
-cstring *cstr_new_buf(const void *buf, size_t sz)
+cstring* cstr_new_sz(size_t sz)
 {
-	cstring *s = cstr_new_sz(sz);
-	if (!s)
-		return NULL;
+    cstring* s = btc_calloc(1, sizeof(cstring));
+    if (!s)
+        return NULL;
 
-	memcpy(s->str, buf, sz);
-	s->len = sz;
-	s->str[s->len] = 0;
+    if (!cstr_alloc_min_sz(s, sz)) {
+        btc_free(s);
+        return NULL;
+    }
 
-	return s;
+    return s;
 }
 
-cstring *cstr_new(const char *init_str)
+cstring* cstr_new_buf(const void* buf, size_t sz)
 {
-	if (!init_str || !*init_str)
-		return cstr_new_sz(0);
+    cstring* s = cstr_new_sz(sz);
+    if (!s)
+        return NULL;
 
-	size_t slen = strlen(init_str);
-	return cstr_new_buf(init_str, slen);
+    memcpy(s->str, buf, sz);
+    s->len = sz;
+    s->str[s->len] = 0;
+
+    return s;
 }
 
-void cstr_free(cstring *s, bool free_buf)
+cstring* cstr_new_cstr(const cstring* copy_str)
 {
-	if (!s)
-		return;
-
-	if (free_buf)
-		free(s->str);
-
-	memset(s, 0, sizeof(*s));
-	free(s);
+    return cstr_new_buf(copy_str->str, copy_str->len);
 }
 
-bool cstr_resize(cstring *s, size_t new_sz)
+cstring* cstr_new(const char* init_str)
 {
-	// no change
-	if (new_sz == s->len)
-		return true;
+    size_t slen;
 
-	// truncate string
-	if (new_sz <= s->len) {
-		s->len = new_sz;
-		s->str[s->len] = 0;
-		return true;
-	}
+    if (!init_str || !*init_str)
+        return cstr_new_sz(0);
 
-	// increase string size
-	if (!cstr_alloc_min_sz(s, new_sz))
-		return false;
-
-	// contents of string tail undefined
-
-	s->len = new_sz;
-	s->str[s->len] = 0;
-
-	return true;
+    slen = strlen(init_str);
+    return cstr_new_buf(init_str, slen);
 }
 
-bool cstr_append_buf(cstring *s, const void *buf, size_t sz)
+void cstr_free(cstring* s, int free_buf)
 {
-	if (!cstr_alloc_min_sz(s, s->len + sz))
-		return false;
+    if (!s)
+        return;
 
-	memcpy(s->str + s->len, buf, sz);
-	s->len += sz;
-	s->str[s->len] = 0;
+    if (free_buf)
+        btc_free(s->str);
 
-	return true;
+    memset(s, 0, sizeof(*s));
+    btc_free(s);
 }
 
-bool cstr_equal(const cstring *a, const cstring *b)
+int cstr_resize(cstring* s, size_t new_sz)
 {
-	if (a == b)
-		return true;
-	if (!a || !b)
-		return false;
-	if (a->len != b->len)
-		return false;
-	return (memcmp(a->str, b->str, a->len) == 0);
+    /* no change */
+    if (new_sz == s->len)
+        return 1;
+
+    /* truncate string */
+    if (new_sz <= s->len) {
+        s->len = new_sz;
+        s->str[s->len] = 0;
+        return 1;
+    }
+
+    /* increase string size */
+    if (!cstr_alloc_min_sz(s, new_sz))
+        return 0;
+
+    /* contents of string tail undefined */
+
+    s->len = new_sz;
+    s->str[s->len] = 0;
+
+    return 1;
 }
 
-bool cstr_erase(cstring *s, size_t pos, ssize_t len)
+int cstr_append_buf(cstring* s, const void* buf, size_t sz)
 {
-	if (pos == s->len && len == 0)
-		return true;
-	if (pos >= s->len)
-		return false;
+    if (!cstr_alloc_min_sz(s, s->len + sz))
+        return 0;
 
-	ssize_t old_tail = s->len - pos;
-	if ((len >= 0) && (len > old_tail))
-		return false;
+    memcpy(s->str + s->len, buf, sz);
+    s->len += sz;
+    s->str[s->len] = 0;
 
-	memmove(&s->str[pos], &s->str[pos + len], old_tail - len);
-	s->len -= len;
-	s->str[s->len] = 0;
-
-	return true;
+    return 1;
 }
 
+int cstr_append_cstr(cstring* s, cstring* append)
+{
+    return cstr_append_buf(s, append->str, append->len);
+}
+
+
+int cstr_append_c(cstring* s, char ch)
+{
+    return cstr_append_buf(s, &ch, 1);
+}
+
+
+int cstr_equal(const cstring* a, const cstring* b)
+{
+    if (a == b)
+        return 1;
+    if (!a || !b)
+        return 0;
+    if (a->len != b->len)
+        return 0;
+    return (memcmp(a->str, b->str, a->len) == 0);
+}
+
+int cstr_compare(const cstring* a, const cstring* b)
+{
+    unsigned int i;
+    if (a->len > b->len)
+        return (1);
+    if (a->len < b->len)
+        return (-1);
+
+    /* length equal, byte per byte compare */
+    for (i = 0; i < a->len; i++) {
+        char a1 = a->str[i];
+        char b1 = b->str[i];
+
+        if (a1 > b1)
+            return (1);
+        if (a1 < b1)
+            return (-1);
+    }
+    return (0);
+}
+
+int cstr_erase(cstring* s, size_t pos, ssize_t len)
+{
+    ssize_t old_tail;
+
+    if (pos == s->len && len == 0)
+        return 1;
+    if (pos >= s->len)
+        return 0;
+
+    old_tail = s->len - pos;
+    if ((len >= 0) && (len > old_tail))
+        return 0;
+
+    memmove(&s->str[pos], &s->str[pos + len], old_tail - len);
+    s->len -= len;
+    s->str[s->len] = 0;
+
+    return 1;
+}

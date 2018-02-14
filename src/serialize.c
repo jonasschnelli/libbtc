@@ -3,259 +3,354 @@
  * file COPYING or http://www.opensource.org/licenses/mit-license.php.
  */
 
-#include "serialize.h"
+#include <btc/cstr.h>
+#include <btc/serialize.h>
 
-#include <stdint.h>
 #include <string.h>
 
-#include "cstr.h"
-
-void ser_bytes(cstring *s, const void *p, size_t len)
+void ser_bytes(cstring* s, const void* p, size_t len)
 {
-	cstr_append_buf(s, p, len);
+    cstr_append_buf(s, p, len);
 }
 
-void ser_u16(cstring *s, uint16_t v_)
+void ser_u16(cstring* s, uint16_t v_)
 {
-	uint16_t v = htole16(v_);
-	cstr_append_buf(s, &v, sizeof(v));
+    uint16_t v = htole16(v_);
+    cstr_append_buf(s, &v, sizeof(v));
 }
 
-void ser_u32(cstring *s, uint32_t v_)
+void ser_u32(cstring* s, uint32_t v_)
 {
-	uint32_t v = htole32(v_);
-	cstr_append_buf(s, &v, sizeof(v));
+    uint32_t v = htole32(v_);
+    cstr_append_buf(s, &v, sizeof(v));
 }
 
-void ser_u64(cstring *s, uint64_t v_)
+void ser_s32(cstring* s, int32_t v_)
 {
-	uint64_t v = htole64(v_);
-	cstr_append_buf(s, &v, sizeof(v));
+    ser_u32(s, (uint32_t)v_);
 }
 
-void ser_varlen(cstring *s, uint32_t vlen)
+void ser_u64(cstring* s, uint64_t v_)
 {
-	unsigned char c;
-
-	if (vlen < 253) {
-		c = vlen;
-		ser_bytes(s, &c, 1);
-	}
-
-	else if (vlen < 0x10000) {
-		c = 253;
-		ser_bytes(s, &c, 1);
-		ser_u16(s, (uint16_t) vlen);
-	}
-
-	else {
-		c = 254;
-		ser_bytes(s, &c, 1);
-		ser_u32(s, vlen);
-	}
-
-	/* u64 case intentionally not implemented */
+    uint64_t v = htole64(v_);
+    cstr_append_buf(s, &v, sizeof(v));
 }
 
-void ser_str(cstring *s, const char *s_in, size_t maxlen)
+void ser_s64(cstring* s, int64_t v_)
 {
-	size_t slen = strnlen(s_in, maxlen);
-
-	ser_varlen(s, slen);
-	ser_bytes(s, s_in, slen);
+    ser_u64(s, (uint64_t)v_);
 }
 
-void ser_varstr(cstring *s, cstring *s_in)
+void ser_u256(cstring* s, const unsigned char* v_)
 {
-	if (!s_in || !s_in->len) {
-		ser_varlen(s, 0);
-		return;
-	}
-
-	ser_varlen(s, s_in->len);
-	ser_bytes(s, s_in->str, s_in->len);
+    ser_bytes(s, v_, 32);
 }
 
-void ser_u256_vector(cstring *s, vector *vec)
+void ser_varlen(cstring* s, uint32_t vlen)
 {
-	unsigned int vec_len = vec ? vec->len : 0;
+    unsigned char c;
 
-	ser_varlen(s, vec_len);
+    if (vlen < 253) {
+        c = vlen;
+        ser_bytes(s, &c, 1);
+    }
 
-	unsigned int i;
-	for (i = 0; i < vec_len; i++) {
-		uint8_t *av = vector_idx(vec, i);
-		ser_u256(s, av);
-	}
+    else if (vlen < 0x10000) {
+        c = 253;
+        ser_bytes(s, &c, 1);
+        ser_u16(s, (uint16_t)vlen);
+    }
+
+    else {
+        c = 254;
+        ser_bytes(s, &c, 1);
+        ser_u32(s, vlen);
+    }
+
+    /* u64 case intentionally not implemented */
 }
 
-bool deser_skip(struct const_buffer *buf, size_t len)
+void ser_str(cstring* s, const char* s_in, size_t maxlen)
 {
-	if (buf->len < len)
-		return false;
+    size_t slen = strnlen(s_in, maxlen);
 
-	buf->p += len;
-	buf->len -= len;
-
-	return true;
+    ser_varlen(s, slen);
+    ser_bytes(s, s_in, slen);
 }
 
-bool deser_bytes(void *po, struct const_buffer *buf, size_t len)
+void ser_varstr(cstring* s, cstring* s_in)
 {
-	if (buf->len < len)
-		return false;
+    if (!s_in || !s_in->len) {
+        ser_varlen(s, 0);
+        return;
+    }
 
-	memcpy(po, buf->p, len);
-	buf->p += len;
-	buf->len -= len;
-
-	return true;
+    ser_varlen(s, s_in->len);
+    ser_bytes(s, s_in->str, s_in->len);
 }
 
-bool deser_u16(uint16_t *vo, struct const_buffer *buf)
+int deser_skip(struct const_buffer* buf, size_t len)
 {
-	uint16_t v;
+    char* p;
+    if (buf->len < len)
+        return false;
 
-	if (!deser_bytes(&v, buf, sizeof(v)))
-		return false;
+    p = (char*)buf->p;
+    p += len;
+    buf->p = p;
+    buf->len -= len;
 
-	*vo = le16toh(v);
-	return true;
+    return true;
 }
 
-bool deser_u32(uint32_t *vo, struct const_buffer *buf)
+int deser_bytes(void* po, struct const_buffer* buf, size_t len)
 {
-	uint32_t v;
+    char* p;
+    if (buf->len < len)
+        return false;
 
-	if (!deser_bytes(&v, buf, sizeof(v)))
-		return false;
+    memcpy(po, buf->p, len);
+    p = (char*)buf->p;
+    p += len;
+    buf->p = p;
+    buf->len -= len;
 
-	*vo = le32toh(v);
-	return true;
+    return true;
 }
 
-bool deser_u64(uint64_t *vo, struct const_buffer *buf)
+int deser_u16(uint16_t* vo, struct const_buffer* buf)
 {
-	uint64_t v;
+    uint16_t v;
 
-	if (!deser_bytes(&v, buf, sizeof(v)))
-		return false;
+    if (!deser_bytes(&v, buf, sizeof(v)))
+        return false;
 
-	*vo = le64toh(v);
-	return true;
+    *vo = le16toh(v);
+    return true;
 }
 
-bool deser_varlen(uint32_t *lo, struct const_buffer *buf)
+int deser_s32(int32_t* vo, struct const_buffer* buf)
 {
-	uint32_t len;
+    int32_t v;
 
-	unsigned char c;
-	if (!deser_bytes(&c, buf, 1)) return false;
+    if (!deser_bytes(&v, buf, sizeof(v)))
+        return false;
 
-	if (c == 253) {
-		uint16_t v16;
-		if (!deser_u16(&v16, buf)) return false;
-		len = v16;
-	}
-	else if (c == 254) {
-		uint32_t v32;
-		if (!deser_u32(&v32, buf)) return false;
-		len = v32;
-	}
-	else if (c == 255) {
-		uint64_t v64;
-		if (!deser_u64(&v64, buf)) return false;
-		len = (uint32_t) v64;	/* WARNING: truncate */
-	}
-	else
-		len = c;
-
-	*lo = len;
-	return true;
+    *vo = le32toh(v);
+    return true;
 }
 
-bool deser_str(char *so, struct const_buffer *buf, size_t maxlen)
+int deser_u32(uint32_t* vo, struct const_buffer* buf)
 {
-	uint32_t len;
-	if (!deser_varlen(&len, buf)) return false;
+    uint32_t v;
 
-	/* if input larger than buffer, truncate copy, skip remainder */
-	uint32_t skip_len = 0;
-	if (len > maxlen) {
-		skip_len = len - maxlen;
-		len = maxlen;
-	}
+    if (!deser_bytes(&v, buf, sizeof(v)))
+        return false;
 
-	if (!deser_bytes(so, buf, len)) return false;
-	if (!deser_skip(buf, skip_len)) return false;
-
-	/* add C string null */
-	if (len < maxlen)
-		so[len] = 0;
-	else
-		so[maxlen - 1] = 0;
-
-	return true;
+    *vo = le32toh(v);
+    return true;
 }
 
-bool deser_varstr(cstring **so, struct const_buffer *buf)
+int deser_u64(uint64_t* vo, struct const_buffer* buf)
 {
-	if (*so) {
-		cstr_free(*so, true);
-		*so = NULL;
-	}
+    uint64_t v;
 
-	uint32_t len;
-	if (!deser_varlen(&len, buf)) return false;
+    if (!deser_bytes(&v, buf, sizeof(v)))
+        return false;
 
-	if (buf->len < len)
-		return false;
-
-	cstring *s = cstr_new_sz(len);
-	cstr_append_buf(s, buf->p, len);
-
-	buf->p += len;
-	buf->len -= len;
-
-	*so = s;
-
-	return true;
+    *vo = le64toh(v);
+    return true;
 }
 
-bool deser_u256_vector(vector **vo, struct const_buffer *buf)
+int deser_u256(uint256 vo, struct const_buffer* buf)
 {
-	vector *vec = *vo;
-	if (vec) {
-		vector_free(vec, true);
-		*vo = vec = NULL;
-	}
+    return deser_bytes(vo, buf, 32);
+}
 
-	uint32_t vlen;
-	if (!deser_varlen(&vlen, buf)) return false;
+int deser_varlen(uint32_t* lo, struct const_buffer* buf)
+{
+    uint32_t len;
 
-	if (!vlen)
-		return true;
+    unsigned char c;
+    if (!deser_bytes(&c, buf, 1))
+        return false;
 
-	vec = vector_new(vlen, free);
-	if (!vec)
-		return false;
+    if (c == 253) {
+        uint16_t v16;
+        if (!deser_u16(&v16, buf))
+            return false;
+        len = v16;
+    } else if (c == 254) {
+        uint32_t v32;
+        if (!deser_u32(&v32, buf))
+            return false;
+        len = v32;
+    } else if (c == 255) {
+        uint64_t v64;
+        if (!deser_u64(&v64, buf))
+            return false;
+        len = (uint32_t)v64; /* WARNING: truncate */
+    } else
+        len = c;
 
-	unsigned int i;
-	for (i = 0; i < vlen; i++) {
-		uint8_t *n = malloc(32);
+    *lo = len;
+    return true;
+}
 
-		if (!deser_u256(n, buf)) {
-            free(n);
-			goto err_out;
-		}
+int deser_varlen_from_file(uint32_t* lo, FILE* file)
+{
+    uint32_t len;
+    struct const_buffer buf;
+    unsigned char c;
+    const unsigned char bufp[sizeof(uint64_t)];
 
-		vector_add(vec, n);
-	}
+    if (fread(&c, 1, 1, file) != 1)
+        return false;
 
-	*vo = vec;
-	return true;
+    buf.p = (void*)bufp;
+    buf.len = sizeof(uint64_t);
 
-err_out:
-	vector_free(vec, true);
-	return false;
+    if (c == 253) {
+        uint16_t v16;
+        if (fread((void*)buf.p, 1, sizeof(v16), file) != sizeof(v16))
+            return false;
+        if (!deser_u16(&v16, &buf))
+            return false;
+        len = v16;
+    } else if (c == 254) {
+        uint32_t v32;
+        if (fread((void*)buf.p, 1, sizeof(v32), file) != sizeof(v32))
+            return false;
+        if (!deser_u32(&v32, &buf))
+            return false;
+        len = v32;
+    } else if (c == 255) {
+        uint64_t v64;
+        if (fread((void*)buf.p, 1, sizeof(v64), file) != sizeof(v64))
+            return false;
+        if (!deser_u64(&v64, &buf))
+            return false;
+        len = (uint32_t)v64; /* WARNING: truncate */
+    } else
+        len = c;
+
+    *lo = len;
+    return true;
+}
+
+int deser_varlen_file(uint32_t* lo, FILE* file, uint8_t* rawdata, size_t* buflen_inout)
+{
+    uint32_t len;
+    struct const_buffer buf;
+    unsigned char c;
+    const unsigned char bufp[sizeof(uint64_t)];
+
+    /* check min size of the buffer */
+    if (*buflen_inout < sizeof(len))
+        return false;
+
+    if (fread(&c, 1, 1, file) != 1)
+        return false;
+
+    rawdata[0] = c;
+    *buflen_inout = 1;
+
+    buf.p = (void*)bufp;
+    buf.len = sizeof(uint64_t);
+
+    if (c == 253) {
+        uint16_t v16;
+        if (fread((void*)buf.p, 1, sizeof(v16), file) != sizeof(v16))
+            return false;
+        memcpy(rawdata + 1, buf.p, sizeof(v16));
+        *buflen_inout += sizeof(v16);
+        if (!deser_u16(&v16, &buf))
+            return false;
+        len = v16;
+    } else if (c == 254) {
+        uint32_t v32;
+        if (fread((void*)buf.p, 1, sizeof(v32), file) != sizeof(v32))
+            return false;
+        memcpy(rawdata + 1, buf.p, sizeof(v32));
+        *buflen_inout += sizeof(v32);
+        if (!deser_u32(&v32, &buf))
+            return false;
+        len = v32;
+    } else if (c == 255) {
+        uint64_t v64;
+        if (fread((void*)buf.p, 1, sizeof(v64), file) != sizeof(v64))
+            return false;
+        memcpy(rawdata + 1, buf.p, sizeof(uint32_t)); /* warning, truncate! */
+        *buflen_inout += sizeof(uint32_t);
+        if (!deser_u64(&v64, &buf))
+            return false;
+        len = (uint32_t)v64; /* WARNING: truncate */
+    } else
+        len = c;
+
+    *lo = len;
+    return true;
+}
+
+
+int deser_str(char* so, struct const_buffer* buf, size_t maxlen)
+{
+    uint32_t len;
+    uint32_t skip_len = 0;
+    if (!deser_varlen(&len, buf))
+        return false;
+
+    /* if input larger than buffer, truncate copy, skip remainder */
+    if (len > maxlen) {
+        skip_len = len - maxlen;
+        len = maxlen;
+    }
+
+    if (!deser_bytes(so, buf, len))
+        return false;
+    if (!deser_skip(buf, skip_len))
+        return false;
+
+    /* add C string null */
+    if (len < maxlen)
+        so[len] = 0;
+    else
+        so[maxlen - 1] = 0;
+
+    return true;
+}
+
+int deser_varstr(cstring** so, struct const_buffer* buf)
+{
+    uint32_t len;
+    cstring* s;
+    char* p;
+
+    if (*so) {
+        cstr_free(*so, 1);
+        *so = NULL;
+    }
+
+    if (!deser_varlen(&len, buf))
+        return false;
+
+    if (buf->len < len)
+        return false;
+
+    s = cstr_new_sz(len);
+    cstr_append_buf(s, buf->p, len);
+
+    p = (char*)buf->p;
+    p += len;
+    buf->p = p;
+    buf->len -= len;
+
+    *so = s;
+
+    return true;
+}
+
+int deser_s64(int64_t* vo, struct const_buffer* buf)
+{
+    return deser_u64((uint64_t*)vo, buf);
 }

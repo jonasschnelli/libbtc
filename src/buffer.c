@@ -3,50 +3,49 @@
  * file COPYING or http://www.opensource.org/licenses/mit-license.php.
  */
 
-#include "buffer.h"
+#include <btc/buffer.h>
 
 #include <stdlib.h>
 #include <string.h>
 
-bool buffer_equal(const void *a_, const void *b_)
+int buffer_equal(const void* a_, const void* b_)
 {
-	const struct buffer *a = a_;
-	const struct buffer *b = b_;
+    const struct buffer* a = a_;
+    const struct buffer* b = b_;
 
-	if (a->len != b->len)
-		return false;
-	return memcmp(a->p, b->p, a->len) == 0;
+    if (a->len != b->len)
+        return 0;
+    return memcmp(a->p, b->p, a->len) == 0;
 }
 
-void buffer_free(void *struct_buffer)
+void buffer_free(void* struct_buffer)
 {
-	struct buffer *buf = struct_buffer;
-	if (!buf)
-		return;
+    struct buffer* buf = struct_buffer;
+    if (!buf)
+        return;
 
-	free(buf->p);
-	free(buf);
+    btc_free(buf->p);
+    btc_free(buf);
 }
 
-struct buffer *buffer_copy(const void *data, size_t data_len)
+struct buffer* buffer_copy(const void* data, size_t data_len)
 {
-	struct buffer *buf;
-	buf = malloc(sizeof(*buf));
-	if (!buf)
-		goto err_out;
+    struct buffer* buf;
+    buf = btc_malloc(sizeof(*buf));
+    if (!buf)
+        goto err_out;
 
-	buf->p = malloc(data_len);
-	if (!buf->p)
-		goto err_out_free;
+    buf->p = btc_malloc(data_len);
+    if (!buf->p)
+        goto err_out_free;
 
-	memcpy(buf->p, data, data_len);
-	buf->len = data_len;
+    memcpy(buf->p, data, data_len);
+    buf->len = data_len;
 
-	return buf;
+    return buf;
 
 err_out_free:
-	free(buf);
+    btc_free(buf);
 err_out:
-	return NULL;
+    return NULL;
 }
-

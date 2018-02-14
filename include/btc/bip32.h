@@ -23,38 +23,59 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
 #ifndef __LIBBTC_BIP32_H__
 #define __LIBBTC_BIP32_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "btc.h"
+#include "chainparams.h"
 
 #include <stdint.h>
 
+#define BTC_BIP32_CHAINCODE_SIZE 32
 
-typedef struct {
+typedef struct
+{
     uint32_t depth;
     uint32_t fingerprint;
     uint32_t child_num;
-    uint8_t chain_code[32];
-    uint8_t private_key[32];
-    uint8_t public_key[33];
-} HDNode;
+    uint8_t chain_code[BTC_BIP32_CHAINCODE_SIZE];
+    uint8_t private_key[BTC_ECKEY_PKEY_LENGTH];
+    uint8_t public_key[BTC_ECKEY_COMPRESSED_LENGTH];
+} btc_hdnode;
 
 
-#define hdnode_private_ckd_prime(X, I) hdnode_private_ckd((X), ((I) | 0x80000000))
+#define btc_hdnode_private_ckd_prime(X, I) btc_hdnode_private_ckd((X), ((I) | 0x80000000))
 
 
-LIBBTC_API bool hdnode_public_ckd(HDNode *inout, uint32_t i);
-LIBBTC_API bool hdnode_from_seed(const uint8_t *seed, int seed_len, HDNode *out);
-LIBBTC_API bool hdnode_private_ckd(HDNode *inout, uint32_t i);
-LIBBTC_API void hdnode_fill_public_key(HDNode *node);
-LIBBTC_API void hdnode_serialize_public(const HDNode *node, char *str, int strsize);
-LIBBTC_API void hdnode_serialize_private(const HDNode *node, char *str, int strsize);
-LIBBTC_API bool hdnode_deserialize(const char *str, HDNode *node);
+LIBBTC_API btc_hdnode* btc_hdnode_new();
+LIBBTC_API btc_hdnode* btc_hdnode_copy(btc_hdnode* hdnode);
+LIBBTC_API void btc_hdnode_free(btc_hdnode* node);
+LIBBTC_API btc_bool btc_hdnode_public_ckd(btc_hdnode* inout, uint32_t i);
+LIBBTC_API btc_bool btc_hdnode_from_seed(const uint8_t* seed, int seed_len, btc_hdnode* out);
+LIBBTC_API btc_bool btc_hdnode_private_ckd(btc_hdnode* inout, uint32_t i);
+LIBBTC_API void btc_hdnode_fill_public_key(btc_hdnode* node);
+LIBBTC_API void btc_hdnode_serialize_public(const btc_hdnode* node, const btc_chainparams* chain, char* str, int strsize);
+LIBBTC_API void btc_hdnode_serialize_private(const btc_hdnode* node, const btc_chainparams* chain, char* str, int strsize);
 
-//!derive HDNode including private key from master private key
-LIBBTC_API bool hd_generate_key(HDNode *node, const char *keypath, const uint8_t *privkeymaster,
-                    const uint8_t *chaincode);
+/* gives out the raw sha256/ripemd160 hash */
+LIBBTC_API void btc_hdnode_get_hash160(const btc_hdnode* node, uint160 hash160_out);
+LIBBTC_API void btc_hdnode_get_p2pkh_address(const btc_hdnode* node, const btc_chainparams* chain, char* str, int strsize);
+LIBBTC_API btc_bool btc_hdnode_get_pub_hex(const btc_hdnode* node, char* str, size_t* strsize);
+LIBBTC_API btc_bool btc_hdnode_deserialize(const char* str, const btc_chainparams* chain, btc_hdnode* node);
+
+//!derive btc_hdnode from extended private or extended public key orkey
+//if you use pub child key derivation, pass usepubckd=true
+LIBBTC_API btc_bool btc_hd_generate_key(btc_hdnode* node, const char* keypath, const uint8_t* keymaster, const uint8_t* chaincode, btc_bool usepubckd);
+
+//!checks if a node has the according private key (or if its a pubkey only node)
+LIBBTC_API btc_bool btc_hdnode_has_privkey(btc_hdnode* node);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // __LIBBTC_BIP32_H__

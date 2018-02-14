@@ -77,80 +77,151 @@
 #define _UTEST_H_
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 
-#define u_run_test(TEST) do {\
- int f_ = U_TESTS_FAIL; \
- TEST();  U_TESTS_RUN++; \
- if (f_ == U_TESTS_FAIL) { \
-  printf("PASSED - %s()\n", #TEST); };\
- } while (0)
+#define u_run_test(TEST)                      \
+    do {                                      \
+        int f_ = U_TESTS_FAIL;                \
+        TEST();                               \
+        U_TESTS_RUN++;                        \
+        if (f_ == U_TESTS_FAIL) {             \
+            printf("PASSED - %s()\n", #TEST); \
+        };                                    \
+    } while (0)
 
-#define u_assert_int_eq(R,E) {\
- int r_ = (R); \
- int e_ = (E); \
- do { if (r_!=e_) { \
-  printf("FAILED - %s() - Line %d\n", __func__, __LINE__);\
-  printf("\tExpect: \t%d\n", e_);\
-  printf("\tReceive:\t%d\n", r_);\
-  U_TESTS_FAIL++;\
-  return; }; \
- } while(0); }
+#define u_assert_int_eq(R, E)                                            \
+    {                                                                    \
+        int r_ = (R);                                                    \
+        int e_ = (E);                                                    \
+        do {                                                             \
+            if (r_ != e_) {                                              \
+                printf("FAILED - %s() - Line %d\n", __func__, __LINE__); \
+                printf("\tExpect: \t%d\n", e_);                          \
+                printf("\tReceive:\t%d\n", r_);                          \
+                U_TESTS_FAIL++;                                          \
+                return;                                                  \
+            };                                                           \
+        } while (0);                                                     \
+    }
 
-#define u_assert_str_eq(R,E) {\
- const char * r_ = (R); \
- const char * e_ = (E); \
- do { if (strcmp(r_,e_)) { \
-  printf("FAILED - %s() - Line %d\n", __func__, __LINE__);\
-  printf("\tExpect: \t%s\n", e_);\
-  printf("\tReceive:\t%s\n", r_);\
-  U_TESTS_FAIL++;\
-  return; }; \
- } while(0); }
+#define u_assert_uint32_eq(R, E)                                         \
+    {                                                                    \
+        uint64_t r_ = (R);                                               \
+        uint64_t e_ = (E);                                               \
+        do {                                                             \
+            if (r_ != e_) {                                              \
+                printf("FAILED - %s() - Line %d\n", __func__, __LINE__); \
+                printf("\tExpect: \t%" PRIu64 "\n", e_);                        \
+                printf("\tReceive:\t%" PRIu64 "\n", r_);                        \
+                U_TESTS_FAIL++;                                          \
+                return;                                                  \
+            };                                                           \
+        } while (0);                                                     \
+    }
 
-#define u_assert_str_not_eq(R,E) {\
- const char * r_ = (R); \
- const char * e_ = (E); \
- do { if (!strcmp(r_,e_)) { \
-  printf("FAILED - %s() - Line %d\n", __func__, __LINE__);\
-  printf("\tNot expect:\t%s\n", e_);\
-  printf("\tReceive:\t%s\n", r_);\
-  U_TESTS_FAIL++;\
-  return; }; \
- } while(0); }
+#define u_assert_str_eq(R, E)                                            \
+    {                                                                    \
+        const char* r_ = (R);                                            \
+        const char* e_ = (E);                                            \
+        do {                                                             \
+            if (strcmp(r_, e_)) {                                        \
+                printf("FAILED - %s() - Line %d\n", __func__, __LINE__); \
+                printf("\tExpect: \t%s\n", e_);                          \
+                printf("\tReceive:\t%s\n", r_);                          \
+                U_TESTS_FAIL++;                                          \
+                return;                                                  \
+            };                                                           \
+        } while (0);                                                     \
+    }
 
-#define u_assert_str_has(R,E) {\
- const char * r_ = (R); \
- const char * e_ = (E); \
- do { if (!strstr(r_,e_)) { \
-  printf("FAILED - %s() - Line %d\n", __func__, __LINE__);\
-  printf("\tExpect: \t%s\n", e_);\
-  printf("\tReceive:\t%s\n", r_);\
-  U_TESTS_FAIL++;\
-  return; }; \
- } while(0); }
+#define u_assert_str_not_eq(R, E)                                        \
+    {                                                                    \
+        const char* r_ = (R);                                            \
+        const char* e_ = (E);                                            \
+        do {                                                             \
+            if (!strcmp(r_, e_)) {                                       \
+                printf("FAILED - %s() - Line %d\n", __func__, __LINE__); \
+                printf("\tNot expect:\t%s\n", e_);                       \
+                printf("\tReceive:\t%s\n", r_);                          \
+                U_TESTS_FAIL++;                                          \
+                return;                                                  \
+            };                                                           \
+        } while (0);                                                     \
+    }
 
-#define u_assert_str_has_not(R,E) {\
- const char * r_ = (R); \
- const char * e_ = (E); \
- do { if (strstr(r_,e_)) { \
-  printf("FAILED - %s() - Line %d\n", __func__, __LINE__);\
-  printf("\tNot expect:\t%s\n", e_);\
-  printf("\tReceive:\t%s\n", r_);\
-  U_TESTS_FAIL++;\
-  return; }; \
- } while(0); }
+#define u_assert_str_has(R, E)                                           \
+    {                                                                    \
+        const char* r_ = (R);                                            \
+        const char* e_ = (E);                                            \
+        do {                                                             \
+            if (!strstr(r_, e_)) {                                       \
+                printf("FAILED - %s() - Line %d\n", __func__, __LINE__); \
+                printf("\tExpect: \t%s\n", e_);                          \
+                printf("\tReceive:\t%s\n", r_);                          \
+                U_TESTS_FAIL++;                                          \
+                return;                                                  \
+            };                                                           \
+        } while (0);                                                     \
+    }
 
-#define u_assert_mem_eq(R,E,L) {\
- const void * r_ = (R); \
- const void * e_ = (E); \
- size_t l_ = (L); \
- do { if (memcmp(r_,e_,l_)) { \
-  printf("FAILED - %s() - Line %d\n", __func__, __LINE__);\
-  printf("\tExpect: \t%s\n", utils_uint8_to_hex(e_,l_));\
-  printf("\tReceive:\t%s\n", utils_uint8_to_hex(r_,l_));\
-  U_TESTS_FAIL++;\
-  return; }; \
- } while(0); }
+#define u_assert_str_has_not(R, E)                                       \
+    {                                                                    \
+        const char* r_ = (R);                                            \
+        const char* e_ = (E);                                            \
+        do {                                                             \
+            if (strstr(r_, e_)) {                                        \
+                printf("FAILED - %s() - Line %d\n", __func__, __LINE__); \
+                printf("\tNot expect:\t%s\n", e_);                       \
+                printf("\tReceive:\t%s\n", r_);                          \
+                U_TESTS_FAIL++;                                          \
+                return;                                                  \
+            };                                                           \
+        } while (0);                                                     \
+    }
+
+#define u_assert_mem_eq(R, E, L)                                         \
+    {                                                                    \
+        const void* r_ = (R);                                            \
+        const void* e_ = (E);                                            \
+        size_t l_ = (L);                                                 \
+        do {                                                             \
+            if (memcmp(r_, e_, l_)) {                                    \
+                printf("FAILED - %s() - Line %d\n", __func__, __LINE__); \
+                printf("\tExpect: \t%s\n", utils_uint8_to_hex(e_, l_));  \
+                printf("\tReceive:\t%s\n", utils_uint8_to_hex(r_, l_));  \
+                U_TESTS_FAIL++;                                          \
+                return;                                                  \
+            };                                                           \
+        } while (0);                                                     \
+    }
+
+#define u_assert_is_null(R)                                              \
+    {                                                                    \
+        const void* r_ = (R);                                            \
+        do {                                                             \
+            if (r_) {                                                    \
+                printf("FAILED - %s() - Line %d\n", __func__, __LINE__); \
+                printf("\tExpect: \tNULL\n");                            \
+                printf("\tReceive:\t%p\n", r_);                          \
+                U_TESTS_FAIL++;                                          \
+                return;                                                  \
+            };                                                           \
+        } while (0);                                                     \
+    }
+
+#define u_assert_not_null(R)                                             \
+    {                                                                    \
+        const void* r_ = (R);                                            \
+        do {                                                             \
+            if (!r_) {                                                   \
+                printf("FAILED - %s() - Line %d\n", __func__, __LINE__); \
+                printf("\tExpect: \tnot NULL\n");                        \
+                printf("\tReceive:\tNULL\n", r_);                        \
+                U_TESTS_FAIL++;                                          \
+                return;                                                  \
+            };                                                           \
+        } while (0);                                                     \
+    }
 
 extern int U_TESTS_RUN;
 extern int U_TESTS_FAIL;
