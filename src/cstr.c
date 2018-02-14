@@ -83,7 +83,7 @@ cstring* cstr_new_buf(const void* buf, size_t sz)
     return s;
 }
 
-cstring* cstr_new_cstr(cstring* copy_str)
+cstring* cstr_new_cstr(const cstring* copy_str)
 {
     return cstr_new_buf(copy_str->str, copy_str->len);
 }

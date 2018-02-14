@@ -38,7 +38,7 @@ extern "C" {
 #include <stdint.h>
 
 /* generate the p2pkh address from a given hex pubkey */
-LIBBTC_API btc_bool address_from_pubkey(const btc_chainparams* chain, const char* pubkey_hex, char* address);
+LIBBTC_API btc_bool addresses_from_pubkey(const btc_chainparams* chain, const char* pubkey_hex, char* p2pkh_address, char* p2sh_p2wpkh_address, char *p2wpkh_address);
 
 /* generate the hex publickey from a given hex private key */
 LIBBTC_API btc_bool pubkey_from_privatekey(const btc_chainparams* chain, const char* privkey_hex, char* pubkey_hex, size_t* sizeout);

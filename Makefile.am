@@ -31,7 +31,6 @@ include_HEADERS = \
     include/btc/sha2.h \
     include/btc/tool.h \
     include/btc/tx.h \
-    include/btc/txref_code.h \
     include/btc/utils.h \
     include/btc/vector.h
 
@@ -62,7 +61,6 @@ libbtc_la_SOURCES = \
     src/serialize.c \
     src/sha2.c \
     src/tx.c \
-    src/txref_code.c \
     src/utils.c \
     src/vector.c
 
@@ -89,7 +87,6 @@ tests_SOURCES = \
     test/utest.h \
     test/unittester.c \
     test/tx_tests.c \
-    test/txref_tests.c \
     test/utils_tests.c \
     test/vector_tests.c
 
@@ -172,6 +169,7 @@ bitcointool_CFLAGS = $(libbtc_la_CFLAGS)
 bitcointool_CPPFLAGS = -I$(top_srcdir)/src
 bitcointool_LDFLAGS = -static
 
+if WITH_NET
 inst_PROGRAMS += bitcoin-send-tx
 bitcoin_send_tx_LDADD = libbtc.la $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
 bitcoin_send_tx_SOURCES = \
@@ -187,15 +185,7 @@ bitcoin_spv_SOURCES = \
 bitcoin_spv_CFLAGS = $(libbtc_la_CFLAGS)
 bitcoin_spv_CPPFLAGS = -I$(top_srcdir)/src
 bitcoin_spv_LDFLAGS = -static
-
-inst_PROGRAMS += bitcoin-txref
-bitcoin_txref_LDADD = libbtc.la
-bitcoin_txref_SOURCES = \
-    src/tools/bitcoin-txref.c
-bitcoin_txref_CFLAGS = $(libbtc_la_CFLAGS)
-bitcoin_txref_CPPFLAGS = -I$(top_srcdir)/src
-bitcoin_txref_LDFLAGS = -static
-
+endif
 
 endif
 

@@ -44,6 +44,7 @@ typedef struct btc_chainparams_ {
     char chainname[32];
     uint8_t b58prefix_pubkey_address;
     uint8_t b58prefix_script_address;
+    const char bech32_hrp[5];
     uint8_t b58prefix_secret_address; //!private key
     uint32_t b58prefix_bip32_privkey;
     uint32_t b58prefix_bip32_pubkey;
@@ -51,9 +52,6 @@ typedef struct btc_chainparams_ {
     uint256 genesisblockhash;
     int default_port;
     btc_dns_seed dnsseeds[8];
-    const char txref_code_magic;
-    const char txref_code_hrp[8];
-    btc_bool txref_code_testnet;
 } btc_chainparams;
 
 typedef struct btc_checkpoint_ {

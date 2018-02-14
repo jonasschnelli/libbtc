@@ -24,7 +24,6 @@ Current features
 * Native constant time AES (+256CBC) cipher implementation including NIST testvectors
 * Keystore (wallet) databases (through logdb https://github.com/liblogdb/liblogdb)
 * Event based bitcoin P2P client capable of connecting to multiple nodes in a single thread (requires [libevent](https://github.com/libevent/libevent))
-* Support for transaction references (BIP XXXX)
 
 Advantages of libbtc?
 ----------------

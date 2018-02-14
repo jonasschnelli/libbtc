@@ -140,14 +140,14 @@ void btc_wallet_wtx_serialize(cstring* s, const btc_wtx* wtx)
 {
     ser_u32(s, wtx->height);
     ser_u256(s, wtx->tx_hash_cache);
-    btc_tx_serialize(s, wtx->tx);
+    btc_tx_serialize(s, wtx->tx, true);
 }
 
 btc_bool btc_wallet_wtx_deserialize(btc_wtx* wtx, struct const_buffer* buf)
 {
     deser_u32(&wtx->height, buf);
     deser_u256(wtx->tx_hash_cache, buf);
-    return btc_tx_deserialize(buf->p, buf->len, wtx->tx, NULL);
+    return btc_tx_deserialize(buf->p, buf->len, wtx->tx, NULL, true);
 }
 
 /*

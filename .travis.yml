@@ -14,11 +14,10 @@ addons:
         - binutils-mingw-w64
         - g++-mingw-w64-x86-64
         - gcc-mingw-w64
-        - wine
+        - wine1.6
         - libevent-dev
 
 before_install:
-  - if [ ${CC} = gcc ] && [ "${TRAVIS_OS_NAME}" = "linux" ]; then pip install --user git+git://github.com/eddyxu/cpp-coveralls.git; fi
   - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew install valgrind gnu-sed --default-names; fi
 
 matrix:
@@ -33,28 +32,30 @@ matrix:
         env: RUN_TOOLTESTS="yes" $BUILD_CONFIG=""
       - os: linux
         compiler: gcc
-        env: VALGRIND_UNIT_TESTS="yes" RUN_TOOLTESTS="yes" SUBMIT_COVERALLS="yes" $BUILD_CONFIG='--enable-debug'
+        env: VALGRIND_UNIT_TESTS="yes" RUN_TOOLTESTS="yes" SUBMIT_COVERALLS="yes" $BUILD_CONFIG=''
       - os: linux
         compiler: x86_64-w64-mingw32
-        env: HOST="x86_64-w64-mingw32" CROSS_COMPILE="yes" RUN_WINE_UNIT_TESTS="yes" $BUILD_CONFIG="--disable-shared --enable-static"
+        env: HOST="x86_64-w64-mingw32" CROSS_COMPILE="yes" RUN_WINE_UNIT_TESTS="yes" $BUILD_CONFIG="--disable-shared --enable-static --disable-net"
       - os: linux
         compiler: i686-w64-mingw32
-        env: HOST="i686-w64-mingw32" CROSS_COMPILE="yes" RUN_WINE_UNIT_TESTS="yes" $BUILD_CONFIG="--disable-shared --enable-static"
+        env: HOST="i686-w64-mingw32" CROSS_COMPILE="yes" RUN_WINE_UNIT_TESTS="yes" $BUILD_CONFIG="--disable-shared --enable-static --disable-net"
       - os: linux
         compiler: arm-linux-gnueabihf
         env: HOST="arm-linux-gnueabihf" CROSS_COMPILE="yes"
         addons:
           apt:
             packages:
-            - g++-arm-linux-gnueabihf
-      - os: linux
-        compiler: i686-pc-linux-gnu
-        env: HOST="i686-pc-linux-gnu" CROSS_COMPILE="yes"
-        addons:
-          apt:
-            packages:
-            - g++-arm-linux-gnueabihf
-            - g++-multilib
+              - g++-arm-linux-gnueabihf
+            sources:
+              - ubuntu-toolchain-r-test
+#      - os: linux
+#        compiler: i686-pc-linux-gnu
+#        env: HOST="i686-pc-linux-gnu" CROSS_COMPILE="yes"
+#        addons:
+#          apt:
+#            packages:
+#            - g++-arm-linux-gnueabihf
+#            - g++-multilib
 
 before_script:
     - ./autogen.sh
@@ -81,11 +82,14 @@ script:
           fi
       fi
     - if ( [ "$RUN_WINE_UNIT_TESTS" == "yes" ] ); then
-          wine tests.exe;
+          wine /home/travis/build/libbtc/libbtc/tests.exe;
       fi
     - if ( [ "$RUN_TOOLTESTS" == "yes" ] ); then
           ./tooltests.py;
       fi
 
 after_success:
-  - if [ "$SUBMIT_COVERALLS" == "yes" ]; then coveralls --verbose -i src -x c -e src/logdb -e src/secp256k1 -r $TRAVIS_BUILD_DIR -b $TRAVIS_BUILD_DIR --gcov-options '\-lp'; fi;
+  - if [ "$SUBMIT_COVERALLS" == "yes" ]; then
+      sudo pip install -U "cpp-coveralls";
+      coveralls --verbose -i src -x c -e src/logdb -e src/secp256k1 -r $TRAVIS_BUILD_DIR -b $TRAVIS_BUILD_DIR --gcov-options '\-lp';
+    fi

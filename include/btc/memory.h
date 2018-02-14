@@ -52,6 +52,8 @@ LIBBTC_API void* btc_calloc(size_t count, size_t size);
 LIBBTC_API void* btc_realloc(void* ptr, size_t size);
 LIBBTC_API void btc_free(void* ptr);
 
+LIBBTC_API volatile void *btc_mem_zero(volatile void *dst, size_t len);
+
 #ifdef __cplusplus
 }
 #endif
