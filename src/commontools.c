@@ -70,7 +70,6 @@ btc_bool pubkey_from_privatekey(const btc_chainparams* chain, const char* privke
     btc_pubkey_get_hex(&pubkey, pubkey_hex, sizeout);
     btc_pubkey_cleanse(&pubkey);
 
-    btc_free(privkey_data);
     return true;
 }
 
