@@ -426,9 +426,9 @@ int main(int argc, char* argv[])
         char masterkeyhex[200];
         int strsize = 200;
         btc_hdnode_serialize_private(&node, &btc_chainparams_test, masterkeyhex, strsize);
-        printf("%s\n", masterkeyhex);
-
-        //022d0e577424abfbbb5e321d3e2c700122a0c004305f57725810988cee6c4c278d
+        printf("xpriv: %s\n", masterkeyhex);
+        btc_hdnode_serialize_public(&node, &btc_chainparams_test, masterkeyhex, strsize);
+        printf("xpub: %s\n", masterkeyhex);
     }
 
 
