@@ -61,6 +61,7 @@ extern void test_tx_sign();
 extern void test_eckey();
 
 #ifdef WITH_WALLET
+extern void test_wallet_basics();
 extern void test_wallet();
 #endif
 
@@ -114,7 +115,8 @@ int main()
     u_run_test(test_eckey);
 
 #ifdef WITH_WALLET
-    //u_run_test(test_wallet);
+    u_run_test(test_wallet_basics);
+    u_run_test(test_wallet);
 #endif
 
 #ifdef WITH_TOOLS

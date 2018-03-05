@@ -27,6 +27,7 @@
 #include "libbtc-config.h"
 
 #include <btc/chainparams.h>
+#include <btc/base58.h>
 #include <btc/ecc.h>
 #include <btc/net.h>
 #include <btc/netspv.h>
@@ -185,11 +186,11 @@ int main(int argc, char* argv[])
             // TODO
         }
 
-        btc_wallet_hdnode* node = btc_wallet_next_key(wallet);
+        btc_wallet_addr* waddr = btc_wallet_next_addr(wallet);
         size_t strsize = 128;
         char str[strsize];
-        btc_hdnode_get_p2pkh_address(node->hdnode, chain, str, strsize);
-        printf("Wallet addr: %s (child %d)\n", str, node->hdnode->child_num);
+        btc_p2wpkh_addr_from_hash160(waddr->pubkeyhash, wallet->chain, str);
+        printf("Wallet addr: %s (child %d)\n", str, waddr->childindex);
 
         vector *addrs = vector_new(1, free);
         btc_wallet_get_addresses(wallet, addrs);

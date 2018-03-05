@@ -89,6 +89,7 @@
         };                                    \
     } while (0)
 
+
 #define u_assert_int_eq(R, E)                                            \
     {                                                                    \
         int r_ = (R);                                                    \
@@ -102,6 +103,11 @@
                 return;                                                  \
             };                                                           \
         } while (0);                                                     \
+    }
+
+#define u_assert_true(R)                                            \
+    {                                                                    \
+        u_assert_int_eq((R), 1);                                                     \
     }
 
 #define u_assert_uint32_eq(R, E)                                         \

@@ -53,19 +53,26 @@ typedef struct btc_wallet {
 
     /* use binary trees for in-memory mapping for wtxs, keys */
     void* wtxes_rbtree;
+    vector *vec_wtxes;
     void* hdkeys_rbtree;
+    void* waddr_rbtree;
+    vector *waddr_vector; //points to the addr objects managed by the waddr_rbtree [in order]
+    void* spends_rbtree;
 } btc_wallet;
 
 typedef struct btc_wtx_ {
     uint256 tx_hash_cache;
+    uint256 blockhash;
     uint32_t height;
     btc_tx* tx;
+    btc_bool ignore; //if set, transaction will be ignored (soft-delete)
 } btc_wtx;
 
-typedef struct btc_wallet_hdnode_ {
+typedef struct btc_wallet_addr_{
     uint160 pubkeyhash;
-    btc_hdnode *hdnode;
-} btc_wallet_hdnode;
+    uint8_t type;
+    uint32_t childindex;
+} btc_wallet_addr;
 
 typedef struct btc_output_ {
     uint32_t i;
@@ -77,13 +84,7 @@ LIBBTC_API btc_wtx* btc_wallet_wtx_new();
 LIBBTC_API void btc_wallet_wtx_free(btc_wtx* wtx);
 LIBBTC_API void btc_wallet_wtx_serialize(cstring* s, const btc_wtx* wtx);
 LIBBTC_API btc_bool btc_wallet_wtx_deserialize(btc_wtx* wtx, struct const_buffer* buf);
-/** ------------------------------------ */
-
-/** wallet hdnode (wallet_hdnode) functions */
-LIBBTC_API btc_wallet_hdnode* btc_wallet_hdnode_new();
-LIBBTC_API void btc_wallet_hdnode_free(btc_wallet_hdnode* whdnode);
-LIBBTC_API void btc_wallet_hdnode_serialize(cstring* s, const btc_chainparams *params, const btc_wallet_hdnode* whdnode);
-LIBBTC_API btc_bool btc_wallet_hdnode_deserialize(btc_wallet_hdnode* whdnode, const btc_chainparams *params, struct const_buffer* buf);
+LIBBTC_API void btc_wallet_addr_free(btc_wallet_addr* waddr);
 /** ------------------------------------ */
 
 /** wallet outputs (prev wtx + n) functions */
@@ -102,22 +103,19 @@ LIBBTC_API btc_bool btc_wallet_flush(btc_wallet* wallet);
 
 /** set the master key of new created wallet
  consuming app needs to ensure that we don't override exiting masterkeys */
-LIBBTC_API void btc_wallet_set_master_key_copy(btc_wallet* wallet, btc_hdnode* masterkey);
+LIBBTC_API void btc_wallet_set_master_key_copy(btc_wallet* wallet, const btc_hdnode* master_xpub);
 
-/** derives the next child hdnode (memory is owned by the wallet) */
-LIBBTC_API btc_wallet_hdnode* btc_wallet_next_key(btc_wallet* wallet);
+/** derives the next child hdnode and derives an address (memory is owned by the wallet) */
+LIBBTC_API btc_wallet_addr* btc_wallet_next_addr(btc_wallet* wallet);
 
 /** writes all available addresses (P2PKH) to the addr_out vector */
 LIBBTC_API void btc_wallet_get_addresses(btc_wallet* wallet, vector* addr_out);
 
-/** searches after a hdnode by given P2PKH (base58(hash160)) address */
-LIBBTC_API btc_wallet_hdnode* btc_wallet_find_hdnode_byaddr(btc_wallet* wallet, const char* search_addr);
+/** finds wallet address object based on pure addresses (base58/bech32) */
+LIBBTC_API btc_wallet_addr* btc_wallet_find_waddr_byaddr(btc_wallet* wallet, const char* search_addr);
 
 /** adds transaction to the wallet (hands over memory management) */
 LIBBTC_API btc_bool btc_wallet_add_wtx_move(btc_wallet* wallet, btc_wtx* wtx);
-
-/** looks if a key with the hash160 (SHA256/RIPEMD) exists */
-LIBBTC_API btc_bool btc_wallet_have_key(btc_wallet* wallet, uint160 hash160);
 
 /** gets credit from given transaction */
 LIBBTC_API int64_t btc_wallet_get_balance(btc_wallet* wallet);
@@ -125,19 +123,29 @@ LIBBTC_API int64_t btc_wallet_get_balance(btc_wallet* wallet);
 /** gets credit from given transaction */
 LIBBTC_API int64_t btc_wallet_wtx_get_credit(btc_wallet* wallet, btc_wtx* wtx);
 
+LIBBTC_API int64_t btc_wallet_get_debit_tx(btc_wallet *wallet, const btc_tx *tx);
+LIBBTC_API int64_t btc_wallet_wtx_get_available_credit(btc_wallet* wallet, btc_wtx* wtx);
+
 /** checks if a transaction outpoint is owned by the wallet */
 LIBBTC_API btc_bool btc_wallet_txout_is_mine(btc_wallet* wallet, btc_tx_out* tx_out);
 
 /** checks if a transaction outpoint is owned by the wallet */
-LIBBTC_API void btc_wallet_add_to_spent(btc_wallet* wallet, btc_wtx* wtx);
+LIBBTC_API void btc_wallet_add_to_spent(btc_wallet* wallet, const btc_wtx* wtx);
 LIBBTC_API btc_bool btc_wallet_is_spent(btc_wallet* wallet, uint256 hash, uint32_t n);
 LIBBTC_API btc_bool btc_wallet_get_unspent(btc_wallet* wallet, vector* unspents);
 
 /** checks a transaction or relevance to the wallet */
 LIBBTC_API void btc_wallet_check_transaction(void *ctx, btc_tx *tx, unsigned int pos, btc_blockindex *pindex);
 
+/** returns wtx based on given hash
+ * may return NULL if transaction could not be found
+ * memory is managed by the transaction tree
+ */
+LIBBTC_API btc_wtx * btc_wallet_get_wtx(btc_wallet* wallet, const uint256 hash);
+
 #ifdef __cplusplus
 }
 #endif
+
 
 #endif //__LIBBTC_WALLET_H__
