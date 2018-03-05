@@ -68,7 +68,7 @@ btc_hdnode* btc_hdnode_new()
     return hdnode;
 }
 
-btc_hdnode* btc_hdnode_copy(btc_hdnode* hdnode)
+btc_hdnode* btc_hdnode_copy(const btc_hdnode* hdnode)
 {
     btc_hdnode* newnode = btc_hdnode_new();
 
