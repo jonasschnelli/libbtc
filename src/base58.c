@@ -26,6 +26,8 @@
 #include <string.h>
 #include <sys/types.h>
 
+#include <btc/chainparams.h>
+#include <btc/segwit_addr.h>
 #include <btc/sha2.h>
 
 static const int8_t b58digits_map[] = {
@@ -251,4 +253,16 @@ int btc_base58_decode_check(const char* str, uint8_t* data, size_t datalen)
         ret = (int)binsize;
     }
     return ret;
+}
+
+btc_bool btc_p2pkh_addr_from_hash160(const uint160 hashin, const btc_chainparams* chain, char *addrout, int len) {
+    uint8_t hash160[sizeof(uint160)+1];
+    hash160[0] = chain->b58prefix_pubkey_address;
+    memcpy(hash160 + 1, hashin, sizeof(uint160));
+
+    return (btc_base58_encode_check(hash160, sizeof(uint160)+1, addrout, len) > 0);
+}
+
+btc_bool btc_p2wpkh_addr_from_hash160(const uint160 hashin, const btc_chainparams* chain, char *addrout) {
+    return segwit_addr_encode(addrout, chain->bech32_hrp, 0, hashin, sizeof(uint160));
 }

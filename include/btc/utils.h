@@ -67,7 +67,7 @@ struct btc_btree_node {
 
 static inline void btc_btree_tdestroy(void *root, void (*freekey)(void *))
 {
-    struct btc_btree_node *r = root;
+    struct btc_btree_node *r = (struct btc_btree_node*)root;
 
     if (r == 0)
         return;

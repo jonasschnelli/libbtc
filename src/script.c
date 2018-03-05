@@ -319,22 +319,6 @@ enum btc_tx_out_type btc_script_classify(const cstring* script, vector* data_out
     return tx_out_type;
 }
 
-btc_bool btc_script_extract_pkh(const cstring* script, uint8_t* data)
-{
-    // expected that data is a 20byte buffer
-
-    btc_bool suc = false;
-
-    vector* ops = vector_new(10, btc_script_op_free_cb);
-    btc_script_get_ops(script, ops);
-    btc_script_op* op = vector_idx(ops, 2);
-    if (op && btc_script_is_op_pubkeyhash(op)) {
-        memcpy(data, op->data, 20);
-        suc = true;
-    }
-    vector_free(ops, true);
-    return suc;
-}
 
 enum opcodetype btc_encode_op_n(const int n)
 {
