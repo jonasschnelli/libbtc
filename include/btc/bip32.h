@@ -52,7 +52,7 @@ typedef struct
 
 
 LIBBTC_API btc_hdnode* btc_hdnode_new();
-LIBBTC_API btc_hdnode* btc_hdnode_copy(btc_hdnode* hdnode);
+LIBBTC_API btc_hdnode* btc_hdnode_copy(const btc_hdnode* hdnode);
 LIBBTC_API void btc_hdnode_free(btc_hdnode* node);
 LIBBTC_API btc_bool btc_hdnode_public_ckd(btc_hdnode* inout, uint32_t i);
 LIBBTC_API btc_bool btc_hdnode_from_seed(const uint8_t* seed, int seed_len, btc_hdnode* out);

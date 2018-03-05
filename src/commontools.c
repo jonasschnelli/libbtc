@@ -120,6 +120,7 @@ btc_bool hd_print_node(const btc_chainparams* chain, const char* nodeser)
     printf("depth: %d\n", node.depth);
     printf("child index: %d\n", node.child_num);
     printf("p2pkh address: %s\n", str);
+    printf("p2wpkh address: %s\n", str);
 
     if (!btc_hdnode_get_pub_hex(&node, str, &strsize))
         return false;
