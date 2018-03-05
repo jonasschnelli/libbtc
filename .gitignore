@@ -7,6 +7,8 @@ test-suite.log
 !.gitignore
 bitcointool
 bitcoin-send-tx
+bitcoin-spv
+bitcoin-txref
 
 Makefile
 configure
@@ -16,6 +18,7 @@ aclocal.m4
 autom4te.cache/
 config.log
 config.status
+*.db
 *.tar.gz
 *.la
 libtool
