@@ -26,7 +26,6 @@
 
 #include <btc/block.h>
 #include <btc/blockchain.h>
-#include <btc/checkpoints.h>
 #include <btc/headersdb.h>
 #include <btc/headersdb_file.h>
 #include <btc/net.h>
