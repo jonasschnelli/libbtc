@@ -27,13 +27,8 @@ OTHER DEALINGS IN THE SOFTWARE.
 #ifndef __LIBBTC_CHECKPOINTS_H__
 #define __LIBBTC_CHECKPOINTS_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+LIBBTC_BEGIN_DECL
 
+LIBBTC_END_DECL
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif //__LIBBTC_CHECKPOINTS_H__
+#endif // __LIBBTC_CHECKPOINTS_H__

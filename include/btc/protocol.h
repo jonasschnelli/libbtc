@@ -27,15 +27,12 @@
 #ifndef __LIBBTC_PROTOCOL_H__
 #define __LIBBTC_PROTOCOL_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "btc.h"
-
 #include "buffer.h"
 #include "cstr.h"
 #include "vector.h"
+
+LIBBTC_BEGIN_DECL
 
 #ifdef _WIN32
 #include <getopt.h>
@@ -178,9 +175,6 @@ LIBBTC_API void btc_p2p_msg_getheaders(vector* blocklocators, uint256 hashstop, 
 /* directly deserialize a getheaders message to blocklocators, hashstop */
 LIBBTC_API btc_bool btc_p2p_deser_msg_getheaders(vector* blocklocators, uint256 hashstop, struct const_buffer* buf);
 
-
-#ifdef __cplusplus
-}
-#endif
+LIBBTC_END_DECL
 
 #endif // __LIBBTC_PROTOCOL_H__
