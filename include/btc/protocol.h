@@ -64,6 +64,7 @@ static const char* BTC_MSG_PONG = "pong";
 static const char* BTC_MSG_GETDATA = "getdata";
 static const char* BTC_MSG_GETHEADERS = "getheaders";
 static const char* BTC_MSG_HEADERS = "headers";
+static const char* BTC_MSG_GETBLOCKS = "getblocks";
 static const char* BTC_MSG_BLOCK = "block";
 static const char* BTC_MSG_INV = "inv";
 static const char* BTC_MSG_TX = "tx";

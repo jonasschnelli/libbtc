@@ -267,7 +267,7 @@ void btc_net_spv_node_request_headers_or_blocks(btc_node *node, btc_bool blocks)
     btc_p2p_msg_getheaders(blocklocators, NULL, getheader_msg);
 
     /* create p2p message */
-    cstring *p2p_msg = btc_p2p_message_new(node->nodegroup->chainparams->netmagic, (blocks ? "getblocks" : "getheaders"), getheader_msg->str, getheader_msg->len);
+    cstring *p2p_msg = btc_p2p_message_new(node->nodegroup->chainparams->netmagic, (blocks ? BTC_MSG_GETBLOCKS : BTC_MSG_GETHEADERS), getheader_msg->str, getheader_msg->len);
     cstr_free(getheader_msg, true);
 
     /* send message */
