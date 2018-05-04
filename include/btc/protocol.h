@@ -108,6 +108,27 @@ typedef struct btc_p2p_version_msg_ {
     uint8_t relay;
 } btc_p2p_version_msg;
 
+/** getdata message type flags */
+static const uint32_t MSG_TYPE_MASK    = 0xffffffff >> 2;
+
+/** getdata / inv message types.
+ * These numbers are defined by the protocol. When adding a new value, be sure
+ * to mention it in the respective BIP.
+ */
+enum GetDataMsg
+{
+    MSG_TX = 1,
+    MSG_BLOCK = 2,
+    // ORed into other flags to add witness
+    MSG_WITNESS_FLAG = 1 << 30,
+    // The following can only occur in getdata. Invs always use TX or BLOCK.
+    MSG_FILTERED_BLOCK = 3,  //!< Defined in BIP37
+    MSG_CMPCT_BLOCK = 4,     //!< Defined in BIP152
+    MSG_WITNESS_BLOCK = MSG_BLOCK | MSG_WITNESS_FLAG, //!< Defined in BIP144
+    MSG_WITNESS_TX = MSG_TX | MSG_WITNESS_FLAG,       //!< Defined in BIP144
+    MSG_FILTERED_WITNESS_BLOCK = MSG_FILTERED_BLOCK | MSG_WITNESS_FLAG,
+};
+
 /* =================================== */
 /* VERSION MESSAGE */
 /* =================================== */
