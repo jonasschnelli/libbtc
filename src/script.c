@@ -159,6 +159,11 @@ btc_bool btc_script_get_ops(const cstring* script_in, vector* ops_out)
             continue;
         }
 
+        // don't alloc a push buffer if there is no more data available
+        if (buf.len == 0 || data_len > buf.len) {
+            goto err_out;
+        }
+
         op->data = btc_calloc(1, data_len);
         memcpy(op->data, buf.p, data_len);
         op->datalen = data_len;
@@ -282,6 +287,9 @@ enum btc_tx_out_type btc_script_classify(const cstring* script, vector* data_out
     //INFO: could be speed up by not forming a vector
     //      and directly parse the script cstring
 
+    if (script->len > MAX_SCRIPT_SIZE) {
+        return BTC_TX_INVALID;
+    }
     enum btc_tx_out_type tx_out_type = BTC_TX_NONSTANDARD;
     vector* ops = vector_new(10, btc_script_op_free_cb);
     btc_script_get_ops(script, ops);
