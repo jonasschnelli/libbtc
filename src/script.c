@@ -194,8 +194,11 @@ static btc_bool btc_script_is_op_pubkey(const btc_script_op* op)
 {
     if (!btc_script_is_pushdata(op->op))
         return false;
-    if (op->datalen < 33 || op->datalen > 120)
+    if (op->datalen != BTC_ECKEY_COMPRESSED_LENGTH && op->datalen != BTC_ECKEY_UNCOMPRESSED_LENGTH)
         return false;
+    if (btc_pubkey_get_length(op->data[0]) != op->datalen) {
+        return false;
+    }
     return true;
 }
 
@@ -209,11 +212,21 @@ static btc_bool btc_script_is_op_pubkeyhash(const btc_script_op* op)
 }
 
 // OP_PUBKEY, OP_CHECKSIG
-btc_bool btc_script_is_pubkey(const vector* ops)
+btc_bool btc_script_is_pubkey(const vector* ops, vector* data_out)
 {
-    return ((ops->len == 2) &&
+    if ((ops->len == 2) &&
             btc_script_is_op(vector_idx(ops, 1), OP_CHECKSIG) &&
-            btc_script_is_op_pubkey(vector_idx(ops, 0)));
+            btc_script_is_op_pubkey(vector_idx(ops, 0))) {
+        if (data_out) {
+            //copy the full pubkey (33 or 65) in case of a non empty vector
+            const btc_script_op* op = vector_idx(ops, 0);
+            uint8_t* buffer = btc_calloc(1, op->datalen);
+            memcpy(buffer, op->data, op->datalen);
+            vector_add(data_out, buffer);
+        }
+        return true;
+    }
+    return false;
 }
 
 // OP_DUP, OP_HASH160, OP_PUBKEYHASH, OP_EQUALVERIFY, OP_CHECKSIG,
@@ -238,12 +251,24 @@ btc_bool btc_script_is_pubkeyhash(const vector* ops, vector* data_out)
 }
 
 // OP_HASH160, OP_PUBKEYHASH, OP_EQUAL
-btc_bool btc_script_is_scripthash(const vector* ops)
+btc_bool btc_script_is_scripthash(const vector* ops, vector* data_out)
 {
-    return ((ops->len == 3) &&
+    if ((ops->len == 3) &&
             btc_script_is_op(vector_idx(ops, 0), OP_HASH160) &&
             btc_script_is_op_pubkeyhash(vector_idx(ops, 1)) &&
-            btc_script_is_op(vector_idx(ops, 2), OP_EQUAL));
+            btc_script_is_op(vector_idx(ops, 2), OP_EQUAL)) {
+
+        if (data_out) {
+            //copy the data (hash160) in case of a non empty vector
+            const btc_script_op* op = vector_idx(ops, 1);
+            uint8_t* buffer = btc_calloc(1, sizeof(uint160));
+            memcpy(buffer, op->data, sizeof(uint160));
+            vector_add(data_out, buffer);
+        }
+
+        return true;
+    }
+    return false;
 }
 
 static btc_bool btc_script_is_op_smallint(const btc_script_op* op)
@@ -272,9 +297,9 @@ enum btc_tx_out_type btc_script_classify_ops(const vector* ops)
 {
     if (btc_script_is_pubkeyhash(ops, NULL))
         return BTC_TX_PUBKEYHASH;
-    if (btc_script_is_scripthash(ops))
+    if (btc_script_is_scripthash(ops, NULL))
         return BTC_TX_SCRIPTHASH;
-    if (btc_script_is_pubkey(ops))
+    if (btc_script_is_pubkey(ops, NULL))
         return BTC_TX_PUBKEY;
     if (btc_script_is_multisig(ops))
         return BTC_TX_MULTISIG;
@@ -287,18 +312,15 @@ enum btc_tx_out_type btc_script_classify(const cstring* script, vector* data_out
     //INFO: could be speed up by not forming a vector
     //      and directly parse the script cstring
 
-    if (script->len > MAX_SCRIPT_SIZE) {
-        return BTC_TX_INVALID;
-    }
     enum btc_tx_out_type tx_out_type = BTC_TX_NONSTANDARD;
     vector* ops = vector_new(10, btc_script_op_free_cb);
     btc_script_get_ops(script, ops);
 
     if (btc_script_is_pubkeyhash(ops, data_out))
         tx_out_type = BTC_TX_PUBKEYHASH;
-    if (btc_script_is_scripthash(ops))
+    if (btc_script_is_scripthash(ops, data_out))
         tx_out_type = BTC_TX_SCRIPTHASH;
-    if (btc_script_is_pubkey(ops))
+    if (btc_script_is_pubkey(ops, data_out))
         tx_out_type = BTC_TX_PUBKEY;
     if (btc_script_is_multisig(ops))
         tx_out_type = BTC_TX_MULTISIG;
