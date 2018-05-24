@@ -131,6 +131,16 @@ void btc_pubkey_init(btc_pubkey* pubkey)
 }
 
 
+unsigned int btc_pubkey_get_length(unsigned char ch_header)
+{
+    if (ch_header == 2 || ch_header == 3)
+        return BTC_ECKEY_COMPRESSED_LENGTH;
+    if (ch_header == 4 || ch_header == 6 || ch_header == 7)
+        return BTC_ECKEY_UNCOMPRESSED_LENGTH;
+    return 0;
+}
+
+
 btc_bool btc_pubkey_is_valid(const btc_pubkey* pubkey)
 {
     return btc_ecc_verify_pubkey(pubkey->pubkey, pubkey->compressed);
