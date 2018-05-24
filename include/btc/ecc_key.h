@@ -21,20 +21,16 @@
  OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
- 
+
 */
 
 #ifndef __LIBBTC_ECC_KEY_H__
 #define __LIBBTC_ECC_KEY_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "btc.h"
 #include "chainparams.h"
 
-#include <stddef.h>
+LIBBTC_BEGIN_DECL
 
 typedef struct btc_key_ {
     uint8_t privkey[BTC_ECKEY_PKEY_LENGTH];
@@ -56,6 +52,10 @@ LIBBTC_API void btc_privkey_encode_wif(const btc_key* privkey, const btc_chainpa
 LIBBTC_API btc_bool btc_privkey_decode_wif(const char *privkey_wif, const btc_chainparams* chain, btc_key* privkey);
 
 LIBBTC_API void btc_pubkey_init(btc_pubkey* pubkey);
+
+// Compute the length of a pubkey with a given first byte.
+LIBBTC_API unsigned int btc_pubkey_get_length(unsigned char ch_header);
+
 LIBBTC_API btc_bool btc_pubkey_is_valid(const btc_pubkey* pubkey);
 LIBBTC_API void btc_pubkey_cleanse(btc_pubkey* pubkey);
 LIBBTC_API void btc_pubkey_from_key(const btc_key* privkey, btc_pubkey* pubkey_inout);
@@ -84,8 +84,6 @@ LIBBTC_API btc_bool btc_pubkey_getaddr_p2sh_p2wpkh(const btc_pubkey* pubkey, con
 LIBBTC_API btc_bool btc_pubkey_getaddr_p2pkh(const btc_pubkey* pubkey, const btc_chainparams* chain, char *addrout);
 LIBBTC_API btc_bool btc_pubkey_getaddr_p2wpkh(const btc_pubkey* pubkey, const btc_chainparams* chain, char *addrout);
 
-#ifdef __cplusplus
-}
-#endif
+LIBBTC_END_DECL
 
-#endif //__LIBBTC_ECC_KEY_H__
+#endif // __LIBBTC_ECC_KEY_H__
