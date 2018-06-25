@@ -254,6 +254,16 @@ btc_bool btc_p2pkh_addr_from_hash160(const uint160 hashin, const btc_chainparams
     return (btc_base58_encode_check(hash160, sizeof(uint160)+1, addrout, len) > 0);
 }
 
+btc_bool btc_p2sh_addr_from_hash160(const uint160 hashin, const btc_chainparams* chain, char* addrout,
+                                    int len)
+{
+    uint8_t hash160[sizeof(uint160) + 1];
+    hash160[0] = chain->b58prefix_script_address;
+    memcpy(hash160 + 1, hashin, sizeof(uint160));
+
+    return (btc_base58_encode_check(hash160, sizeof(uint160) + 1, addrout, len) > 0);
+}
+
 btc_bool btc_p2wpkh_addr_from_hash160(const uint160 hashin, const btc_chainparams* chain, char *addrout) {
     return segwit_addr_encode(addrout, chain->bech32_hrp, 0, hashin, sizeof(uint160));
 }
