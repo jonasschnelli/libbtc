@@ -32,9 +32,9 @@
 
 #include <btc/buffer.h>
 #include <btc/hash.h>
+#include <btc/ripemd160.h>
 #include <btc/serialize.h>
 
-#include "ripemd160.h" //non exposed header
 
 btc_bool btc_script_copy_without_op_codeseperator(const cstring* script_in, cstring* script_out)
 {
@@ -450,7 +450,7 @@ btc_bool btc_script_get_scripthash(const cstring* script_in, uint160 scripthash)
     }
     uint256 hash;
     btc_hash_sngl_sha256((const unsigned char *)script_in->str, script_in->len, hash);
-    ripemd160(hash, sizeof(hash), scripthash);
+    btc_ripemd160(hash, sizeof(hash), scripthash);
 
     return true;
 }
