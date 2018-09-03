@@ -31,6 +31,7 @@
 #include "btc.h"
 #include "cstr.h"
 #include "memory.h"
+#include "utils.h"
 
 #define TO_UINT8_HEX_BUF_LEN 2048
 #define VARINT_LEN 20
@@ -50,6 +51,12 @@ LIBBTC_API void* safe_malloc(size_t size);
 LIBBTC_API void btc_cheap_random_bytes(uint8_t* buf, uint32_t len);
 LIBBTC_API void btc_get_default_datadir(cstring *path_out);
 LIBBTC_API void btc_file_commit(FILE *file);
+/**
+ * @brief identity_assert
+ * @param expression this assertion function ensures that the expression inside it is called
+ * before assert is called
+ */
+LIBBTC_API void identity_assert(int expression);
 
 /* support substitude for GNU only tdestroy */
 /* Let's hope the node struct is always compatible */

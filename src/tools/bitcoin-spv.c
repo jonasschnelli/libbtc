@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
 
             btc_hdnode node;
             uint8_t seed[32];
-            assert(btc_random_bytes(seed, sizeof(seed), true));
+            identity_assert(btc_random_bytes(seed, sizeof(seed), true));
             btc_hdnode_from_seed(seed, sizeof(seed), &node);
             btc_wallet_set_master_key_copy(wallet, &node);
         }

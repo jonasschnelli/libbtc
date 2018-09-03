@@ -32,6 +32,7 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <assert.h>
 
 #include <btc/utils.h>
 
@@ -72,6 +73,11 @@ void utils_clear_buffers(void)
 {
     memset(buffer_hex_to_uint8, 0, TO_UINT8_HEX_BUF_LEN);
     memset(buffer_uint8_to_hex, 0, TO_UINT8_HEX_BUF_LEN);
+}
+
+void identity_assert(int expression)
+{
+    assert(expression);
 }
 
 void utils_hex_to_bin(const char* str, unsigned char* out, int inLen, int* outLen)

@@ -26,7 +26,6 @@
 
 #include <btc/ecc_key.h>
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,6 +37,7 @@
 #include <btc/random.h>
 #include <btc/script.h>
 #include <btc/segwit_addr.h>
+#include <btc/utils.h>
 #include <btc/utils.h>
 
 #include "ripemd160.h"
@@ -70,7 +70,7 @@ void btc_privkey_gen(btc_key* privkey)
         return;
 
     do {
-        assert(btc_random_bytes(privkey->privkey, BTC_ECKEY_PKEY_LENGTH, 0));
+        identity_assert(btc_random_bytes(privkey->privkey, BTC_ECKEY_PKEY_LENGTH, 0));
     } while (btc_ecc_verify_privatekey(privkey->privkey) == 0);
 }
 
@@ -78,7 +78,7 @@ void btc_privkey_gen(btc_key* privkey)
 btc_bool btc_privkey_verify_pubkey(btc_key* privkey, btc_pubkey* pubkey)
 {
     uint256 rnddata, hash;
-    assert(btc_random_bytes(rnddata, BTC_HASH_LENGTH, 0));
+    identity_assert(btc_random_bytes(rnddata, BTC_HASH_LENGTH, 0));
     btc_hash(rnddata, BTC_HASH_LENGTH, hash);
 
     unsigned char sig[74];
@@ -96,7 +96,7 @@ void btc_privkey_encode_wif(const btc_key* privkey, const btc_chainparams* chain
     pkeybase58c[33] = 1; /* always use compressed keys */
 
     memcpy(&pkeybase58c[1], privkey->privkey, BTC_ECKEY_PKEY_LENGTH);
-    assert(btc_base58_encode_check(pkeybase58c, 34, privkey_wif, *strsize_inout) != 0);
+    identity_assert(btc_base58_encode_check(pkeybase58c, 34, privkey_wif, *strsize_inout));
     btc_mem_zero(&pkeybase58c, 34);
 }
 
