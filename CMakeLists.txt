@@ -9,10 +9,10 @@ add_definitions(-DUSE_FIELD_INV_BUILTIN)
 add_definitions(-DUSE_SCALAR_8X32)
 add_definitions(-DUSE_SCALAR_INV_BUILTIN)
 add_definitions(-DRANDOM_DEVICE="/dev/urandom")
+add_definitions(-DENABLE_MODULE_RECOVERY)
 
 FILE(GLOB SOURCES src/*.c)
 list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/net.c)
-list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/ecc_libsecp256k1.c)
 
 FILE(GLOB HEADERS include/btc/*.h)
 list(REMOVE_ITEM HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/btc/net.h)
