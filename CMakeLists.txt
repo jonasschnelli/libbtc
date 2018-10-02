@@ -12,6 +12,7 @@ add_definitions(-DRANDOM_DEVICE="/dev/urandom")
 
 FILE(GLOB SOURCES src/*.c)
 list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/net.c)
+list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/ecc_libsecp256k1.c)
 
 FILE(GLOB HEADERS include/btc/*.h)
 list(REMOVE_ITEM HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/btc/net.h)
