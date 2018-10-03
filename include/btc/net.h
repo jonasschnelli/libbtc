@@ -36,10 +36,6 @@
 
 LIBBTC_BEGIN_DECL
 
-#ifndef WIN32
-#include <event2/event.h>
-#endif
-
 static const unsigned int BTC_P2P_MESSAGE_CHUNK_SIZE = 4096;
 
 enum NODE_STATE {
