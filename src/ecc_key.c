@@ -105,11 +105,12 @@ btc_bool btc_privkey_decode_wif(const char *privkey_wif, const btc_chainparams* 
         return false;
     }
 
-    uint8_t *privkey_data = (uint8_t *)btc_malloc(strlen(privkey_wif));
-    memset(privkey_data, 0, sizeof(privkey_data));
+    const size_t privkey_len = strlen(privkey_wif);
+    uint8_t *privkey_data = (uint8_t *)btc_malloc(privkey_len);
+    memset(privkey_data, 0, privkey_len);
     size_t outlen = 0;
 
-    outlen = btc_base58_decode_check(privkey_wif, privkey_data, sizeof(privkey_data));
+    outlen = btc_base58_decode_check(privkey_wif, privkey_data, privkey_len);
     if (!outlen) {
         btc_free(privkey_data);
         return false;
