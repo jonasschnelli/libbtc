@@ -93,7 +93,7 @@ btc_bool btc_hdnode_from_seed(const uint8_t* seed, int seed_len, btc_hdnode* out
 {
     uint8_t I[BTC_ECKEY_PKEY_LENGTH + BTC_BIP32_CHAINCODE_SIZE];
     memset(out, 0, sizeof(btc_hdnode));
-    out->depth = 0;
+    out->child_num = out->depth = 0;
     out->fingerprint = 0x00000000;
     out->child_num = 0;
     hmac_sha512((const uint8_t*)"Bitcoin seed", 12, seed, seed_len, I);
@@ -275,6 +275,7 @@ btc_bool btc_hdnode_deserialize(const char* str, const btc_chainparams* chain, b
     const size_t ndlen = sizeof(uint8_t) * strlen(str);
     uint8_t *node_data = (uint8_t *)btc_malloc(ndlen);
     memset(node, 0, sizeof(btc_hdnode));
+    node->child_num = node->depth = 0;
     size_t outlen = 0;
 
     outlen = btc_base58_decode_check(str, node_data, ndlen);

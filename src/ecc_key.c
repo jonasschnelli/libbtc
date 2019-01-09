@@ -120,7 +120,7 @@ btc_bool btc_privkey_decode_wif(const char *privkey_wif, const btc_chainparams* 
         return false;
     }
     memcpy(privkey->privkey, &privkey_data[1], BTC_ECKEY_PKEY_LENGTH);
-    btc_mem_zero(&privkey_data, sizeof(privkey_data));
+    btc_mem_zero(privkey_data, privkey_len);
     btc_free(privkey_data);
     return true;
 }
@@ -184,10 +184,10 @@ void btc_pubkey_from_key(const btc_key* privkey, btc_pubkey* pubkey_inout)
     if (pubkey_inout == NULL || privkey == NULL)
         return;
 
-    size_t in_out_len = BTC_ECKEY_COMPRESSED_LENGTH;
+    size_t in_out_len = BTC_ECKEY_UNCOMPRESSED_LENGTH;
 
-    btc_ecc_get_pubkey(privkey->privkey, pubkey_inout->pubkey, &in_out_len, true);
-    pubkey_inout->compressed = true;
+    btc_ecc_get_pubkey(privkey->privkey, pubkey_inout->pubkey, &in_out_len, false);
+    pubkey_inout->compressed = false;
 }
 
 

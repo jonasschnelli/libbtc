@@ -59,6 +59,13 @@ btc_bool btc_ecc_private_key_tweak_add(uint8_t* private_key, const uint8_t* twea
     return secp256k1_ec_privkey_tweak_add(secp256k1_ctx, (unsigned char*)private_key, (const unsigned char*)tweak);
 }
 
+btc_bool btc_ecc_private_key_tweak_mul(uint8_t* private_key, const uint8_t* tweak)
+{
+    assert(secp256k1_ctx);
+    return secp256k1_ec_privkey_tweak_mul(secp256k1_ctx, (unsigned char*)private_key, (const unsigned char*)tweak);
+}
+
+
 btc_bool btc_ecc_public_key_tweak_add(uint8_t* public_key_inout, const uint8_t* tweak)
 {
     size_t out = BTC_ECKEY_COMPRESSED_LENGTH;
@@ -77,6 +84,53 @@ btc_bool btc_ecc_public_key_tweak_add(uint8_t* public_key_inout, const uint8_t* 
     return true;
 }
 
+btc_bool btc_ecc_public_key_tweak_mul(uint8_t* public_key_inout, const uint8_t* tweak)
+{
+    size_t out = BTC_ECKEY_UNCOMPRESSED_LENGTH;
+    secp256k1_pubkey pubkey;
+
+    assert(secp256k1_ctx);
+    if (!secp256k1_ec_pubkey_parse(secp256k1_ctx, &pubkey, public_key_inout, 65))
+        return false;
+
+    if (!secp256k1_ec_pubkey_tweak_mul(secp256k1_ctx, &pubkey, (const unsigned char*)tweak))
+        return false;
+
+    if (!secp256k1_ec_pubkey_serialize(secp256k1_ctx, public_key_inout, &out, &pubkey, SECP256K1_EC_UNCOMPRESSED))
+        return false;
+
+    return true;
+}
+
+btc_bool btc_ecc_public_key_compress(uint8_t* public_key_in, uint8_t* public_key_out)
+{
+    secp256k1_pubkey pubkey;
+    assert(secp256k1_ctx);
+
+    if(!secp256k1_ec_pubkey_parse(secp256k1_ctx, &pubkey, public_key_in, 65))
+        return false;
+
+    size_t out = BTC_ECKEY_COMPRESSED_LENGTH;
+    if(!secp256k1_ec_pubkey_serialize(secp256k1_ctx, public_key_out, &out, &pubkey, SECP256K1_EC_COMPRESSED))
+        return false;
+    
+    return true;
+}
+
+btc_bool btc_ecc_public_key_uncompress(uint8_t* public_key_in, uint8_t* public_key_out)
+{
+    secp256k1_pubkey pubkey;
+    assert(secp256k1_ctx);
+
+    if(!secp256k1_ec_pubkey_parse(secp256k1_ctx, &pubkey, public_key_in, 33))
+        return false;    
+
+    size_t out = BTC_ECKEY_UNCOMPRESSED_LENGTH;
+    if(!secp256k1_ec_pubkey_serialize(secp256k1_ctx, public_key_out, &out, &pubkey, SECP256K1_EC_UNCOMPRESSED))
+        return false;
+    
+    return true;    
+}
 
 btc_bool btc_ecc_verify_privatekey(const uint8_t* private_key)
 {

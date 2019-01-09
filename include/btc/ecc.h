@@ -42,9 +42,15 @@ LIBBTC_API void btc_ecc_get_pubkey(const uint8_t* private_key, uint8_t* public_k
 
 //!ec mul tweak on given private key
 LIBBTC_API btc_bool btc_ecc_private_key_tweak_add(uint8_t* private_key, const uint8_t* tweak);
+LIBBTC_API btc_bool btc_ecc_private_key_tweak_mul(uint8_t* private_key, const uint8_t* tweak);
 
 //!ec mul tweak on given public key
 LIBBTC_API btc_bool btc_ecc_public_key_tweak_add(uint8_t* public_key_inout, const uint8_t* tweak);
+LIBBTC_API btc_bool btc_ecc_public_key_tweak_mul(uint8_t* public_key_inout, const uint8_t* tweak);
+
+//!compress/uncompress public key
+LIBBTC_API btc_bool btc_ecc_public_key_compress(uint8_t* public_key_in, uint8_t* public_key_out);
+LIBBTC_API btc_bool btc_ecc_public_key_uncompress(uint8_t* public_key_in, uint8_t* public_key_out);
 
 //!verifies a given 32byte key
 LIBBTC_API btc_bool btc_ecc_verify_privatekey(const uint8_t* private_key);

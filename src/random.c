@@ -25,8 +25,9 @@
 */
 
 #include <btc/random.h>
-#ifdef HAVE_CONFIG_H
-#  include "libbtc-config.h"
+
+#ifndef _MSC_VER
+#include "libbtc-config.h"
 #endif
 
 #include <assert.h>
@@ -34,7 +35,7 @@
 #include <string.h>
 #include <time.h>
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
 #include <windows.h>
 #include <wincrypt.h>
 #endif
@@ -85,7 +86,7 @@ btc_bool btc_random_bytes_internal(uint8_t* buf, uint32_t len, uint8_t update_se
 void btc_random_init_internal(void) {}
 btc_bool btc_random_bytes_internal(uint8_t* buf, uint32_t len, const uint8_t update_seed)
 {
-#ifdef WIN32
+#if defined(WIN32) || defined(_MSC_VER)
     HCRYPTPROV hProvider;
     int ret = CryptAcquireContextW(&hProvider, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
     assert(ret);
@@ -102,7 +103,7 @@ btc_bool btc_random_bytes_internal(uint8_t* buf, uint32_t len, const uint8_t upd
     size_t len_read = fread(buf, 1, len, frand);
     assert(len_read == len);
     fclose(frand);
-    return true;
 #endif
+    return true;
 }
 #endif
