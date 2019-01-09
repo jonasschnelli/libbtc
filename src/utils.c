@@ -32,6 +32,7 @@
 #include <string.h>
 #include <time.h>
 
+#include <btc/memory.h>
 #include <btc/utils.h>
 
 #ifdef WIN32

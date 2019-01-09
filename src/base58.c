@@ -27,6 +27,7 @@
 #include <sys/types.h>
 
 #include <btc/chainparams.h>
+#include <btc/memory.h>
 #include <btc/segwit_addr.h>
 #include <btc/sha2.h>
 

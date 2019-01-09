@@ -32,6 +32,7 @@
 
 #include <btc/base58.h>
 #include <btc/ecc.h>
+#include <btc/memory.h>
 #include <btc/segwit_addr.h>
 #include <btc/serialize.h>
 #include <btc/sha2.h>
