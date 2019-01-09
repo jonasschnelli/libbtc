@@ -163,17 +163,15 @@ int btc_base58_encode(char* b58, size_t* b58sz, const void* data, size_t binsz)
 {
     const uint8_t* bin = data;
     int carry;
-    ssize_t i, j, high, zcount = 0;
-    size_t size;
+    ssize_t i, j = 0, high, zcount = 0;
 
     while (zcount < (ssize_t)binsz && !bin[zcount]) {
         ++zcount;
     }
 
-    size = (binsz - zcount) * 138 / 100 + 1;
-    const size_t buflen = sizeof(uint8_t) * size;
-    uint8_t *buf = (uint8_t *)btc_malloc(buflen);
-    memset(buf, 0, buflen);
+    const size_t size = (binsz - zcount) * 138 / 100 + 1;
+    uint8_t *buf = (uint8_t *)btc_malloc(size);
+    memset(buf, 0, size);
 
     for (i = zcount, high = size - 1; i < (ssize_t)binsz; ++i, high = j) {
         for (carry = bin[i], j = size - 1; (j > high) || carry; --j) {
@@ -188,7 +186,7 @@ int btc_base58_encode(char* b58, size_t* b58sz, const void* data, size_t binsz)
 
     if (*b58sz <= zcount + size - j) {
         *b58sz = zcount + size - j + 1;
-        memset(buf, 0, buflen);
+        memset(buf, 0, size);
         btc_free(buf);
         return false;
     }
@@ -202,7 +200,7 @@ int btc_base58_encode(char* b58, size_t* b58sz, const void* data, size_t binsz)
     b58[i] = '\0';
     *b58sz = i + 1;
 
-    memset(buf, 0, buflen);
+    memset(buf, 0, size);
     btc_free(buf);
     return true;
 }
