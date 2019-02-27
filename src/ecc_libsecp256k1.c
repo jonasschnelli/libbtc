@@ -18,7 +18,8 @@ void btc_ecc_start(void)
     assert(secp256k1_ctx != NULL);
 
     uint8_t seed[32];
-    assert(btc_random_bytes(seed, 32, 0));
+    const btc_bool rc = btc_random_bytes(seed, 32, 0);
+    assert(rc);
     int ret = secp256k1_context_randomize(secp256k1_ctx, seed);
     assert(ret);
 }

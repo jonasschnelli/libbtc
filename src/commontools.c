@@ -92,7 +92,8 @@ btc_bool hd_gen_master(const btc_chainparams* chain, char* masterkeyhex, size_t 
 {
     btc_hdnode node;
     uint8_t seed[32];
-    assert(btc_random_bytes(seed, 32, true));
+    const btc_bool rc = btc_random_bytes(seed, 32, true);
+    assert(rc);
     btc_hdnode_from_seed(seed, 32, &node);
     memset(seed, 0, 32);
     btc_hdnode_serialize_private(&node, chain, masterkeyhex, strsize);
