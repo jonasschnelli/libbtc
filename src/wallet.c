@@ -346,6 +346,7 @@ btc_bool btc_wallet_load(btc_wallet* wallet, const char* file_path, int *error, 
             if (rectype == WALLET_DB_REC_TYPE_MASTERKEY) {
                 uint32_t len;
                 char strbuf[196];
+                memset(strbuf, 0, 196);
                 if (!deser_varlen_from_file(&len, wallet->dbfile)) return false;
                 if (len > sizeof(strbuf)) { return false; }
                 if (fread(strbuf, len, 1, wallet->dbfile ) != 1) return false;
