@@ -10,7 +10,8 @@ $(LIBSECP256K1): $(wildcard src/secp256k1/src/*) $(wildcard src/secp256k1/includ
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 lib_LTLIBRARIES = libbtc.la
-include_HEADERS = \
+libbtcincludedir = $(includedir)/btc
+libbtcinclude_HEADERS = \
     include/btc/aes256_cbc.h \
     include/btc/base58.h \
     include/btc/bip32.h \
@@ -103,7 +104,8 @@ libbtc_la_SOURCES += \
     src/logdb/logdb_rec.c \
     src/logdb/red_black_tree.c
 
-include_HEADERS += \
+logdbincludedir = $(includedir)/logdb
+logdbinclude_HEADERS = \
     src/logdb/include/logdb/logdb_base.h \
     src/logdb/include/logdb/logdb_core.h \
     src/logdb/include/logdb/logdb_memdb_llist.h \
@@ -112,7 +114,7 @@ include_HEADERS += \
     src/logdb/include/logdb/logdb.h \
     src/logdb/include/logdb/red_black_tree.h
 
-include_HEADERS += \
+libbtcinclude_HEADERS += \
     include/btc/wallet.h
 
 libbtc_la_SOURCES += \
@@ -127,7 +129,7 @@ endif
 endif
 
 if WITH_NET
-include_HEADERS += \
+libbtcinclude_HEADERS += \
     include/btc/headersdb.h \
     include/btc/headersdb_file.h \
     include/btc/protocol.h \
