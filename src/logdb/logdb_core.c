@@ -29,6 +29,7 @@
 #include <logdb/logdb_memdb_rbtree.h>
 #include <btc/serialize.h>
 
+#include <assert.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
@@ -359,7 +360,7 @@ size_t logdb_cache_size(logdb_log_db* db)
     return logdb_record_height(db->cache_head);
 }
 
-void logdb_write_record(logdb_log_db* db, logdb_record *rec)
+logdb_bool logdb_write_record(logdb_log_db* db, logdb_record *rec)
 {
     SHA256_CTX ctx = db->hashctx;
     SHA256_CTX ctx_final;
@@ -373,11 +374,17 @@ void logdb_write_record(logdb_log_db* db, logdb_record *rec)
     sha256_Raw((const uint8_t*)serbuf->str, serbuf->len, hash);
 
     /* write record header */
-    identity_assert(fwrite(record_magic, 8, 1, db->file) == 1);
+    if (fwrite(record_magic, 8, 1, db->file) != 1) {
+        cstr_free(serbuf, true);
+        return false;
+    }
     sha256_Update(&ctx, record_magic, 8);
 
     /* write partial hash as body checksum&indicator (body start) */
-    identity_assert(fwrite(hash, db->hashlen, 1, db->file) == 1);
+    if (fwrite(hash, db->hashlen, 1, db->file) != 1) {
+        cstr_free(serbuf, true);
+        return false;
+    }
     sha256_Update(&ctx, hash, db->hashlen);
 
     /* write the body */
@@ -385,14 +392,18 @@ void logdb_write_record(logdb_log_db* db, logdb_record *rec)
     sha256_Update(&ctx, (uint8_t *)serbuf->str, serbuf->len);
 
     /* write partial hash as body checksum&indicator (body end) */
-    identity_assert(fwrite(hash, db->hashlen, 1, db->file) == 1);
+    if (fwrite(hash, db->hashlen, 1, db->file) != 1) {
+        cstr_free(serbuf, true);
+        return false;
+    }
     sha256_Update(&ctx, hash, db->hashlen);
     
     cstr_free(serbuf, true);
 
     ctx_final = ctx;
     sha256_Final(hash, &ctx_final);
-    identity_assert(fwrite(hash, db->hashlen, 1, db->file) == 1);
+    if (fwrite(hash, db->hashlen, 1, db->file) != 1)
+        return false;
     db->hashctx = ctx;
 }
 

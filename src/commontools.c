@@ -16,6 +16,7 @@
 #include <btc/tx.h>
 #include <btc/utils.h>
 
+#include <assert.h>
 #include <getopt.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -37,7 +38,9 @@ btc_bool addresses_from_pubkey(const btc_chainparams* chain, const char* pubkey_
     if (outlen != BTC_ECKEY_COMPRESSED_LENGTH) {
         return false;
     }
-    identity_assert(btc_pubkey_is_valid(&pubkey) == 1);
+    if (!btc_pubkey_is_valid(&pubkey)) {
+        return false;
+    }
 
     btc_pubkey_getaddr_p2pkh(&pubkey, chain, p2pkh_address);
     btc_pubkey_getaddr_p2sh_p2wpkh(&pubkey, chain, p2sh_p2wpkh_address);
@@ -55,7 +58,7 @@ btc_bool pubkey_from_privatekey(const btc_chainparams* chain, const char* privke
 
     btc_pubkey pubkey;
     btc_pubkey_init(&pubkey);
-    identity_assert(btc_pubkey_is_valid(&pubkey) == 0);
+    assert(btc_pubkey_is_valid(&pubkey) == 0);
     btc_pubkey_from_key(&key, &pubkey);
     btc_privkey_cleanse(&key);
 
@@ -84,7 +87,9 @@ btc_bool hd_gen_master(const btc_chainparams* chain, char* masterkeyhex, size_t 
 {
     btc_hdnode node;
     uint8_t seed[32];
-    identity_assert(btc_random_bytes(seed, 32, true));
+    if (!btc_random_bytes(seed, 32, true)) {
+        return false;
+    }
     btc_hdnode_from_seed(seed, 32, &node);
     memset(seed, 0, 32);
     btc_hdnode_serialize_private(&node, chain, masterkeyhex, strsize);
@@ -111,7 +116,7 @@ btc_bool hd_print_node(const btc_chainparams* chain, const char* nodeser)
     size_t privkey_wif_size = 128;
     char privkey_wif[privkey_wif_size];
     memcpy(&pkeybase58c[1], node.private_key, BTC_ECKEY_PKEY_LENGTH);
-    identity_assert(btc_base58_encode_check(pkeybase58c, privkey_wif_size_bin, privkey_wif, privkey_wif_size) != 0);
+    assert(btc_base58_encode_check(pkeybase58c, privkey_wif_size_bin, privkey_wif, privkey_wif_size) != 0);
     if (btc_hdnode_has_privkey(&node)) {
         printf("privatekey WIF: %s\n", privkey_wif);
     }

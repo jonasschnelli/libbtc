@@ -176,7 +176,10 @@ int main(int argc, char* argv[])
 
             btc_hdnode node;
             uint8_t seed[32];
-            identity_assert(btc_random_bytes(seed, sizeof(seed), true));
+            if (!btc_random_bytes(seed, sizeof(seed), true)) {
+                fprintf(stdout, "Failed to generate random bytes\n");
+                exit(EXIT_FAILURE);
+            }
             btc_hdnode_from_seed(seed, sizeof(seed), &node);
             btc_wallet_set_master_key_copy(wallet, &node);
         }
