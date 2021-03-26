@@ -45,7 +45,9 @@ btc_bool addresses_from_pubkey(const btc_chainparams* chain, const char* pubkey_
     if (outlen != BTC_ECKEY_COMPRESSED_LENGTH) {
         return false;
     }
-    assert(btc_pubkey_is_valid(&pubkey) == 1);
+    if (!btc_pubkey_is_valid(&pubkey)) {
+        return false;
+    }
 
     btc_pubkey_getaddr_p2pkh(&pubkey, chain, p2pkh_address);
     btc_pubkey_getaddr_p2sh_p2wpkh(&pubkey, chain, p2sh_p2wpkh_address);
