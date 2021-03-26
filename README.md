@@ -100,9 +100,9 @@ The application will try to connect to max 6 peers, send the transaction two two
 How to Build
 ----------------
 
-#### Dependencies
+#### Install dependencies
 
-##### Debian
+##### Debian / Ubuntu
 ```
 sudo apt-get install build-essential libevent-dev
 ```
@@ -113,7 +113,7 @@ sudo pkg_add autoconf automake libtool libevent
 ```
 
 ##### Other
-Please submit a pull request to add dependencies for your system.
+Please submit a pull request to add dependencies for your system, or update these.
 
 #### Full library including CLI tool and wallet database
 ```
