@@ -92,8 +92,9 @@ btc_bool hd_gen_master(const btc_chainparams* chain, char* masterkeyhex, size_t 
 {
     btc_hdnode node;
     uint8_t seed[32];
-    const btc_bool rc = btc_random_bytes(seed, 32, true);
-    assert(rc);
+    const btc_bool res = btc_random_bytes(seed, 32, true);
+    if (!res)
+        return false;
     btc_hdnode_from_seed(seed, 32, &node);
     memset(seed, 0, 32);
     btc_hdnode_serialize_private(&node, chain, masterkeyhex, strsize);
@@ -107,20 +108,18 @@ btc_bool hd_print_node(const btc_chainparams* chain, const char* nodeser)
     if (!btc_hdnode_deserialize(nodeser, chain, &node))
         return false;
 
-    size_t strsize = 128;
     char str[128];
+    size_t strsize = sizeof(str);
     btc_hdnode_get_p2pkh_address(&node, chain, str, strsize);
 
     printf("ext key: %s\n", nodeser);
 
-    size_t privkey_wif_size_bin = 34;
     uint8_t pkeybase58c[34];
     pkeybase58c[0] = chain->b58prefix_secret_address;
     pkeybase58c[33] = 1; /* always use compressed keys */
-    size_t privkey_wif_size = 128;
     char privkey_wif[128];
     memcpy(&pkeybase58c[1], node.private_key, BTC_ECKEY_PKEY_LENGTH);
-    assert(btc_base58_encode_check(pkeybase58c, privkey_wif_size_bin, privkey_wif, privkey_wif_size) != 0);
+    assert(btc_base58_encode_check(pkeybase58c, sizeof(pkeybase58c), privkey_wif, sizeof(privkey_wif)) != 0);
     if (btc_hdnode_has_privkey(&node)) {
         printf("privatekey WIF: %s\n", privkey_wif);
     }
@@ -134,7 +133,7 @@ btc_bool hd_print_node(const btc_chainparams* chain, const char* nodeser)
         return false;
     printf("pubkey hex: %s\n", str);
 
-    strsize = 128;
+    strsize = sizeof(str);
     btc_hdnode_serialize_public(&node, chain, str, strsize);
     printf("extended pubkey: %s\n", str);
     return true;

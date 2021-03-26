@@ -63,15 +63,17 @@ void btc_privkey_cleanse(btc_key* privkey)
 }
 
 
-void btc_privkey_gen(btc_key* privkey)
+btc_bool btc_privkey_gen(btc_key* privkey)
 {
     if (privkey == NULL)
-        return;
+        return false;
 
     do {
-        const btc_bool rc = btc_random_bytes(privkey->privkey, BTC_ECKEY_PKEY_LENGTH, 0);
-        assert(rc); /* don't prevent code inside assert() to be executed in release mode */
+        const btc_bool res = btc_random_bytes(privkey->privkey, BTC_ECKEY_PKEY_LENGTH, 0);
+        if (!res)
+            return false;
     } while (btc_ecc_verify_privatekey(privkey->privkey) == 0);
+    return true;
 }
 
 
