@@ -124,7 +124,7 @@ btc_bool btc_privkey_decode_wif(const char *privkey_wif, const btc_chainparams* 
         return false;
     }
     memcpy(privkey->privkey, &privkey_data[1], BTC_ECKEY_PKEY_LENGTH);
-    btc_mem_zero(&privkey_data, sizeof(privkey_data));
+    btc_mem_zero(privkey_data, sizeof(privkey_data));
     btc_free(privkey_data);
     return true;
 }
