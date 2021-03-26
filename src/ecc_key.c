@@ -35,12 +35,11 @@
 #include <btc/ecc.h>
 #include <btc/hash.h>
 #include <btc/random.h>
+#include <btc/ripemd160.h>
 #include <btc/script.h>
 #include <btc/segwit_addr.h>
 #include <btc/utils.h>
 #include <btc/utils.h>
-
-#include "ripemd160.h"
 
 
 void btc_privkey_init(btc_key* privkey)
@@ -161,7 +160,7 @@ void btc_pubkey_get_hash160(const btc_pubkey* pubkey, uint160 hash160)
     uint256 hashout;
     btc_hash_sngl_sha256(pubkey->pubkey, pubkey->compressed ? BTC_ECKEY_COMPRESSED_LENGTH : BTC_ECKEY_UNCOMPRESSED_LENGTH, hashout);
 
-    ripemd160(hashout, sizeof(hashout), hash160);
+    btc_ripemd160(hashout, sizeof(hashout), hash160);
 }
 
 
