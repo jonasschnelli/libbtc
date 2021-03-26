@@ -545,14 +545,14 @@ void btc_net_spv_post_cmd(btc_node *node, btc_p2p_msg_hdr *hdr, struct const_buf
     }
     if (strcmp(hdr->command, BTC_MSG_CFILTER) == 0)
     {
-        printf("Got BTC_MSG_CFILTER\n");
+        client->nodegroup->log_write_cb("Got BTC_MSG_CFILTER\n");
     }
     if (strcmp(hdr->command, BTC_MSG_CFHEADERS) == 0)
     {
-        printf("Got BTC_MSG_CFHEADERS\n");
+        client->nodegroup->log_write_cb("Got BTC_MSG_CFHEADERS\n");
     }
     if (strcmp(hdr->command, BTC_MSG_CFCHECKPT) == 0)
     {
-        printf("Got BTC_MSG_CFCHECKPT\n");
+        client->nodegroup->log_write_cb("Got BTC_MSG_CFCHECKPT\n");
     }
 }
