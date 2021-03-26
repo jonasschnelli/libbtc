@@ -28,20 +28,16 @@
 #ifndef __LIBBTC_UTILS_H__
 #define __LIBBTC_UTILS_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "btc.h"
-#include <btc/cstr.h>
-
-#include <stddef.h>
-#include <stdint.h>
+#include "cstr.h"
+#include "memory.h"
 
 #define TO_UINT8_HEX_BUF_LEN 2048
 #define VARINT_LEN 20
 
 #define strlens(s) (s == NULL ? 0 : strlen(s))
+
+LIBBTC_BEGIN_DECL
 
 LIBBTC_API void utils_clear_buffers(void);
 LIBBTC_API void utils_hex_to_bin(const char* str, unsigned char* out, int inLen, int* outLen);
@@ -55,7 +51,6 @@ LIBBTC_API void btc_cheap_random_bytes(uint8_t* buf, uint32_t len);
 LIBBTC_API void btc_get_default_datadir(cstring *path_out);
 LIBBTC_API void btc_file_commit(FILE *file);
 
-
 /* support substitude for GNU only tdestroy */
 /* Let's hope the node struct is always compatible */
 
@@ -67,7 +62,7 @@ struct btc_btree_node {
 
 static inline void btc_btree_tdestroy(void *root, void (*freekey)(void *))
 {
-    struct btc_btree_node *r = root;
+    struct btc_btree_node *r = (struct btc_btree_node*)root;
 
     if (r == 0)
         return;
@@ -78,8 +73,6 @@ static inline void btc_btree_tdestroy(void *root, void (*freekey)(void *))
     btc_free(r);
 }
 
-#ifdef __cplusplus
-}
-#endif
+LIBBTC_END_DECL
 
-#endif /* __LIBBTC_UTILS_H__*/
+#endif // __LIBBTC_UTILS_H__

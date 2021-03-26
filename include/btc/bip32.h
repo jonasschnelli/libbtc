@@ -26,16 +26,14 @@
 #ifndef __LIBBTC_BIP32_H__
 #define __LIBBTC_BIP32_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "btc.h"
 #include "chainparams.h"
 
 #include <stdint.h>
 
 #define BTC_BIP32_CHAINCODE_SIZE 32
+
+LIBBTC_BEGIN_DECL
 
 typedef struct
 {
@@ -52,7 +50,7 @@ typedef struct
 
 
 LIBBTC_API btc_hdnode* btc_hdnode_new();
-LIBBTC_API btc_hdnode* btc_hdnode_copy(btc_hdnode* hdnode);
+LIBBTC_API btc_hdnode* btc_hdnode_copy(const btc_hdnode* hdnode);
 LIBBTC_API void btc_hdnode_free(btc_hdnode* node);
 LIBBTC_API btc_bool btc_hdnode_public_ckd(btc_hdnode* inout, uint32_t i);
 LIBBTC_API btc_bool btc_hdnode_from_seed(const uint8_t* seed, int seed_len, btc_hdnode* out);
@@ -74,8 +72,6 @@ LIBBTC_API btc_bool btc_hd_generate_key(btc_hdnode* node, const char* keypath, c
 //!checks if a node has the according private key (or if its a pubkey only node)
 LIBBTC_API btc_bool btc_hdnode_has_privkey(btc_hdnode* node);
 
-#ifdef __cplusplus
-}
-#endif
+LIBBTC_END_DECL
 
 #endif // __LIBBTC_BIP32_H__

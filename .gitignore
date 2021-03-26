@@ -7,6 +7,8 @@ test-suite.log
 !.gitignore
 bitcointool
 bitcoin-send-tx
+bitcoin-spv
+bitcoin-txref
 
 Makefile
 configure
@@ -16,6 +18,7 @@ aclocal.m4
 autom4te.cache/
 config.log
 config.status
+*.db
 *.tar.gz
 *.la
 libtool
@@ -33,7 +36,7 @@ m4/ltsugar.m4
 m4/ltversion.m4
 m4/lt~obsolete.m4
 src/stamp-h1
-libbtc256k1.pc
+libbtc.pc
 *.DS_Store
 *.gcda
 *.gcov
