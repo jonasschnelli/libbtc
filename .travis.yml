@@ -82,7 +82,7 @@ script:
           fi
       fi
     - if ( [ "$RUN_WINE_UNIT_TESTS" == "yes" ] ); then
-          wine /home/travis/build/libbtc/libbtc/tests.exe;
+          wine $(pwd)/tests.exe;
       fi
     - if ( [ "$RUN_TOOLTESTS" == "yes" ] ); then
           ./tooltests.py;
