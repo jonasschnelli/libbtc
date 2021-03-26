@@ -1189,12 +1189,12 @@ void test_script_op_codeseperator()
 void test_invalid_tx_deser()
 {
     char txstr[] =   "asadasdadad";
-    uint8_t tx_data[sizeof(txstr) / 2+1];
+    uint8_t tx_data_txstr[sizeof(txstr) / 2+1];
     int outlen;
-    utils_hex_to_bin(txstr, tx_data, strlen(txstr), &outlen);
+    utils_hex_to_bin(txstr, tx_data_txstr, strlen(txstr), &outlen);
 
     btc_tx* tx = btc_tx_new();
-    u_assert_int_eq(btc_tx_deserialize(tx_data, outlen, tx, NULL, true), false);
+    u_assert_int_eq(btc_tx_deserialize(tx_data_txstr, outlen, tx, NULL, true), false);
     btc_tx_free(tx);
 
     char failed_output[] =   "02000000000101bb3ee7f13f00b58a65f3789ff9917ae2eb2f360957ca86d4ec8068deae16f94c0000000017160014d7d7d2e56512a14b41f2b412eb33f9a2c464e407ffffffff01c0878b3b0000000017a914b1";
@@ -1202,7 +1202,7 @@ void test_invalid_tx_deser()
     utils_hex_to_bin(failed_output, tx_data_fo, strlen(failed_output), &outlen);
 
     btc_tx* tx_o = btc_tx_new();
-    u_assert_int_eq(btc_tx_deserialize(tx_data, outlen, tx_o, NULL, true), false);
+    u_assert_int_eq(btc_tx_deserialize(tx_data_fo, outlen, tx_o, NULL, true), false);
     btc_tx_free(tx_o);
 
 }

@@ -240,7 +240,7 @@ int btc_base58_decode_check(const char* str, uint8_t* data, size_t datalen)
 
     size_t binsize = strl;
     if (btc_base58_decode(data, &binsize, str) != true) {
-        ret = 0;
+        return 0;
     }
 
     memmove(data, data + strl - binsize, binsize);
