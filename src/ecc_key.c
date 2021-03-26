@@ -80,8 +80,9 @@ btc_bool btc_privkey_gen(btc_key* privkey)
 btc_bool btc_privkey_verify_pubkey(btc_key* privkey, btc_pubkey* pubkey)
 {
     uint256 rnddata, hash;
-    const btc_bool rc = btc_random_bytes(rnddata, BTC_HASH_LENGTH, 0);
-    assert(rc);
+    const btc_bool res = btc_random_bytes(rnddata, BTC_HASH_LENGTH, 0);
+    if (!res)
+        return false;
     btc_hash(rnddata, BTC_HASH_LENGTH, hash);
 
     unsigned char sig[74];
