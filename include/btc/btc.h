@@ -21,28 +21,36 @@
  OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
- 
+
 */
 
-#ifndef _LIBBTC_H_
-#define _LIBBTC_H_
+#ifndef __LIBBTC_BTC_H__
+#define __LIBBTC_BTC_H__
 
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 typedef uint8_t btc_bool; //!serialize, c/c++ save bool
 
-#ifndef true
-#define true 1
-#endif
+#ifndef __cplusplus
+# ifndef true
+#  define true 1
+# endif
 
-#ifndef false
-#define false 0
-#endif
+# ifndef false
+#  define false 0
+# endif
+#endif //__cplusplus
 
 #ifdef __cplusplus
-extern "C" {
+# define LIBBTC_BEGIN_DECL extern "C" {
+# define LIBBTC_END_DECL	}
+#else
+# define LIBBTC_BEGIN_DECL /* empty */
+# define LIBBTC_END_DECL	/* empty */
 #endif
 
 #ifndef LIBBTC_API
@@ -59,7 +67,10 @@ extern "C" {
 #endif
 #endif
 
-#include "memory.h"
+#if defined(_MSC_VER)
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#endif
 
 #define BTC_ECKEY_UNCOMPRESSED_LENGTH 65
 #define BTC_ECKEY_COMPRESSED_LENGTH 33
@@ -70,11 +81,11 @@ extern "C" {
 #define BTC_MIN(a,b) (((a)<(b))?(a):(b))
 #define BTC_MAX(a,b) (((a)>(b))?(a):(b))
 
+LIBBTC_BEGIN_DECL
+
 typedef uint8_t uint256[32];
 typedef uint8_t uint160[20];
 
-#ifdef __cplusplus
-}
-#endif
+LIBBTC_END_DECL
 
-#endif //_LIBBTC_H_
+#endif // __LIBBTC_BTC_H__

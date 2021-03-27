@@ -26,7 +26,6 @@
 
 #include <btc/block.h>
 #include <btc/blockchain.h>
-#include <btc/checkpoints.h>
 #include <btc/headersdb.h>
 #include <btc/headersdb_file.h>
 #include <btc/net.h>
@@ -37,19 +36,19 @@
 #include <btc/utils.h>
 
 #ifdef _WIN32
-#include <getopt.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #else
+#include <getopt.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <unistd.h>
 #endif
 
 #include <assert.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <time.h>
 
 static const unsigned int HEADERS_MAX_RESPONSE_TIME = 60;
@@ -73,7 +72,7 @@ void btc_net_set_spv(btc_node_group *nodegroup)
 btc_spv_client* btc_spv_client_new(const btc_chainparams *params, btc_bool debug, btc_bool headers_memonly)
 {
     btc_spv_client* client;
-    client = calloc(1, sizeof(*client));
+    client = btc_calloc(1, sizeof(*client));
 
     client->last_headersrequest_time = 0; //!< time when we requested the last header package
     client->last_statecheck_time = 0;
@@ -136,7 +135,7 @@ void btc_spv_client_free(btc_spv_client *client)
         client->nodegroup = NULL;
     }
 
-    free(client);
+    btc_free(client);
 }
 
 btc_bool btc_spv_client_load(btc_spv_client *client, const char *file_path)
@@ -267,7 +266,7 @@ void btc_net_spv_node_request_headers_or_blocks(btc_node *node, btc_bool blocks)
     btc_p2p_msg_getheaders(blocklocators, NULL, getheader_msg);
 
     /* create p2p message */
-    cstring *p2p_msg = btc_p2p_message_new(node->nodegroup->chainparams->netmagic, (blocks ? "getblocks" : "getheaders"), getheader_msg->str, getheader_msg->len);
+    cstring *p2p_msg = btc_p2p_message_new(node->nodegroup->chainparams->netmagic, (blocks ? BTC_MSG_GETBLOCKS : BTC_MSG_GETHEADERS), getheader_msg->str, getheader_msg->len);
     cstr_free(getheader_msg, true);
 
     /* send message */
@@ -543,5 +542,17 @@ void btc_net_spv_post_cmd(btc_node *node, btc_p2p_msg_hdr *hdr, struct const_buf
             /* headers download seems to be completed */
             /* we should have switched to block request if the oldest_item_of_interest was set correctly */
         }
+    }
+    if (strcmp(hdr->command, BTC_MSG_CFILTER) == 0)
+    {
+        client->nodegroup->log_write_cb("Got BTC_MSG_CFILTER\n");
+    }
+    if (strcmp(hdr->command, BTC_MSG_CFHEADERS) == 0)
+    {
+        client->nodegroup->log_write_cb("Got BTC_MSG_CFHEADERS\n");
+    }
+    if (strcmp(hdr->command, BTC_MSG_CFCHECKPT) == 0)
+    {
+        client->nodegroup->log_write_cb("Got BTC_MSG_CFCHECKPT\n");
     }
 }

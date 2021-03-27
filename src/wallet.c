@@ -38,7 +38,10 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>
+#ifndef _MSC_VER
+#  include <unistd.h>
+#endif
+
 
 #include <search.h>
 
@@ -53,9 +56,9 @@ static const unsigned char file_hdr_magic[4] = {0xA8, 0xF0, 0x11, 0xC5}; /* head
 static const unsigned char file_rec_magic[4] = {0xC8, 0xF2, 0x69, 0x1E}; /* record magic */
 static const uint32_t current_version = 1;
 
-static const char* hdkey_key = "hdkey";
-static const char* hdmasterkey_key = "mstkey";
-static const char* tx_key = "tx";
+static const char hdkey_key[] = "hdkey";
+static const char hdmasterkey_key[] = "mstkey";
+static const char tx_key[] = "tx";
 
 
 /* ====================== */
@@ -408,7 +411,9 @@ btc_bool btc_wallet_load(btc_wallet* wallet, const char* file_path, int *error, 
             if (rectype == WALLET_DB_REC_TYPE_MASTERPUBKEY) {
                 uint32_t len;
                 char strbuf[196];
+                memset(strbuf, 0, sizeof(strbuf));
                 char strbuf_check[196];
+                memset(strbuf_check, 0, sizeof(strbuf_check));
                 if (!deser_varlen_from_file(&len, wallet->dbfile)) return false;
                 if (len > sizeof(strbuf)) { return false; }
                 if (fread(strbuf, len, 1, wallet->dbfile ) != 1) return false;
@@ -423,7 +428,6 @@ btc_bool btc_wallet_load(btc_wallet* wallet, const char* file_path, int *error, 
                 wallet->masterkey = btc_hdnode_new();
                 printf("xpub: %s\n", strbuf);
                 btc_hdnode_deserialize(strbuf, wallet->chain, wallet->masterkey );
-                int i = 0;
             }
             else if (rectype == WALLET_DB_REC_TYPE_ADDR) {
                 uint32_t len;
@@ -569,7 +573,7 @@ btc_wallet_addr* btc_wallet_find_waddr_byaddr(btc_wallet* wallet, const char* se
         return NULL;
 
 
-    uint8_t hashdata[strlen(search_addr)];
+    uint8_t *hashdata = (uint8_t *)btc_malloc(strlen(search_addr));
     memset(hashdata, 0, sizeof(uint160));
     int outlen = btc_base58_decode_check(search_addr, hashdata, strlen(search_addr));
 
@@ -589,6 +593,7 @@ btc_wallet_addr* btc_wallet_find_waddr_byaddr(btc_wallet* wallet, const char* se
             }
         }
         else {
+            btc_free(hashdata);
             return NULL;
         }
     }
@@ -603,6 +608,7 @@ btc_wallet_addr* btc_wallet_find_waddr_byaddr(btc_wallet* wallet, const char* se
     }
     btc_free(waddr_search);
 
+    btc_free(hashdata);
     return needle;
 }
 
@@ -813,8 +819,6 @@ btc_bool btc_wallet_is_spent(btc_wallet* wallet, uint256 hash, uint32_t n)
     if (!wallet)
         return false;
 
-    unsigned int i = 0;
-
     btc_tx_outpoint outpoint;
     memcpy(&outpoint.hash, hash, sizeof(uint256));
     outpoint.n = n;
@@ -866,7 +870,6 @@ void btc_wallet_check_transaction(void *ctx, btc_tx *tx, unsigned int pos, btc_b
     (void)(pindex);
     btc_wallet *wallet = (btc_wallet *)ctx;
     if (btc_wallet_is_mine(wallet, tx) || btc_wallet_is_from_me(wallet, tx)) {
-        int i = 0;
         printf("\nFound relevant transaction!\n");
     }
 }

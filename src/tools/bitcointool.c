@@ -322,11 +322,11 @@ int main(int argc, char* argv[])
         int outlen = 0;
         utils_hex_to_bin(txhex, data_bin, strlen(txhex), &outlen);
         if (!btc_tx_deserialize(data_bin, outlen, tx, NULL, true)) {
-            free(data_bin);
+            btc_free(data_bin);
             btc_tx_free(tx);
             return showError("Invalid tx hex");
         }
-        free(data_bin);
+        btc_free(data_bin);
 
         if ((size_t)inputindex >= tx->vin->len) {
             btc_tx_free(tx);
