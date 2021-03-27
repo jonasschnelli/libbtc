@@ -507,6 +507,7 @@ btc_wallet_hdnode* btc_wallet_find_hdnode_byaddr(btc_wallet* wallet, const char*
     }
     btc_free(whdnode_search);
 
+    btc_free(hashdata);
     return needle;
 }
 

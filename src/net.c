@@ -283,6 +283,7 @@ btc_node_group* btc_node_group_new(const btc_chainparams* chainparams)
     node_group = btc_calloc(1, sizeof(*node_group));
     node_group->event_base = event_base_new();
     if (!node_group->event_base) {
+        btc_free(node_group);
         return NULL;
     };
 

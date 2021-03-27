@@ -167,7 +167,7 @@ btc_bool btc_headers_db_load(btc_headers_db* db, const char *file_path) {
                 btc_bool connected;
                 if (firstblock)
                 {
-                    btc_blockindex *chainheader = calloc(1, sizeof(btc_blockindex));
+                    btc_blockindex *chainheader = btc_calloc(1, sizeof(btc_blockindex));
                     chainheader->height = height;
                     if (!btc_block_header_deserialize(&chainheader->header, &cbuf_all)) {
                         btc_free(chainheader);
