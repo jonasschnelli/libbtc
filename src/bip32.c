@@ -35,11 +35,10 @@
 #include <btc/ecc.h>
 #include <btc/ecc_key.h>
 #include <btc/hash.h>
+#include <btc/memory.h>
 #include <btc/ripemd160.h>
 #include <btc/sha2.h>
 #include <btc/utils.h>
-
-#include "memory.h"
 
 // write 4 big endian bytes
 static void write_be(uint8_t* data, uint32_t x)
