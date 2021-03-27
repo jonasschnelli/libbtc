@@ -110,7 +110,7 @@ LIBBTC_API int net_write_log_printf(const char* format, ...);
 
 /* create new node object */
 LIBBTC_API btc_node* btc_node_new();
-LIBBTC_API void btc_node_free(btc_node* group);
+LIBBTC_API void btc_node_free(btc_node* node);
 
 /* set the nodes ip address and port (ipv4 or ipv6)*/
 LIBBTC_API btc_bool btc_node_set_ipport(btc_node* node, const char* ipport);
@@ -138,7 +138,7 @@ LIBBTC_API void btc_node_group_add_node(btc_node_group* group, btc_node* node);
 /* start node groups event loop */
 LIBBTC_API void btc_node_group_event_loop(btc_node_group* group);
 
-/* connect to more nodex */
+/* connect to more nodes */
 LIBBTC_API btc_bool btc_node_group_connect_next_nodes(btc_node_group* group);
 
 /* get the amount of connected nodes */
