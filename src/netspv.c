@@ -72,7 +72,7 @@ void btc_net_set_spv(btc_node_group *nodegroup)
 btc_spv_client* btc_spv_client_new(const btc_chainparams *params, btc_bool debug, btc_bool headers_memonly)
 {
     btc_spv_client* client;
-    client = calloc(1, sizeof(*client));
+    client = btc_calloc(1, sizeof(*client));
 
     client->last_headersrequest_time = 0; //!< time when we requested the last header package
     client->last_statecheck_time = 0;
@@ -135,7 +135,7 @@ void btc_spv_client_free(btc_spv_client *client)
         client->nodegroup = NULL;
     }
 
-    free(client);
+    btc_free(client);
 }
 
 btc_bool btc_spv_client_load(btc_spv_client *client, const char *file_path)
