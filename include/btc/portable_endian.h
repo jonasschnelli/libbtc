@@ -4,8 +4,8 @@
 // be "dual licensed" under the BSD, MIT and Apache licenses, if you want to. This code is trivial anyway. Consider it
 // an example on how to get the endian conversion functions on different platforms.
 */
-#ifndef PORTABLE_ENDIAN_H__
-#define PORTABLE_ENDIAN_H__
+#ifndef __LIBBTC_PORTABLE_ENDIAN_H__
+#define __LIBBTC_PORTABLE_ENDIAN_H__
 
 #if (defined(_WIN16) || defined(_WIN32) || defined(_WIN64)) && !defined(__WINDOWS__)
 
@@ -60,7 +60,9 @@
 
 #elif defined(__WINDOWS__)
 
-#include <sys/param.h>
+#ifndef _MSC_VER
+#  include <sys/param.h>
+#endif
 #include <winsock2.h>
 
 #if BYTE_ORDER == LITTLE_ENDIAN
@@ -115,4 +117,4 @@
 
 #endif
 
-#endif
+#endif // __LIBBTC_PORTABLE_ENDIAN_H__

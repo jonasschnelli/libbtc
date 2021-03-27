@@ -1189,12 +1189,12 @@ void test_script_op_codeseperator()
 void test_invalid_tx_deser()
 {
     char txstr[] =   "asadasdadad";
-    uint8_t tx_data[sizeof(txstr) / 2+1];
+    uint8_t tx_data_txstr[sizeof(txstr) / 2+1];
     int outlen;
-    utils_hex_to_bin(txstr, tx_data, strlen(txstr), &outlen);
+    utils_hex_to_bin(txstr, tx_data_txstr, strlen(txstr), &outlen);
 
     btc_tx* tx = btc_tx_new();
-    u_assert_int_eq(btc_tx_deserialize(tx_data, outlen, tx, NULL, true), false);
+    u_assert_int_eq(btc_tx_deserialize(tx_data_txstr, outlen, tx, NULL, true), false);
     btc_tx_free(tx);
 
     char failed_output[] =   "02000000000101bb3ee7f13f00b58a65f3789ff9917ae2eb2f360957ca86d4ec8068deae16f94c0000000017160014d7d7d2e56512a14b41f2b412eb33f9a2c464e407ffffffff01c0878b3b0000000017a914b1";
@@ -1202,7 +1202,7 @@ void test_invalid_tx_deser()
     utils_hex_to_bin(failed_output, tx_data_fo, strlen(failed_output), &outlen);
 
     btc_tx* tx_o = btc_tx_new();
-    u_assert_int_eq(btc_tx_deserialize(tx_data, outlen, tx_o, NULL, true), false);
+    u_assert_int_eq(btc_tx_deserialize(tx_data_fo, outlen, tx_o, NULL, true), false);
     btc_tx_free(tx_o);
 
 }
@@ -1353,6 +1353,7 @@ void test_tx_sign_p2pkh_i2(btc_tx *tx) {
 
     cstr_free(tx_ser, true);
     cstr_free(script, true);
+    cstr_free(script_wrong, true);
 }
 
 void test_tx_sign() {
@@ -1363,3 +1364,25 @@ void test_tx_sign() {
     btc_tx_free(tx);
 }
 
+void test_scripts() {
+    const char *script_p2pk = "41042f462d3245d2f3a015f7f9505f763ee1080cab36191d07ae9e6509f71bb68818719e6fb41c019bf48ae11c45b024d476e19b6963103ce8647fc15fee513b15c7ac";
+    const char *script_p2pkh = "76a91481edb497b5ba6eb9e67b7ed50fb220395f76f95088ac";
+    int outlen;
+    cstring* script_data_p2pk = cstr_new_sz(strlen(script_p2pk) / 2);
+    utils_hex_to_bin(script_p2pk, (unsigned char *)script_data_p2pk->str, strlen(script_p2pk), &outlen);
+    script_data_p2pk->len = outlen;
+
+    cstring* script_data_p2pkh = cstr_new_sz(strlen(script_p2pkh) / 2);
+    utils_hex_to_bin(script_p2pkh, (unsigned char *)script_data_p2pkh->str, strlen(script_p2pkh), &outlen);
+    script_data_p2pkh->len = outlen;
+
+    vector* vec = vector_new(16, free);
+    enum btc_tx_out_type type = btc_script_classify(script_data_p2pk, vec);
+    u_assert_int_eq(type, BTC_TX_PUBKEY);
+    type = btc_script_classify(script_data_p2pkh, vec);
+    u_assert_int_eq(type, BTC_TX_PUBKEYHASH);
+
+    cstr_free(script_data_p2pk, true);
+    cstr_free(script_data_p2pkh, true);
+    vector_free(vec, true);
+}

@@ -32,6 +32,7 @@
 
 #include <btc/base58.h>
 #include <btc/ecc.h>
+#include <btc/memory.h>
 #include <btc/segwit_addr.h>
 #include <btc/serialize.h>
 #include <btc/sha2.h>
@@ -672,8 +673,9 @@ btc_bool btc_tx_add_puzzle_out(btc_tx* tx, const int64_t amount, const uint8_t *
 
 btc_bool btc_tx_add_address_out(btc_tx* tx, const btc_chainparams* chain, int64_t amount, const char* address)
 {
-    uint8_t buf[strlen(address) * 2];
-    int r = btc_base58_decode_check(address, buf, sizeof(buf));
+    const size_t buflen = sizeof(uint8_t) * strlen(address) * 2;
+    uint8_t *buf = (uint8_t *)btc_malloc(buflen);
+    int r = btc_base58_decode_check(address, buf, buflen);
     if (r > 0 && buf[0] == chain->b58prefix_pubkey_address) {
         btc_tx_add_p2pkh_hash160_out(tx, amount, &buf[1]);
     } else if (r > 0 && buf[0] == chain->b58prefix_script_address) {
@@ -695,9 +697,11 @@ btc_bool btc_tx_add_address_out(btc_tx* tx, const btc_chainparams* chain, int64_
                 vector_add(tx->vout, tx_out);
             }
         }
+        btc_free(buf);
         return false;
     }
 
+    btc_free(buf);
     return true;
 }
 
@@ -808,6 +812,8 @@ enum btc_tx_sign_result btc_tx_sign_input(btc_tx *tx_in_out, const cstring *scri
     if (type == BTC_TX_SCRIPTHASH) {
         // p2sh script, need the redeem script
         // for now, pretend to be a p2sh-p2wpkh
+        vector_free(script_pushes, true);
+        script_pushes = vector_new(1, free);
         type = BTC_TX_WITNESS_V0_PUBKEYHASH;
         uint8_t *hash160 = btc_calloc(1, 20);
         btc_pubkey_get_hash160(&pubkey, hash160);

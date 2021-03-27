@@ -10,11 +10,13 @@ $(LIBSECP256K1): $(wildcard src/secp256k1/src/*) $(wildcard src/secp256k1/includ
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 lib_LTLIBRARIES = libbtc.la
-include_HEADERS = \
+libbtcincludedir = $(includedir)/btc
+libbtcinclude_HEADERS = \
     include/btc/aes256_cbc.h \
     include/btc/base58.h \
     include/btc/bip32.h \
     include/btc/block.h \
+    include/btc/blockchain.h \
     include/btc/btc.h \
     include/btc/buffer.h \
     include/btc/chainparams.h \
@@ -23,8 +25,10 @@ include_HEADERS = \
     include/btc/ecc_key.h \
     include/btc/ecc.h \
     include/btc/hash.h \
+    include/btc/memory.h \
     include/btc/portable_endian.h \
     include/btc/random.h \
+    include/btc/ripemd160.h \
     include/btc/script.h \
     include/btc/segwit_addr.h \
     include/btc/serialize.h \
@@ -33,9 +37,6 @@ include_HEADERS = \
     include/btc/tx.h \
     include/btc/utils.h \
     include/btc/vector.h
-
-noinst_HEADERS = \
-	src/ripemd160.h
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libbtc.pc
@@ -53,7 +54,6 @@ libbtc_la_SOURCES = \
     src/ecc_key.c \
     src/ecc_libsecp256k1.c \
     src/memory.c \
-    src/memory.h \
     src/random.c \
     src/ripemd160.c \
     src/script.c \
@@ -105,7 +105,8 @@ libbtc_la_SOURCES += \
     src/logdb/logdb_rec.c \
     src/logdb/red_black_tree.c
 
-include_HEADERS += \
+logdbincludedir = $(includedir)/logdb
+logdbinclude_HEADERS = \
     src/logdb/include/logdb/logdb_base.h \
     src/logdb/include/logdb/logdb_core.h \
     src/logdb/include/logdb/logdb_memdb_llist.h \
@@ -114,7 +115,7 @@ include_HEADERS += \
     src/logdb/include/logdb/logdb.h \
     src/logdb/include/logdb/red_black_tree.h
 
-include_HEADERS += \
+libbtcinclude_HEADERS += \
     include/btc/wallet.h
 
 libbtc_la_SOURCES += \
@@ -129,7 +130,7 @@ endif
 endif
 
 if WITH_NET
-include_HEADERS += \
+libbtcinclude_HEADERS += \
     include/btc/headersdb.h \
     include/btc/headersdb_file.h \
     include/btc/protocol.h \
@@ -151,7 +152,6 @@ tests_SOURCES += \
     test/netspv_tests.c \
     test/protocol_tests.c
 tests_LDADD += $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
-tests_LDFLAGS += -levent
 endif
 endif
 
