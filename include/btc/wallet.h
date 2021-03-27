@@ -33,7 +33,7 @@
 #include "buffer.h"
 #include "tx.h"
 
-LIBBTC_END_DECL
+LIBBTC_BEGIN_DECL
 
 /** single key/value record */
 typedef struct btc_wallet {
