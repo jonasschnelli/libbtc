@@ -149,7 +149,6 @@ tests_SOURCES += \
     test/netspv_tests.c \
     test/protocol_tests.c
 tests_LDADD += $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
-tests_LDFLAGS += -levent
 endif
 endif
 
